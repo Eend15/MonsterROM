@@ -203,7 +203,6 @@ if $APKTOOL; then
 fi
 if $EROFS_UTILS; then
     EROFS_UTILS_CMDS=(
-        "git -C \"src/selinux\" apply \"$SRC_DIR/external/patches/erofs-utils/0001-libselinux-guard-non-linux-includes.patch\" || git -C \"src/selinux\" apply --reverse --check \"$SRC_DIR/external/patches/erofs-utils/0001-libselinux-guard-non-linux-includes.patch\""
         "cmake -S \"build/cmake\" -B \"out\" $(GET_CMAKE_FLAGS) -DRUN_ON_WSL=\"$(IS_WSL)\" -DENABLE_FULL_LTO=\"ON\" -DMAX_BLOCK_SIZE=\"4096\""
         "make -C \"out\" -j\"$(nproc)\""
         "find \"out/erofs-tools\" -maxdepth 1 -type f -exec test -x {} \; -exec cp -a {} \"$TOOLS_DIR/bin\" \;"
@@ -222,8 +221,9 @@ fi
 if $SAMLOADER; then
     SAMLOADER_CMDS=(
         "git reset --hard"
-        "git apply \"$SRC_DIR/external/patches/samloader/0001-Add-timeout-to-version.xml-request.patch\""
-        "git apply \"$SRC_DIR/external/patches/samloader/0002-Add-parallel-range-downloads.patch\""
+        "git apply \"$SRC_DIR/external/patches/samloader/0001-Update-decryption-keys.patch\""
+        "git apply \"$SRC_DIR/external/patches/samloader/0002-Fix-client-request-params.patch\""
+        "git apply \"$SRC_DIR/external/patches/samloader/0003-Add-timeout-to-version.xml-request.patch\""
         "python3 -m venv \"$TOOLS_DIR/venv\""
         "source \"$TOOLS_DIR/venv/bin/activate\"; pip3 install ."
     )

@@ -159,14 +159,6 @@ GENERATE_BUILD_INFO
 
 LOG "- Creating zip"
 rm -f "$OUTPUT_FILE"
-
-ZIP_THREADS="$(nproc)"
-[ "$ZIP_THREADS" -le 8 ] || ZIP_THREADS=8
-if ! EVAL "cd \"$TMP_DIR\" && 7z a -tzip -mx=3 -mmt=$ZIP_THREADS -mtc=off -mtm=off \"$OUTPUT_FILE\" -r *"; then
-    LOGW "7z failed while creating the target-files zip. Retrying with zip"
-    rm -f "$OUTPUT_FILE"
-    EVAL "cd \"$TMP_DIR\" && zip -qry -3 -X -y \"$OUTPUT_FILE\" ." || exit 1
-fi
-unset ZIP_THREADS
+EVAL "cd \"$TMP_DIR\" && 7z a -tzip -mx=3 -mmt=$(nproc) -mtc=off -mtm=off \"$OUTPUT_FILE\" -r *" || exit 1
 
 exit 0

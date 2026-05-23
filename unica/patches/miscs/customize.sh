@@ -15,3 +15,11 @@ fi
 if [ ! "$(GET_PROP "system" "ro.unica.device")" ]; then
     SET_PROP "system" "ro.unica.device" "$(GET_PROP "system" "ro.monsterrom.device")"
 fi
+
+SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+    "smali_classes2/com/android/settingslib/development/AbstractLogpersistPreferenceController.smali" "return" \
+    "isAvailable()Z" \
+    "false"
+SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+    "smali_classes2/com/android/settingslib/development/AbstractLogpersistPreferenceController.smali" "null" \
+    "setLogpersistOff(Z)V"

@@ -15,7 +15,6 @@ IMEI=""
 SERIAL_NO=""
 LATEST_FIRMWARE=""
 ZIP_FILE=""
-FIRMWARE_DOWNLOAD_JOBS=""
 
 PREPARE_SCRIPT()
 {
@@ -107,23 +106,6 @@ VERIFY_ODIN_PACKAGES()
         LOG_STEP_OUT
     done < <(find "$ODIN_DIR/${MODEL}_${CSC}" -type f -name "*.md5")
 }
-
-GET_FIRMWARE_DOWNLOAD_JOBS()
-{
-    local JOBS="${UNICA_FIRMWARE_DOWNLOAD_JOBS:-${SAMLOADER_DOWNLOAD_JOBS:-}}"
-
-    if [ ! "$JOBS" ]; then
-        JOBS="$(nproc 2> /dev/null || echo 4)"
-        [ "$JOBS" -gt 8 ] && JOBS=8
-    fi
-
-    if ! [[ "$JOBS" =~ ^[0-9]+$ ]] || [ "$JOBS" -lt 1 ]; then
-        LOGE "Firmware download jobs must be a positive integer"
-        exit 1
-    fi
-
-    echo "$JOBS"
-}
 # ]
 
 PREPARE_SCRIPT "$@"
@@ -166,25 +148,14 @@ for i in "${FIRMWARES[@]}"; do
         fi
     fi
 
-    FIRMWARE_DOWNLOAD_JOBS="$(GET_FIRMWARE_DOWNLOAD_JOBS)"
-    export SAMLOADER_DOWNLOAD_JOBS="$FIRMWARE_DOWNLOAD_JOBS"
-    [ "$UNICA_FIRMWARE_DOWNLOAD_CHUNK_SIZE" ] && export SAMLOADER_CHUNK_SIZE="$UNICA_FIRMWARE_DOWNLOAD_CHUNK_SIZE"
-
-    LOG "- Downloading firmware with $FIRMWARE_DOWNLOAD_JOBS connection(s)..."
+    LOG "- Downloading firmware..."
     [ -f "$ODIN_DIR/${MODEL}_${CSC}/.downloaded" ] && rm -rf "$ODIN_DIR/${MODEL}_${CSC}"
     mkdir -p "$ODIN_DIR/${MODEL}_${CSC}"
     # shellcheck disable=SC2164
     # Anan's samloader stores its logs in the current working directory, let's move into OUT_DIR just for this time
     (
     cd "$OUT_DIR"
-    SAMLOADER_ARGS=(-O "$ODIN_DIR/${MODEL}_${CSC}")
-    if samloader -m "$MODEL" -r "$CSC" -i "$IMEI" -s "$SERIAL_NO" download --help 2>&1 | grep -q -- "--jobs"; then
-        SAMLOADER_ARGS=(-j "$FIRMWARE_DOWNLOAD_JOBS" "${SAMLOADER_ARGS[@]}")
-    else
-        LOG "\033[0;33m! Installed samloader does not support parallel downloads; rebuild dependencies to speed this up\033[0m"
-    fi
-
-    samloader -m "$MODEL" -r "$CSC" -i "$IMEI" -s "$SERIAL_NO" download "${SAMLOADER_ARGS[@]}" 1> /dev/null || exit 1
+    samloader -m "$MODEL" -r "$CSC" -i "$IMEI" -s "$SERIAL_NO" download -O "$ODIN_DIR/${MODEL}_${CSC}" 1> /dev/null || exit 1
     )
 
     ZIP_FILE="$(find "$ODIN_DIR/${MODEL}_${CSC}" -name "*.zip" | sort -r | head -n 1)"

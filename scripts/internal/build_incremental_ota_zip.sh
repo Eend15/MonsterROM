@@ -75,15 +75,14 @@ GENERATE_OP_LIST()
             fi
         done
         for p in $PARTITIONS_LIST; do
-            if [ ! -f "$TMP_DIR/source/$p.img" ] && [ ! -f "$TMP_DIR/target/$p.img" ]; then
-                continue
-            fi
-            SOURCE_PARTITION_SIZE="$(GET_IMAGE_SIZE "$TMP_DIR/source/$p.img")"
-            TARGET_PARTITION_SIZE="$(GET_IMAGE_SIZE "$TMP_DIR/target/$p.img")"
-            if [ "$SOURCE_PARTITION_SIZE" -gt "$TARGET_PARTITION_SIZE" ]; then
-                echo "# Shrink partition $p from $SOURCE_PARTITION_SIZE to $TARGET_PARTITION_SIZE"
-                echo "resize $p $TARGET_PARTITION_SIZE"
-                OCCUPIED_SPACE=$((OCCUPIED_SPACE + TARGET_PARTITION_SIZE))
+            if [ -f "$TMP_DIR/source/$p.img" ] && [ -f "$TMP_DIR/target/$p.img" ]; then
+                SOURCE_PARTITION_SIZE="$(GET_IMAGE_SIZE "$TMP_DIR/source/$p.img")"
+                TARGET_PARTITION_SIZE="$(GET_IMAGE_SIZE "$TMP_DIR/target/$p.img")"
+                if [ "$SOURCE_PARTITION_SIZE" -gt "$TARGET_PARTITION_SIZE" ]; then
+                    echo "# Shrink partition $p from $SOURCE_PARTITION_SIZE to $TARGET_PARTITION_SIZE"
+                    echo "resize $p $TARGET_PARTITION_SIZE"
+                    OCCUPIED_SPACE=$((OCCUPIED_SPACE + TARGET_PARTITION_SIZE))
+                fi
             fi
         done
         if [[ "$SOURCE_SUPER_GROUP_NAME" != "$TARGET_SUPER_GROUP_NAME" ]]; then
@@ -135,13 +134,12 @@ GENERATE_OP_LIST()
     } > "$OP_LIST_FILE"
 
     for p in $PARTITIONS_LIST; do
-        if [ ! -f "$TMP_DIR/source/$p.img" ] && [ ! -f "$TMP_DIR/target/$p.img" ]; then
-            continue
-        fi
-        SOURCE_PARTITION_SIZE="$(GET_IMAGE_SIZE "$TMP_DIR/source/$p.img")"
-        TARGET_PARTITION_SIZE="$(GET_IMAGE_SIZE "$TMP_DIR/target/$p.img")"
-        if [[ "$SOURCE_PARTITION_SIZE" == "$TARGET_PARTITION_SIZE" ]]; then
-            OCCUPIED_SPACE=$((OCCUPIED_SPACE + TARGET_PARTITION_SIZE))
+        if [ -f "$TMP_DIR/source/$p.img" ] && [ -f "$TMP_DIR/target/$p.img" ]; then
+            SOURCE_PARTITION_SIZE="$(GET_IMAGE_SIZE "$TMP_DIR/source/$p.img")"
+            TARGET_PARTITION_SIZE="$(GET_IMAGE_SIZE "$TMP_DIR/target/$p.img")"
+            if [[ "$SOURCE_PARTITION_SIZE" == "$TARGET_PARTITION_SIZE" ]]; then
+                OCCUPIED_SPACE=$((OCCUPIED_SPACE + TARGET_PARTITION_SIZE))
+            fi
         fi
     done
 

@@ -288,15 +288,8 @@ EVAL "rm -f \"$TMP_DIR/rom.zip\"" || exit 1
 # https://android.googlesource.com/platform/build/+/refs/tags/android-15.0.0_r1/tools/releasetools/common.py#3609
 # https://android.googlesource.com/platform/build/+/refs/tags/android-15.0.0_r1/tools/releasetools/ota_utils.py#184
 # https://android.googlesource.com/platform/build/+/refs/tags/android-15.0.0_r1/tools/releasetools/ota_utils.py#186
-
-ZIP_THREADS="$(nproc)"
-[ "$ZIP_THREADS" -le 8 ] || ZIP_THREADS=8
-if ! EVAL "cd \"$TMP_DIR\" && 7z a -tzip -mx=1 -mmt=$ZIP_THREADS \"$TMP_DIR/rom.zip\" -r * -x!rom.zip"; then
-    LOGW "7z failed while creating the flashable zip. Retrying with zip"
-    rm -f "$TMP_DIR/rom.zip"
-    EVAL "cd \"$TMP_DIR\" && zip -qry -1 -X -y \"$TMP_DIR/rom.zip\" . -x rom.zip" || exit 1
-fi
-unset ZIP_THREADS
+EVAL "cd \"$TMP_DIR\" && 7z a -tzip -mx=0 -mmt=$(nproc) $TMP_DIR/rom.zip -r *.patch.dat -ir!META-INF/com/android/* -i!*.new.dat.br" || exit 1
+EVAL "cd \"$TMP_DIR\" && 7z a -tzip -mx=3 -mmt=$(nproc) $TMP_DIR/rom.zip -r * -xr!META-INF/com/android/* -x!*.new.dat.br -x!*.patch.dat -x!rom.zip" || exit 1
 
 if ! $DEBUG || $ROM_IS_OFFICIAL; then
     LOG "- Signing zip"

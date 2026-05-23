@@ -67,7 +67,7 @@ run_cmd()
         local CMDS=()
         while IFS= read -r f; do
             CMDS+=("$f")
-        done < <(find "$SRC_DIR/scripts" -maxdepth 1 ! -type d -printf '%f\n' | sort | sed "s/.sh//")
+        done < <(find "$SRC_DIR/scripts" -maxdepth 1 ! -type d -printf '%f\n' | sort | sed "s/\.sh//")
 
         if [ "$CMD" ]; then
             if [[ "$CMD" == "--help" ]] || [[ "$CMD" == "-h" ]]; then

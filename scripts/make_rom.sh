@@ -135,17 +135,6 @@ if $BUILD_ROM; then
     if [ -d "$APKTOOL_DIR" ]; then
         LOG_STEP_IN true "Building APKs/JARs"
 
-        APKTOOL_BUILD_JOBS="${APKTOOL_BUILD_JOBS:-$(awk -v max="$(nproc)" '/MemTotal/ {
-            jobs = int($2 / 8388608);
-            if (jobs < 1) jobs = 1;
-            if (jobs > 4) jobs = 4;
-            if (jobs > max) jobs = max;
-            print jobs;
-        }' /proc/meminfo)}"
-        [ -n "$GITHUB_ACTIONS" ] && APKTOOL_BUILD_JOBS=1
-
-        LOG "- Running $APKTOOL_BUILD_JOBS parallel apktool job(s)"
-
         while IFS= read -r f; do
             f="${f/$APKTOOL_DIR\//}"
             PARTITION="$(cut -d "/" -f 1 -s <<< "$f")"
@@ -153,10 +142,6 @@ if $BUILD_ROM; then
                 "$SRC_DIR/scripts/apktool.sh" b "system" "$f" &
             else
                 "$SRC_DIR/scripts/apktool.sh" b "$PARTITION" "$(cut -d "/" -f 2- -s <<< "$f")" &
-            fi
-
-            if [ "$(jobs -r -p | wc -l)" -ge "$APKTOOL_BUILD_JOBS" ]; then
-                wait -n || exit 1
             fi
         done < <(find "$APKTOOL_DIR" -type d \( -name "*.apk" -o -name "*.jar" \))
 

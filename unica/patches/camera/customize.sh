@@ -16,6 +16,18 @@ LOG_MISSING_PATCHES()
 SOURCE_FIRMWARE_PATH="$(cut -d "/" -f 1 -s <<< "$SOURCE_FIRMWARE")_$(cut -d "/" -f 2 -s <<< "$SOURCE_FIRMWARE")"
 TARGET_FIRMWARE_PATH="$(cut -d "/" -f 1 -s <<< "$TARGET_FIRMWARE")_$(cut -d "/" -f 2 -s <<< "$TARGET_FIRMWARE")"
 
+# Samsung's ACodec::reconfigEncoder4OtherApps reads /proc/<pid>/cmdline with
+# a 512-byte count into a 255-byte stack buffer on One UI 8.5, which trips
+# Android 16 FORTIFY when starting AVC video recording.
+if xxd -p -c 0 "$WORK_DIR/system/system/lib64/libstagefright.so" 2> /dev/null | \
+        grep -q "21008052c21f8052e30315aae41f8052f6c30191588c0594"; then
+    LOG "- libstagefright AVC encoder cmdline read size is already patched"
+else
+    HEX_PATCH "$WORK_DIR/system/system/lib64/libstagefright.so" \
+        "2100805202408052e30315aae41f8052f6c30191588c0594" \
+        "21008052c21f8052e30315aae41f8052f6c30191588c0594"
+fi
+
 DELETE_FROM_WORK_DIR "system" "system/cameradata/portrait_data"
 ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/cameradata/portrait_data" 0 0 755 "u:object_r:system_file:s0"
 if [ -f "$SRC_DIR/target/$TARGET_CODENAME/camera/singletake/service-feature.xml" ]; then

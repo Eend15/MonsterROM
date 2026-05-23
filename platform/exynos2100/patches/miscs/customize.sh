@@ -29,9 +29,48 @@ _SED_DELETE_IF_EXISTS()
     sed -i "$2" "$1"
 }
 
+_FOR_EACH_EXYNOS_INIT()
+{
+    local SED_EXPR="$1"
+    local INIT_RC
+
+    if [ -f "$WORK_DIR/vendor/etc/init/init.exynos2100.rc" ] \
+        && [ ! -f "$WORK_DIR/vendor/etc/init/hw/init.exynos2100.rc" ]; then
+        mkdir -p "$WORK_DIR/vendor/etc/init/hw"
+        cp -a "$WORK_DIR/vendor/etc/init/init.exynos2100.rc" \
+            "$WORK_DIR/vendor/etc/init/hw/init.exynos2100.rc"
+    fi
+
+    for INIT_RC in \
+        "$WORK_DIR/vendor/etc/init/init.exynos2100.rc" \
+        "$WORK_DIR/vendor/etc/init/hw/init.exynos2100.rc"; do
+        _SED_DELETE_IF_EXISTS "$INIT_RC" "$SED_EXPR"
+    done
+}
+
+_DISABLE_PERFETTO_TRACED()
+{
+    local PERFETTO_RC="$WORK_DIR/system/system/etc/init/perfetto.rc"
+
+    [ -f "$PERFETTO_RC" ] || return 0
+
+    LOG "- Disabling Perfetto traced daemon for legacy Exynos kernel"
+    sed -i \
+        -e 's/^\([[:space:]]*\)setprop persist\.traced\.enable 1$/\1# setprop persist.traced.enable 1/g' \
+        -e 's/^\([[:space:]]*\)start traced$/\1# start traced/g' \
+        -e 's/^\([[:space:]]*\)start traced_relay$/\1# start traced_relay/g' \
+        -e 's/^\([[:space:]]*\)start traced_probes$/\1# start traced_probes/g' \
+        -e 's/^\([[:space:]]*\)wait_for_prop sys\.trace\.traced_started 1$/\1# wait_for_prop sys.trace.traced_started 1/g' \
+        "$PERFETTO_RC"
+    SET_PROP_IF_DIFF "system" "persist.traced.enable" "0"
+}
+
 DELETE_FROM_WORK_DIR "system_ext" "priv-app/com.qualcomm.location"
 DELETE_FROM_WORK_DIR "system_ext" "etc/permissions/com.qualcomm.location.xml"
 DELETE_FROM_WORK_DIR "system_ext" "etc/permissions/privapp-permissions-com.qualcomm.location.xml"
+DELETE_FROM_WORK_DIR "system_ext" "bin/perfservice"
+DELETE_FROM_WORK_DIR "system_ext" "etc/init/perfservice.rc"
+DELETE_FROM_WORK_DIR "system_ext" "etc/seccomp_policy/perfservice.policy"
 DELETE_FROM_WORK_DIR "system_ext" "app/QCC"
 DELETE_FROM_WORK_DIR "system_ext" "etc/permissions/com.qti.qcc.vendor_qcc.xml"
 DELETE_FROM_WORK_DIR "system_ext" "bin/qccsyshal@1.2-service"
@@ -51,13 +90,14 @@ _SED_DELETE_IF_EXISTS "$WORK_DIR/system/system/etc/permissions/platform.xml" "/c
 
 LOG_STEP_IN "- Removing invalid vendor property sets"
 _SED_DELETE_IF_EXISTS "$WORK_DIR/vendor/build.prop" "/^\(net\.dns1\|net\.dns2\|persist\.demo\.hdmirotationlock\|ro\.em\.version\|vendor\.hwc\.exynos\.vsync_mode\|ro\.smps\.enable\|security\.securehw\.available\|security\.securenvm\.available\|ro\.apk_verity\.mode\)=/d"
-_SED_DELETE_IF_EXISTS "$WORK_DIR/vendor/etc/init/init.exynos2100.rc" "/setprop persist\.rmnet\.mux /d"
-_SED_DELETE_IF_EXISTS "$WORK_DIR/vendor/etc/init/init.exynos2100.rc" "/setprop persist\.rmnet\.data\.enable /d"
-_SED_DELETE_IF_EXISTS "$WORK_DIR/vendor/etc/init/init.exynos2100.rc" "/setprop persist\.data\.wda\.enable /d"
-_SED_DELETE_IF_EXISTS "$WORK_DIR/vendor/etc/init/init.exynos2100.rc" "/setprop persist\.data\.df\.agg\.dl_pkt /d"
-_SED_DELETE_IF_EXISTS "$WORK_DIR/vendor/etc/init/init.exynos2100.rc" "/setprop persist\.data\.df\.agg\.dl_size /d"
-_SED_DELETE_IF_EXISTS "$WORK_DIR/vendor/etc/init/init.exynos2100.rc" "/setprop ro\.crypto\.fuse_sdcard /d"
+_FOR_EACH_EXYNOS_INIT "/setprop persist\.rmnet\.mux /d"
+_FOR_EACH_EXYNOS_INIT "/setprop persist\.rmnet\.data\.enable /d"
+_FOR_EACH_EXYNOS_INIT "/setprop persist\.data\.wda\.enable /d"
+_FOR_EACH_EXYNOS_INIT "/setprop persist\.data\.df\.agg\.dl_pkt /d"
+_FOR_EACH_EXYNOS_INIT "/setprop persist\.data\.df\.agg\.dl_size /d"
+_FOR_EACH_EXYNOS_INIT "/setprop ro\.crypto\.fuse_sdcard /d"
+_DISABLE_PERFETTO_TRACED
 LOG_STEP_OUT
 
-unset -f GET_SYSTEM_EXT _SED_DELETE_IF_EXISTS
+unset -f GET_SYSTEM_EXT _SED_DELETE_IF_EXISTS _FOR_EACH_EXYNOS_INIT _DISABLE_PERFETTO_TRACED
 LOG_STEP_OUT

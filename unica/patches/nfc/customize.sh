@@ -16,5 +16,5 @@ DELETE_FROM_WORK_DIR "system" "system/etc/libnfc-nci_temp.conf"
 DELETE_FROM_WORK_DIR "system" "system/lib/libnfc_sec_jni.so"
 DELETE_FROM_WORK_DIR "system" "system/lib64/libnfc_sec_jni.so"
 
-SET_PROP "vendor" "ro.vendor.nfc.info.antpos" "27"
+SET_PROP "vendor" "ro.vendor.nfc.info.antpos" "29"
 

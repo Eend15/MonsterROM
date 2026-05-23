@@ -105,11 +105,6 @@ do
     ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "$blob" 0 0 644 "u:object_r:system_lib_file:s0" &
 done
 
-LOG_STEP_IN "- Removing EDEN log tag"
-SET_PROP "system" "log.tag.EDEN" --delete
-SET_PROP "vendor" "log.tag.EDEN" --delete
-LOG_STEP_OUT
-
 LOG_STEP_IN "- Fixing vendor display props"
 # DPI
 LCD_DENSITY="$(GET_PROP "vendor" "ro.sf.lcd_density")"

@@ -214,15 +214,49 @@ _APPEND_PROP_ALLOW()
     fi
 }
 
+_APPEND_CIL_RULE()
+{
+    local FILE="$1"
+    local RULE="$2"
+
+    if ! grep -q -F "$RULE" "$FILE"; then
+        LOG "- Adding SELinux rule: $RULE"
+        printf "%s\n" "$RULE" >> "$FILE"
+    fi
+}
+
+_APPEND_PROCESS_ALLOW()
+{
+    local FILE="$1"
+    local SOURCE="$2"
+    local TARGET="$3"
+    local PERMS="$4"
+
+    if ! _TYPE_EXISTS "$SOURCE"; then
+        LOGW "SELinux domain not found for process allow: $SOURCE"
+        return 0
+    fi
+
+    if [[ "$TARGET" != "self" ]] && ! _TYPE_EXISTS "$TARGET"; then
+        LOGW "SELinux target not found for process allow: $TARGET"
+        return 0
+    fi
+
+    _APPEND_CIL_RULE "$FILE" "(allow $SOURCE $TARGET (process ($PERMS)))"
+}
+
 SYSTEM_EXT_SEPOLICY="$WORK_DIR/$(GET_SYSTEM_EXT)/etc/selinux/system_ext_sepolicy.cil"
 _APPEND_PROP_ALLOW "$SYSTEM_EXT_SEPOLICY" "emservice" "vendor_em_tstate_prop"
 _APPEND_PROP_ALLOW "$SYSTEM_EXT_SEPOLICY" "emservice" "em_version_prop"
 _APPEND_PROP_ALLOW "$SYSTEM_EXT_SEPOLICY" "hermesd" "vendor_securehw_prop"
 _APPEND_PROP_ALLOW "$SYSTEM_EXT_SEPOLICY" "hermesd" "vendor_securenvm_prop"
 _APPEND_PROP_ALLOW "$SYSTEM_EXT_SEPOLICY" "snap_utility" "cache_status_prop"
+_APPEND_PROCESS_ALLOW "$SYSTEM_EXT_SEPOLICY" "adbd" "self" "setcurrent"
+_APPEND_PROCESS_ALLOW "$SYSTEM_EXT_SEPOLICY" "adbd" "su" "dyntransition"
+_APPEND_PROCESS_ALLOW "$SYSTEM_EXT_SEPOLICY" "adbd" "adbd_tradeinmode" "dyntransition"
 
 unset SYSTEM_EXT_SEPOLICY
-unset -f _TYPE_EXISTS _APPEND_CONTEXT _APPEND_PROP_ALLOW
+unset -f _TYPE_EXISTS _APPEND_CONTEXT _APPEND_PROP_ALLOW _APPEND_CIL_RULE _APPEND_PROCESS_ALLOW
 LOG_STEP_OUT
 
 unset ENTRIES DUPLICATES CIL_NAME SELINUX_DIRS VENDOR_API_LIST MAPPING_FILE

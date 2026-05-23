@@ -84,6 +84,9 @@ COPY_SOURCE_FIRMWARE()
             grep -F "system/system_ext" "$FW_DIR/$SOURCE_FIRMWARE_PATH/fs_config-system" | sed "s/^system\///" > "$WORK_DIR/configs/fs_config-system_ext"
             sed -i "s/^system_ext /  /g" "$WORK_DIR/configs/fs_config-system_ext"
 
+            ADD_TO_WORK_DIR "b0qxxx" "system_ext" "etc/build_flags.json" 0 0 644 "u:object_r:system_file:s0" || exit 1
+            ADD_TO_WORK_DIR "b0qxxx" "system_ext" "etc/NOTICE.xml.gz" 0 0 644 "u:object_r:system_file:s0" || exit 1
+
             LOG_STEP_OUT
         else
             LOG_STEP_IN "- Copying /system/system/system_ext from source firmware"
