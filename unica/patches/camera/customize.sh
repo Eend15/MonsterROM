@@ -16,18 +16,6 @@ LOG_MISSING_PATCHES()
 SOURCE_FIRMWARE_PATH="$(cut -d "/" -f 1 -s <<< "$SOURCE_FIRMWARE")_$(cut -d "/" -f 2 -s <<< "$SOURCE_FIRMWARE")"
 TARGET_FIRMWARE_PATH="$(cut -d "/" -f 1 -s <<< "$TARGET_FIRMWARE")_$(cut -d "/" -f 2 -s <<< "$TARGET_FIRMWARE")"
 
-# Samsung's ACodec::reconfigEncoder4OtherApps reads /proc/<pid>/cmdline with
-# a 512-byte count into a 255-byte stack buffer on One UI 8.5, which trips
-# Android 16 FORTIFY when starting AVC video recording.
-if xxd -p -c 0 "$WORK_DIR/system/system/lib64/libstagefright.so" 2> /dev/null | \
-        grep -q "21008052c21f8052e30315aae41f8052f6c30191588c0594"; then
-    LOG "- libstagefright AVC encoder cmdline read size is already patched"
-else
-    HEX_PATCH "$WORK_DIR/system/system/lib64/libstagefright.so" \
-        "2100805202408052e30315aae41f8052f6c30191588c0594" \
-        "21008052c21f8052e30315aae41f8052f6c30191588c0594"
-fi
-
 DELETE_FROM_WORK_DIR "system" "system/cameradata/portrait_data"
 ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/cameradata/portrait_data" 0 0 755 "u:object_r:system_file:s0"
 if [ -f "$SRC_DIR/target/$TARGET_CODENAME/camera/singletake/service-feature.xml" ]; then
@@ -61,11 +49,7 @@ if [ "$CAMERA_CONFIG_VENDOR_LIB_INFO" ]; then
 else
     ABORT "SEC_FLOATING_FEATURE_CAMERA_CONFIG_VENDOR_LIB_INFO config not found in source firmware floating_feature.xml"
 fi
-CAMERA_CONFIG_GALAXYRAW_PLATFORM_VERSION="$(GET_FLOATING_FEATURE_CONFIG "$FW_DIR/$SOURCE_FIRMWARE_PATH/system/system/etc/floating_feature.xml" "SEC_FLOATING_FEATURE_CAMERA_CONFIG_GALAXYRAW_PLATFORM_VERSION")"
-if [ "$CAMERA_CONFIG_GALAXYRAW_PLATFORM_VERSION" ]; then
-    SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_CONFIG_GALAXYRAW_PLATFORM_VERSION" "$CAMERA_CONFIG_GALAXYRAW_PLATFORM_VERSION"
-fi
-unset CAMERA_CONFIG_VENDOR_LIB_INFO CAMERA_CONFIG_GALAXYRAW_PLATFORM_VERSION
+unset CAMERA_CONFIG_VENDOR_LIB_INFO
 LOG_STEP_OUT
 
 LOG_STEP_IN

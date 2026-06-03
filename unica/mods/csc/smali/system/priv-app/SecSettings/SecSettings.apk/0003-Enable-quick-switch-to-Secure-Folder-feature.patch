@@ -41,14 +41,15 @@ index 67cc8a7..cd23417 100644
 +++ b/smali_classes2/com/samsung/android/settings/usefulfeature/functionkey/FunctionKeyUtils.smali
 @@ -670,9 +670,7 @@
  
-     sget v26, Lcom/samsung/android/settings/usefulfeature/functionkey/item/SecureFolderAction;->pressType:I
+     sget v29, Lcom/samsung/android/settings/usefulfeature/functionkey/item/SecureFolderAction;->pressType:I
  
 -    invoke-static {v1, v0}, Lcom/android/settings/Utils;->hasPackage(Landroid/content/Context;Ljava/lang/String;)Z
 -
 -    move-result v0
 +    const/4 v0, 0x1
  
-     if-nez v0, :cond_9
+     if-nez v0, :cond_7
  
 -- 
 2.43.0
+
