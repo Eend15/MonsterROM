@@ -18,7 +18,7 @@ index 156f74a..b1cf4da 100644
 -    sput-boolean v4, Lcom/samsung/android/rune/CoreRune;->FW_DYNAMIC_RESOLUTION_CONTROL:Z
 +    sput-boolean v3, Lcom/samsung/android/rune/CoreRune;->FW_DYNAMIC_RESOLUTION_CONTROL:Z
  
-     const-string v0, "4"
+     const-string v0, "2"
  
 @@ -2866,9 +2866,9 @@
  
@@ -34,4 +34,3 @@ index 156f74a..b1cf4da 100644
  
 -- 
 2.43.0
-

@@ -1,0 +1,4 @@
+id=runtime_fixes
+name=p3s Runtime Fixes
+author=Codex
+description=Fixes p3s runtime defaults for S25FE-based MonsterROM builds.

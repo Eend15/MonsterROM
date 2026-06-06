@@ -1,0 +1,7 @@
+#!/system/bin/sh
+
+# S25FE heatmap depends on ectcore_G_1.3.3.so, which is absent on p3s.
+# Keep init's heatmap service alive without spamming linker crashes.
+while true; do
+    sleep 3600
+done

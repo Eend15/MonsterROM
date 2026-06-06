@@ -38,6 +38,9 @@ fi
 if xxd -p -c 0 "$WORK_DIR/system/system/lib64/libbluetooth_jni.so" | grep -q "39d9199428518152"; then
     HEX_PATCH "$WORK_DIR/system/system/lib64/libbluetooth_jni.so" \
         "39d9199428518152" "000080d228518152"
+elif xxd -p -c 0 "$WORK_DIR/system/system/lib64/libbluetooth_jni.so" | grep -q "49d2199428518152"; then
+    HEX_PATCH "$WORK_DIR/system/system/lib64/libbluetooth_jni.so" \
+        "49d2199428518152" "000080d228518152"
 elif xxd -p -c 0 "$WORK_DIR/system/system/lib64/libbluetooth_jni.so" | grep -q "2897773948050037"; then
     HEX_PATCH "$WORK_DIR/system/system/lib64/libbluetooth_jni.so" \
         "2897773948050037" "289777392a000014"

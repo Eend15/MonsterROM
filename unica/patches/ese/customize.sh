@@ -17,6 +17,42 @@ LOG_MISSING_PATCHES()
         ABORT "${MESSAGE}. Aborting"
     fi
 }
+
+SMALI_REPLACEALL_IF_PRESENT()
+{
+    local PARTITION="$1"
+    local FILE="$2"
+    local SMALI="$3"
+    local VALUE="$4"
+    local REPLACEMENT="$5"
+
+    DECODE_APK "$PARTITION" "$FILE" || return 1
+
+    local FILE_PATH="$APKTOOL_DIR/$PARTITION/${FILE//system\//}/$SMALI"
+    if [ -f "$FILE_PATH" ] && grep -q -F "$VALUE" "$FILE_PATH"; then
+        SMALI_PATCH "$PARTITION" "$FILE" "$SMALI" "replaceall" "$VALUE" "$REPLACEMENT"
+    fi
+}
+
+SMALI_REPLACE_ESE_VENDOR()
+{
+    local VALUE
+
+    for VALUE in "$SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" "GEMALTO" "NXP"; do
+        [ "$VALUE" = "$TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR" ] && continue
+        SMALI_REPLACEALL_IF_PRESENT "$1" "$2" "$3" "$VALUE" "${TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR//none/}"
+    done
+}
+
+SMALI_REPLACE_ESE_COS()
+{
+    local VALUE
+
+    for VALUE in "$SOURCE_SECURITY_CONFIG_ESE_COS_NAME" "UT8.3U" "JCOP7.2U" "JCOP7.0U" "JCOP6.2U"; do
+        [ "$VALUE" = "$TARGET_SECURITY_CONFIG_ESE_COS_NAME" ] && continue
+        SMALI_REPLACEALL_IF_PRESENT "$1" "$2" "$3" "$VALUE" "${TARGET_SECURITY_CONFIG_ESE_COS_NAME//none/}"
+    done
+}
 # ]
 
 if [[ "$SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" == "NXP" ]] && [[ "$SOURCE_SECURITY_CONFIG_ESE_COS_NAME" == "JCOP6.2U" ]] && \
@@ -53,59 +89,36 @@ elif [[ "$SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" != "none" ]] && [[ "$SOURCE_SE
     fi
 
     if [[ "$SOURCE_SECURITY_CONFIG_ESE_COS_NAME" != "$TARGET_SECURITY_CONFIG_ESE_COS_NAME" ]]; then
-        SMALI_PATCH "system" "system/app/SecureElement/SecureElement.apk" \
-            "smali/com/android/se/internal/UtilExtension.smali" "replace" \
-            "<clinit>()V" \
-            "$SOURCE_SECURITY_CONFIG_ESE_COS_NAME" \
-            "${TARGET_SECURITY_CONFIG_ESE_COS_NAME//none/}"
+        SMALI_REPLACE_ESE_COS "system" "system/app/SecureElement/SecureElement.apk" \
+            "smali/com/android/se/internal/UtilExtension.smali"
+    fi
+    if [[ "$SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" != "$TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR" ]]; then
+        SMALI_REPLACE_ESE_VENDOR "system" "system/app/SecureElement/SecureElement.apk" \
+            "smali/com/android/se/internal/UtilExtension.smali"
+    fi
+    if [[ "$SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" != "$TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR" ]]; then
+        SMALI_REPLACE_ESE_VENDOR "system" "system/framework/framework.jar" \
+            "smali_classes6/com/android/server/SemService.smali"
     fi
     if [[ "$SOURCE_SECURITY_CONFIG_ESE_COS_NAME" != "$TARGET_SECURITY_CONFIG_ESE_COS_NAME" ]]; then
-        SMALI_PATCH "system" "system/app/SecureElement/SecureElement.apk" \
-            "smali/com/android/se/internal/UtilExtension.smali" "replace" \
-            "supportEse(Landroid/content/Context;)Z" \
-            "eSE_COS: $SOURCE_SECURITY_CONFIG_ESE_COS_NAME" \
-            "eSE_COS: ${TARGET_SECURITY_CONFIG_ESE_COS_NAME//none/}"
+        SMALI_REPLACE_ESE_COS "system" "system/framework/framework.jar" \
+            "smali_classes6/com/android/server/SemService.smali"
     fi
     if [[ "$SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" != "$TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR" ]]; then
-        SMALI_PATCH "system" "system/app/SecureElement/SecureElement.apk" \
-            "smali/com/android/se/internal/UtilExtension.smali" "replace" \
-            "supportEse(Landroid/content/Context;)Z" \
-            "eSE_Vendor: $SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" \
-            "eSE_Vendor: ${TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR//none/}"
-    fi
-    if [[ "$SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" != "$TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR" ]]; then
-        SMALI_PATCH "system" "system/framework/framework.jar" \
-            "smali_classes6/com/android/server/SemService.smali" "replaceall" \
-            "$SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" \
-            "${TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR//none/}"
+        SMALI_REPLACE_ESE_VENDOR "system" "system/framework/framework.jar" \
+            "smali_classes6/com/samsung/android/service/SemService/SemServiceManager.smali"
     fi
     if [[ "$SOURCE_SECURITY_CONFIG_ESE_COS_NAME" != "$TARGET_SECURITY_CONFIG_ESE_COS_NAME" ]]; then
-        SMALI_PATCH "system" "system/framework/framework.jar" \
-            "smali_classes6/com/android/server/SemService.smali" "replaceall" \
-            "$SOURCE_SECURITY_CONFIG_ESE_COS_NAME" \
-            "${TARGET_SECURITY_CONFIG_ESE_COS_NAME//none/}"
+        SMALI_REPLACE_ESE_COS "system" "system/framework/framework.jar" \
+            "smali_classes6/com/samsung/android/service/SemService/SemServiceManager.smali"
     fi
     if [[ "$SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" != "$TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR" ]]; then
-        SMALI_PATCH "system" "system/framework/framework.jar" \
-            "smali_classes6/com/samsung/android/service/SemService/SemServiceManager.smali" "replaceall" \
-            "$SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" \
-            "${TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR//none/}"
-    fi
-    if [[ "$SOURCE_SECURITY_CONFIG_ESE_COS_NAME" != "$TARGET_SECURITY_CONFIG_ESE_COS_NAME" ]]; then
-        SMALI_PATCH "system" "system/framework/framework.jar" \
-            "smali_classes6/com/samsung/android/service/SemService/SemServiceManager.smali" "replaceall" \
-            "$SOURCE_SECURITY_CONFIG_ESE_COS_NAME" \
-            "${TARGET_SECURITY_CONFIG_ESE_COS_NAME//none/}"
-    fi
-    if [[ "$SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" != "$TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR" ]]; then
-        SMALI_PATCH "system" "system/framework/services.jar" \
-            "smali_classes2/com/samsung/ucm/ucmservice/CredentialManagerService.smali" "replaceall" \
-            "$SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" \
-            "${TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR//none/}"
+        SMALI_REPLACE_ESE_VENDOR "system" "system/framework/services.jar" \
+            "smali_classes2/com/samsung/ucm/ucmservice/CredentialManagerService.smali"
     fi
 else
     LOG_MISSING_PATCHES "SOURCE_SECURITY_CONFIG_ESE_CHIP_VENDOR" "TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR" || true
     LOG_MISSING_PATCHES "SOURCE_SECURITY_CONFIG_ESE_COS_NAME" "TARGET_SECURITY_CONFIG_ESE_COS_NAME"
 fi
 
-unset -f LOG_MISSING_PATCHES
+unset -f LOG_MISSING_PATCHES SMALI_REPLACEALL_IF_PRESENT SMALI_REPLACE_ESE_VENDOR SMALI_REPLACE_ESE_COS

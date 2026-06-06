@@ -32,52 +32,56 @@ LOG_STEP_OUT
 
 # Adaptive colour tone
 LOG_STEP_IN "- Enabling Adaptive colour tone feature"
-DECODE_APK "system" "system/framework/services.jar"
-if grep -R -q "setEnvironmentAdaptiveDisplayLevel" "$APKTOOL_DIR/system/framework/services.jar"; then
-    LOG "- Adaptive colour tone service hooks already present in S947B base"
+if [[ "$TARGET_CODENAME" == "p3s" && "$SOURCE_FIRMWARE" == SM-S731* ]]; then
+    LOG "- Skipping Adaptive colour tone backport on S25 FE base"
 else
-    if ${TARGET_LCD_SUPPORT_MDNIE_HW:-false}; then
-        APPLY_PATCH "system" "system/framework/services.jar" \
-            "$MODPATH/ead/services.jar/0001-Add-Adaptive-color-tone-feature.patch"
+    DECODE_APK "system" "system/framework/services.jar"
+    if grep -R -q "setEnvironmentAdaptiveDisplayLevel" "$APKTOOL_DIR/system/framework/services.jar"; then
+        LOG "- Adaptive colour tone service hooks already present in S947B base"
     else
-        APPLY_PATCH "system" "system/framework/services.jar" \
-            "$MODPATH/ead_mdnie/services.jar/0001-Add-Adaptive-color-tone-feature.patch"
+        if ${TARGET_LCD_SUPPORT_MDNIE_HW:-false}; then
+            APPLY_PATCH "system" "system/framework/services.jar" \
+                "$MODPATH/ead/services.jar/0001-Add-Adaptive-color-tone-feature.patch"
+        else
+            APPLY_PATCH "system" "system/framework/services.jar" \
+                "$MODPATH/ead_mdnie/services.jar/0001-Add-Adaptive-color-tone-feature.patch"
+        fi
     fi
-fi
-DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
-MIRACLE_SECSETTINGS_DIR="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk"
-if grep -q "SecEADPreferenceController" "$MIRACLE_SECSETTINGS_DIR/res/xml/sec_display_settings.xml"; then
-    LOG "- Adaptive colour tone Settings UI already present in S947B base"
-else
-    if $TARGET_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
-        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-            "$MODPATH/ead_resolution/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
+    DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
+    MIRACLE_SECSETTINGS_DIR="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk"
+    if grep -q "SecEADPreferenceController" "$MIRACLE_SECSETTINGS_DIR/res/xml/sec_display_settings.xml"; then
+        LOG "- Adaptive colour tone Settings UI already present in S947B base"
     else
-        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-            "$MODPATH/ead/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
+        if $TARGET_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
+            APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+                "$MODPATH/ead_resolution/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
+        else
+            APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+                "$MODPATH/ead/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
+        fi
     fi
-fi
-unset MIRACLE_SECSETTINGS_DIR
+    unset MIRACLE_SECSETTINGS_DIR
 
-DECODE_APK "system" "system/priv-app/SettingsProvider/SettingsProvider.apk"
-MIRACLE_SETTINGS_PROVIDER_DIR="$APKTOOL_DIR/system/priv-app/SettingsProvider/SettingsProvider.apk"
-if grep -R -q '"ead_enabled"' "$MIRACLE_SETTINGS_PROVIDER_DIR"; then
-    LOG "- Adaptive colour tone SettingsProvider defaults already present in S947B base"
-else
-    APPLY_PATCH "system" "system/priv-app/SettingsProvider/SettingsProvider.apk" \
-        "$MODPATH/ead/SettingsProvider.apk/0001-Add-Adaptive-color-tone-feature.patch"
-fi
-unset MIRACLE_SETTINGS_PROVIDER_DIR
+    DECODE_APK "system" "system/priv-app/SettingsProvider/SettingsProvider.apk"
+    MIRACLE_SETTINGS_PROVIDER_DIR="$APKTOOL_DIR/system/priv-app/SettingsProvider/SettingsProvider.apk"
+    if grep -R -q '"ead_enabled"' "$MIRACLE_SETTINGS_PROVIDER_DIR"; then
+        LOG "- Adaptive colour tone SettingsProvider defaults already present in S947B base"
+    else
+        APPLY_PATCH "system" "system/priv-app/SettingsProvider/SettingsProvider.apk" \
+            "$MODPATH/ead/SettingsProvider.apk/0001-Add-Adaptive-color-tone-feature.patch"
+    fi
+    unset MIRACLE_SETTINGS_PROVIDER_DIR
 
-DECODE_APK "system_ext" "priv-app/SystemUI/SystemUI.apk"
-MIRACLE_SYSTEMUI_DIR="$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk"
-if [ -f "$MIRACLE_SYSTEMUI_DIR/smali_classes3/com/android/systemui/settings/brightness/QuickBrightnessSeadView.smali" ]; then
-    LOG "- Adaptive colour tone SystemUI classes already present in S947B base"
-else
-    APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
-        "$MODPATH/ead/SystemUI.apk/0001-Add-Adaptive-color-tone-toggle.patch"
+    DECODE_APK "system_ext" "priv-app/SystemUI/SystemUI.apk"
+    MIRACLE_SYSTEMUI_DIR="$APKTOOL_DIR/system_ext/priv-app/SystemUI/SystemUI.apk"
+    if [ -f "$MIRACLE_SYSTEMUI_DIR/smali_classes3/com/android/systemui/settings/brightness/QuickBrightnessSeadView.smali" ]; then
+        LOG "- Adaptive colour tone SystemUI classes already present in S947B base"
+    else
+        APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+            "$MODPATH/ead/SystemUI.apk/0001-Add-Adaptive-color-tone-toggle.patch"
+    fi
+    unset MIRACLE_SYSTEMUI_DIR
 fi
-unset MIRACLE_SYSTEMUI_DIR
 LOG_STEP_OUT
 
 # Media Context Analyzer

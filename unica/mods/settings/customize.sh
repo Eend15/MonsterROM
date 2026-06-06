@@ -18,6 +18,28 @@ SMALI_PATCH "system" "system/framework/framework.jar" \
     '    invoke-virtual {p0, p3}, Landroid/app/Application;->attach(Landroid/content/Context;)V\n\n    invoke-static {p3}, Lio/mesalabs/unica/SamsungPropsHooks;->init(Landroid/content/Context;)V' \
     > /dev/null
 
+DECODE_APK "system" "system/framework/framework.jar"
+FRAMEWORK_JAR_DIR="$APKTOOL_DIR/system/framework/framework.jar"
+FRAMEWORK_CLASSES3_OS_DIR="$FRAMEWORK_JAR_DIR/smali_classes3/android/os"
+FRAMEWORK_CLASSES8_OS_DIR="$FRAMEWORK_JAR_DIR/smali_classes8/android/os"
+if [ -d "$FRAMEWORK_CLASSES3_OS_DIR" ]; then
+    mkdir -p "$FRAMEWORK_CLASSES8_OS_DIR"
+    shopt -s nullglob
+    FRAMEWORK_REBALANCE_FILES=(
+        "$FRAMEWORK_CLASSES3_OS_DIR/BaseBundle"*.smali
+        "$FRAMEWORK_CLASSES3_OS_DIR/BatteryStats"*.smali
+    )
+    if [ "${#FRAMEWORK_REBALANCE_FILES[@]}" -gt 0 ]; then
+        for FRAMEWORK_REBALANCE_FILE in "${FRAMEWORK_REBALANCE_FILES[@]}"; do
+            mv -f -- "$FRAMEWORK_REBALANCE_FILE" "$FRAMEWORK_CLASSES8_OS_DIR/"
+        done
+        LOG "- Moving BaseBundle/BatteryStats classes to framework classes8"
+    fi
+    shopt -u nullglob
+    unset FRAMEWORK_REBALANCE_FILES FRAMEWORK_REBALANCE_FILE
+fi
+unset FRAMEWORK_JAR_DIR FRAMEWORK_CLASSES3_OS_DIR FRAMEWORK_CLASSES8_OS_DIR
+
 DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 SECSETTINGS_APK_DIR="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk"
 

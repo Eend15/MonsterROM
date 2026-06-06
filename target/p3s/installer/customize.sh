@@ -1,11 +1,26 @@
-LOG "- Downloading BL_G998BXXSJHZC2_G998BXXSJHZC2_MQB107295400_REV01_user_low_ship_MULTI_CERT.tar.md5"
-DOWNLOAD_FILE \
-    "https://github.com/UN1CA/proprietary_vendor_samsung_exynos2100/releases/download/G998BXXSJHZC2_XEO_OXM/BL_G998BXXSJHZC2_G998BXXSJHZC2_MQB107295400_REV01_user_low_ship_MULTI_CERT.tar.md5" \
-    "$TMP_DIR/BL_G998BXXSJHZC2_G998BXXSJHZC2_MQB107295400_REV01_user_low_ship_MULTI_CERT.tar.md5" || return 1
-LOG "- Downloading CP_G998BXXSJHZA6_CP32677266_MQB105755821_REV01_user_low_ship_MULTI_CERT.tar.md5"
-DOWNLOAD_FILE \
-    "https://github.com/UN1CA/proprietary_vendor_samsung_exynos2100/releases/download/G998BXXSJHZC2_XEO_OXM/CP_G998BXXSJHZA6_CP32677266_MQB105755821_REV01_user_low_ship_MULTI_CERT.tar.md5" \
-    "$TMP_DIR/CP_G998BXXSJHZA6_CP32677266_MQB105755821_REV01_user_low_ship_MULTI_CERT.tar.md5" || return 1
+TARGET_BL="BL_G998BXXSJHZC2_G998BXXSJHZC2_MQB107295400_REV01_user_low_ship_MULTI_CERT.tar.md5"
+TARGET_CP="CP_G998BXXSJHZA6_CP32677266_MQB105755821_REV01_user_low_ship_MULTI_CERT.tar.md5"
+TARGET_FW_DIR="$ODIN_DIR/SM-G998B_AUT"
+
+if [ -f "$TARGET_FW_DIR/$TARGET_BL" ]; then
+    LOG "- Copying $TARGET_BL from downloaded target firmware"
+    EVAL "cp -a \"$TARGET_FW_DIR/$TARGET_BL\" \"$TMP_DIR/$TARGET_BL\"" || return 1
+else
+    LOG "- Downloading $TARGET_BL"
+    DOWNLOAD_FILE \
+        "https://github.com/UN1CA/proprietary_vendor_samsung_exynos2100/releases/download/G998BXXSJHZC2_XEO_OXM/$TARGET_BL" \
+        "$TMP_DIR/$TARGET_BL" || return 1
+fi
+
+if [ -f "$TARGET_FW_DIR/$TARGET_CP" ]; then
+    LOG "- Copying $TARGET_CP from downloaded target firmware"
+    EVAL "cp -a \"$TARGET_FW_DIR/$TARGET_CP\" \"$TMP_DIR/$TARGET_CP\"" || return 1
+else
+    LOG "- Downloading $TARGET_CP"
+    DOWNLOAD_FILE \
+        "https://github.com/UN1CA/proprietary_vendor_samsung_exynos2100/releases/download/G998BXXSJHZC2_XEO_OXM/$TARGET_CP" \
+        "$TMP_DIR/$TARGET_CP" || return 1
+fi
 
 while IFS= read -r f; do
     FILE_NAME="$(basename "$f")"
@@ -51,4 +66,4 @@ LOG "- Patching vbmeta.img"
 # https://android.googlesource.com/platform/system/core/+/refs/tags/android-15.0.0_r1/fastboot/fastboot.cpp#1129
 EVAL "printf \"\x03\" | dd of=\"$TMP_DIR/vbmeta.img\" bs=1 seek=123 count=1 conv=notrunc" || return 1
 
-unset FILE_NAME LENGTH STORED_HASH CALCULATED_HASH
+unset TARGET_BL TARGET_CP TARGET_FW_DIR FILE_NAME LENGTH STORED_HASH CALCULATED_HASH

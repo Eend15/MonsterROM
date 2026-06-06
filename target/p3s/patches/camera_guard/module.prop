@@ -1,0 +1,4 @@
+id=camera_guard
+name=p3s Camera Guard
+author=Codex
+description=Bakes the p3s Perfetto/camera-provider guard into the ROM image.

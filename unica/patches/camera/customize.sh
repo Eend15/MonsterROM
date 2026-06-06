@@ -44,12 +44,23 @@ fi
 
 LOG_STEP_IN "- Adding cameramodes"
 CAMERA_CONFIG_VENDOR_LIB_INFO="$(GET_FLOATING_FEATURE_CONFIG "$FW_DIR/$SOURCE_FIRMWARE_PATH/system/system/etc/floating_feature.xml" "SEC_FLOATING_FEATURE_CAMERA_CONFIG_VENDOR_LIB_INFO")"
+if [[ "$TARGET_CODENAME" == "p3s" ]]; then
+    P3S_CAMERA_CONFIG_VENDOR_LIB_INFO="$(GET_FLOATING_FEATURE_CONFIG "$FW_DIR/$TARGET_FIRMWARE_PATH/vendor/etc/floating_feature.xml" "SEC_FLOATING_FEATURE_CAMERA_CONFIG_VENDOR_LIB_INFO")"
+    if [ "$P3S_CAMERA_CONFIG_VENDOR_LIB_INFO" ]; then
+        LOG "- Using p3s vendor camera vendor-lib list"
+        CAMERA_CONFIG_VENDOR_LIB_INFO="$P3S_CAMERA_CONFIG_VENDOR_LIB_INFO"
+    fi
+fi
+if [[ "$TARGET_CODENAME" == "p3s" ]] && [[ "$CAMERA_CONFIG_VENDOR_LIB_INFO" != *"image_codec.samsung.v1"* ]]; then
+    LOG "- Adding p3s camera image codec vendor-lib nodes"
+    CAMERA_CONFIG_VENDOR_LIB_INFO+=",image_codec.samsung.v1,image_codec.samsung.v2"
+fi
 if [ "$CAMERA_CONFIG_VENDOR_LIB_INFO" ]; then
     SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_CONFIG_VENDOR_LIB_INFO" "$CAMERA_CONFIG_VENDOR_LIB_INFO"
 else
     ABORT "SEC_FLOATING_FEATURE_CAMERA_CONFIG_VENDOR_LIB_INFO config not found in source firmware floating_feature.xml"
 fi
-unset CAMERA_CONFIG_VENDOR_LIB_INFO
+unset CAMERA_CONFIG_VENDOR_LIB_INFO P3S_CAMERA_CONFIG_VENDOR_LIB_INFO
 LOG_STEP_OUT
 
 LOG_STEP_IN

@@ -1,0 +1,44 @@
+on post-fs-data
+    setprop persist.traced.enable 0
+    stop traced
+    stop traced_relay
+    stop traced_probes
+    setprop vendor.camera.unihal.enable true
+    setprop vendor.hal.camera.sslon 0
+
+on property:persist.traced.enable=1
+    setprop persist.traced.enable 0
+    stop traced
+    stop traced_relay
+    stop traced_probes
+
+on property:sys.boot_completed=1
+    start monsterrom-camera-guard
+    start monsterrom-camera-watchdog
+
+on property:vendor.boot_completed=1
+    start monsterrom-camera-guard
+    start monsterrom-camera-watchdog
+
+on property:init.svc.bootanim=stopped
+    start monsterrom-camera-guard
+    start monsterrom-camera-watchdog
+
+on property:init.svc.sec-camera-provider-4-0=running
+    start monsterrom-camera-guard
+
+service monsterrom-camera-guard /system/bin/sh /system/bin/monsterrom-camera-guard.sh
+    class late_start
+    user root
+    group root system readproc log media camera
+    disabled
+    oneshot
+    seclabel u:r:init:s0
+
+service monsterrom-camera-watchdog /system/bin/sh /system/bin/monsterrom-camera-watchdog.sh
+    class late_start
+    user root
+    group root system readproc log media camera
+    disabled
+    oneshot
+    seclabel u:r:init:s0

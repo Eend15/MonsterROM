@@ -69,16 +69,27 @@ ENCODE_MP4()
 # ]
 
 DECODE_APK "system" "system/priv-app/wallpaper-res/wallpaper-res.apk"
-for f in "$APKTOOL_DIR/system/priv-app/wallpaper-res/wallpaper-res.apk/res/drawable-nodpi/dex_wallpaper_"*.webp; do
+WALLPAPER_APK_DIR="$APKTOOL_DIR/system/priv-app/wallpaper-res/wallpaper-res.apk"
+shopt -s nullglob
+
+for f in "$WALLPAPER_APK_DIR/res/drawable-nodpi/dex_wallpaper_"*.webp; do
     COMPRESS_WEBP "$f"
 done
-for f in "$APKTOOL_DIR/system/priv-app/wallpaper-res/wallpaper-res.apk/res/drawable-nodpi/wallpaper_"*.webp; do
+for f in "$WALLPAPER_APK_DIR/res/drawable-nodpi/wallpaper_"*.webp; do
     COMPRESS_WEBP "$f"
 done
-for f in "$APKTOOL_DIR/system/priv-app/wallpaper-res/wallpaper-res.apk/res/raw/video_"*.mp4; do
+
+VIDEO_WALLPAPERS=("$WALLPAPER_APK_DIR/res/raw/video_"*.mp4)
+for f in "${VIDEO_WALLPAPERS[@]}"; do
     ENCODE_MP4 "$f"
 done
-APPLY_PATCH "system" "system/priv-app/wallpaper-res/wallpaper-res.apk" \
-    "$MODPATH/wallpaper-res.apk/0001-Adjust-metadata-for-60fps-video-files.patch"
+if [ "${#VIDEO_WALLPAPERS[@]}" -gt 0 ]; then
+    APPLY_PATCH "system" "system/priv-app/wallpaper-res/wallpaper-res.apk" \
+        "$MODPATH/wallpaper-res.apk/0001-Adjust-metadata-for-60fps-video-files.patch"
+else
+    LOG "- No video wallpaper files found, skipping video metadata patch"
+fi
+shopt -u nullglob
 
+unset WALLPAPER_APK_DIR VIDEO_WALLPAPERS
 unset -f ENCODE_MP4 COMPRESS_WEBP

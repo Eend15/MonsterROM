@@ -76,7 +76,7 @@ set_prop ro.build.tags release-keys
 set_prop ro.build.type user
 set_prop ro.debuggable 0
 set_prop ro.secure 1
-set_prop ro.adb.secure 1
+[ "$(getprop ro.adb.secure)" = "0" ] || set_prop ro.adb.secure 1
 
 set_prop ro.build.version.release "$release"
 set_prop ro.build.version.sdk "$sdk"
