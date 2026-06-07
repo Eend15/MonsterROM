@@ -146,6 +146,7 @@ PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS()
 {
     local CONTROLLER_SMALI
     local DISPLAY_UTILS_SMALI
+    local HIGH_REFRESH_APPLY_SMALI
     local RADIO_PREF_SMALI
     local SCREEN_FRAGMENT_CHANGE_SMALI
     local SCREEN_FRAGMENT_SMALI
@@ -154,6 +155,7 @@ PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS()
 
     DISPLAY_UTILS_SMALI="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/smali_classes5/com/samsung/android/settings/display/SecDisplayUtils.smali"
     CONTROLLER_SMALI="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/smali_classes5/com/samsung/android/settings/display/controller/SecScreenResolutionSingleChoiceController.smali"
+    HIGH_REFRESH_APPLY_SMALI="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/smali_classes5/com/samsung/android/settings/display/HighRefreshRateFragment\$\$ExternalSyntheticLambda0.smali"
     SCREEN_FRAGMENT_SMALI="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/smali_classes5/com/samsung/android/settings/display/ScreenResolutionFragment.smali"
     SCREEN_FRAGMENT_CHANGE_SMALI="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/smali_classes5/com/samsung/android/settings/display/ScreenResolutionFragment\$3.smali"
     RADIO_PREF_SMALI="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/smali_classes2/com/samsung/android/settings/widget/SecHorizontalRadioPreference.smali"
@@ -163,6 +165,9 @@ PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS()
     fi
     if [ ! -f "$CONTROLLER_SMALI" ]; then
         ABORT "SecScreenResolutionSingleChoiceController smali not found for p3s resolution patch"
+    fi
+    if [ ! -f "$HIGH_REFRESH_APPLY_SMALI" ]; then
+        ABORT "HighRefreshRateFragment apply listener smali not found for p3s refresh patch"
     fi
     if [ ! -f "$SCREEN_FRAGMENT_SMALI" ]; then
         ABORT "ScreenResolutionFragment smali not found for p3s resolution patch"
@@ -183,6 +188,35 @@ PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS()
         "smali_classes5/com/samsung/android/settings/display/SecDisplayUtils.smali" "return" \
         "canSetHighRefreshRateAboveWQHD(Landroid/content/Context;)Z" \
         "true"
+
+    if ! grep -q -F "MonsterROM p3s: keep resolution radio preference visible" "$SCREEN_FRAGMENT_SMALI"; then
+        perl -0pi -e 's~(sget-object v1, Lcom/samsung/android/settings/Rune;->COMMON_CONFIG_PACKAGE_NAME_SMART_MANAGER:Ljava/lang/String;
+
+)    invoke-virtual \{p0, p1\}, Lcom/android/settings/SettingsPreferenceFragment;->removePreference\(Ljava/lang/String;\)Z
+~${1}    # MonsterROM p3s: keep resolution radio preference visible.
+    nop
+~' "$SCREEN_FRAGMENT_SMALI"
+        if ! grep -q -F "MonsterROM p3s: keep resolution radio preference visible" "$SCREEN_FRAGMENT_SMALI"; then
+            ABORT "Failed to keep p3s resolution radio preference visible"
+        fi
+        LOG "- Keeping p3s resolution radio selector visible"
+    fi
+
+    if ! grep -q -F "MonsterROM p3s: use fragment radio preference key" "$CONTROLLER_SMALI"; then
+        perl -0pi -e 's~const-string/jumbo v0, "screen_resolution"(
+
+    invoke-virtual \{p1, v0\}, Landroidx/preference/PreferenceGroup;->findPreference)~const-string/jumbo v0, "screen_resolution_seekbar"
+
+    # MonsterROM p3s: use fragment radio preference key.\1~' "$CONTROLLER_SMALI"
+        perl -0pi -e 's~(\.method public getPreferenceKey\(\)Ljava/lang/String;
+    \.locals 0
+
+    const-string/jumbo p0, ")screen_resolution(")~${1}screen_resolution_seekbar${2}~' "$CONTROLLER_SMALI"
+        if ! grep -q -F "MonsterROM p3s: use fragment radio preference key" "$CONTROLLER_SMALI" ||                 ! grep -q -F 'const-string/jumbo p0, "screen_resolution_seekbar"' "$CONTROLLER_SMALI"; then
+            ABORT "Failed to point p3s resolution controller at visible radio preference"
+        fi
+        LOG "- Pointing p3s resolution controller at visible radio preference"
+    fi
 
     if ! grep -q "^\\.method public static applyP3sSelectedScreenResolution(Landroid/content/Context;I)V" "$DISPLAY_UTILS_SMALI"; then
         awk '
@@ -269,6 +303,8 @@ PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS()
                 print ""
                 print "    const/4 v11, 0x0"
                 print ""
+                print "    const/4 v1, 0x0"
+                print ""
                 print "    move v13, v6"
                 print ""
                 print "    goto :goto_rate"
@@ -277,6 +313,8 @@ PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS()
                 print "    const/high16 v5, 0x42700000    # 60.0f"
                 print ""
                 print "    const/high16 v11, 0x42700000    # 60.0f"
+                print ""
+                print "    const/high16 v1, 0x42700000    # 60.0f"
                 print ""
                 print "    move v13, v7"
                 print ""
@@ -326,7 +364,7 @@ PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS()
                 print ""
                 print "    new-instance v7, Landroid/view/Display$Mode;"
                 print ""
-                print "    invoke-direct {v7, v2, v3, v5}, Landroid/view/Display$Mode;-><init>(IIF)V"
+                print "    invoke-direct {v7, v2, v3, v1}, Landroid/view/Display$Mode;-><init>(IIF)V"
                 print ""
                 print "    invoke-virtual {v6, v7}, Landroid/view/Display;->setUserPreferredDisplayMode(Landroid/view/Display$Mode;)V"
                 print ""
@@ -401,6 +439,66 @@ PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS()
         }
         mv "$DISPLAY_UTILS_SMALI.tmp" "$DISPLAY_UTILS_SMALI"
         LOG "- Adding p3s exact HD/FHD/QHD size-density/mode helper"
+    fi
+
+    if ! grep -q -F "MonsterROM p3s: apply selected refresh mode to real display" "$HIGH_REFRESH_APPLY_SMALI"; then
+        perl -0pi -e 's~(    invoke-static \{p1, v0, v1\}, Lcom/samsung/android/settings/display/SecDisplayUtils;->putIntRefreshRate\(Landroid/content/Context;II\)V
+)~${1}
+    # MonsterROM p3s: apply selected refresh mode to real display.
+    invoke-static {p1}, Lcom/samsung/android/settings/display/SecDisplayUtils;->getScreenResolution(Landroid/content/Context;)I
+
+    move-result v0
+
+    invoke-static {p1, v0}, Lcom/samsung/android/settings/display/SecDisplayUtils;->applyP3sSelectedScreenResolution(Landroid/content/Context;I)V
+~' "$HIGH_REFRESH_APPLY_SMALI"
+        if ! grep -q -F "MonsterROM p3s: apply selected refresh mode to real display" "$HIGH_REFRESH_APPLY_SMALI"; then
+            ABORT "Failed to wire p3s refresh Apply through display helper"
+        fi
+        LOG "- Wiring p3s refresh-rate Apply through display helper"
+    fi
+
+    if ! grep -q -F "MonsterROM p3s: central refresh writer applies real display" "$DISPLAY_UTILS_SMALI"; then
+        awk '
+            BEGIN { in_method = 0; patched_locals = 0; patched_apply = 0 }
+            /^\.method public static putIntRefreshRate\(Landroid\/content\/Context;II\)V/ {
+                in_method = 1
+            }
+            in_method && /^[[:space:]]*\.locals / {
+                sub(/\.locals [0-9]+/, ".locals 2")
+                print
+                print ""
+                print "    # MonsterROM p3s: central refresh writer applies real display."
+                print "    move-object v1, p0"
+                patched_locals = 1
+                next
+            }
+            in_method && /Landroid\/provider\/Settings\$Secure;->putInt\(Landroid\/content\/ContentResolver;Ljava\/lang\/String;I\)Z/ {
+                print
+                print ""
+                print "    # MonsterROM p3s: apply refresh change through the p3s display helper."
+                print "    invoke-static {v1}, Lcom/samsung/android/settings/display/SecDisplayUtils;->getScreenResolution(Landroid/content/Context;)I"
+                print ""
+                print "    move-result p1"
+                print ""
+                print "    invoke-static {v1, p1}, Lcom/samsung/android/settings/display/SecDisplayUtils;->applyP3sSelectedScreenResolution(Landroid/content/Context;I)V"
+                patched_apply = 1
+                next
+            }
+            in_method && /^\.end method/ {
+                in_method = 0
+            }
+            { print }
+            END {
+                if (!patched_locals || !patched_apply) {
+                    exit 42
+                }
+            }
+        ' "$DISPLAY_UTILS_SMALI" > "$DISPLAY_UTILS_SMALI.tmp" || {
+            rm -f "$DISPLAY_UTILS_SMALI.tmp"
+            ABORT "Failed to wire p3s central refresh writer"
+        }
+        mv "$DISPLAY_UTILS_SMALI.tmp" "$DISPLAY_UTILS_SMALI"
+        LOG "- Wiring p3s central refresh writer through display helper"
     fi
 
     if ! grep -q -F "MonsterROM p3s: apply selected resolution through p3s helper" "$CONTROLLER_SMALI"; then
@@ -622,6 +720,56 @@ PATCH_P3S_REFRESH_RATE_OVERLAY_SETTINGS()
     unset SHOW_REFRESH_SMALI
 }
 
+PATCH_P3S_SEAMLESS_AOD_REFRESH()
+{
+    local SEAMLESS_PLUS_SMALI
+
+    DECODE_APK "system" "system/framework/services.jar" || return 1
+
+    SEAMLESS_PLUS_SMALI="$APKTOOL_DIR/system/framework/services.jar/smali/com/android/server/display/mode/RefreshRateController\$SeamlessPlusController.smali"
+
+    if [ ! -f "$SEAMLESS_PLUS_SMALI" ]; then
+        ABORT "SeamlessPlusController smali not found for p3s AOD refresh-rate patch"
+    fi
+
+    if ! grep -q -F "MonsterROM p3s: low/off-display LFD vote uses panel minimum" "$SEAMLESS_PLUS_SMALI"; then
+        awk '
+            BEGIN { in_method = 0; patched = 0 }
+            /^\.method public final updateLfdScalabilityLocked\(ZZ\)V/ {
+                in_method = 1
+                print
+                next
+            }
+            in_method && /^[[:space:]]*\.locals / {
+                print
+                print ""
+                print "    # MonsterROM p3s: low/off-display LFD vote uses panel minimum instead of max."
+                next
+            }
+            in_method && /Lcom\/samsung\/android\/hardware\/display\/RefreshRateConfig\$SupportedRefreshRate;->max\(\)I/ {
+                sub(/->max\(\)I/, "->min()I")
+                patched++
+            }
+            { print }
+            in_method && /^\.end method/ {
+                in_method = 0
+            }
+            END {
+                if (patched < 2) {
+                    exit 42
+                }
+            }
+        ' "$SEAMLESS_PLUS_SMALI" > "$SEAMLESS_PLUS_SMALI.tmp" || {
+            rm -f "$SEAMLESS_PLUS_SMALI.tmp"
+            ABORT "Failed to patch p3s Samsung seamless low/off-display refresh vote"
+        }
+        mv "$SEAMLESS_PLUS_SMALI.tmp" "$SEAMLESS_PLUS_SMALI"
+        LOG "- Making p3s Samsung seamless low/off-display refresh vote use 48 Hz minimum"
+    fi
+
+    unset SEAMLESS_PLUS_SMALI
+}
+
 PATCH_P3S_ULTRASONIC_BIOMETRIC_UI()
 {
     local DISPLAY_STATE_SMALI
@@ -817,11 +965,17 @@ if ! $SOURCE_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
 else
     if ! $TARGET_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
         DISABLE_DYNAMIC_RESOLUTION_CONTROL
+    elif [[ "$TARGET_CODENAME" == "p3s" ]]; then
+        # MonsterROM p3s: source firmwares with native dynamic resolution still
+        # need p3s-specific Settings glue and target resolution ordering.
+        SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_COMMON_CONFIG_DYN_RESOLUTION_CONTROL" "WQHD,FHD,HD"
+        PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS
     fi
 fi
 
 if [[ "$TARGET_CODENAME" == "p3s" ]]; then
     PATCH_P3S_REFRESH_RATE_OVERLAY_SETTINGS
+    PATCH_P3S_SEAMLESS_AOD_REFRESH
 fi
 
 # SEC_PRODUCT_FEATURE_COMMON_SUPPORT_EMBEDDED_SIM
@@ -1811,4 +1965,5 @@ fi
 unset TARGET_FIRMWARE_PATH
 unset -f GET_FINGERPRINT_SENSOR_TYPE LOG_MISSING_PATCHES REFRESH_RATE_CONFIG_DUMP_PATCH
 unset -f DISABLE_DYNAMIC_RESOLUTION_CONTROL PATCH_SEMWIFI_CONNECTION_PERSONALIZATION
-unset -f PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS PATCH_P3S_REFRESH_RATE_OVERLAY_SETTINGS PATCH_P3S_ULTRASONIC_BIOMETRIC_UI
+unset -f PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS PATCH_P3S_REFRESH_RATE_OVERLAY_SETTINGS
+unset -f PATCH_P3S_SEAMLESS_AOD_REFRESH PATCH_P3S_ULTRASONIC_BIOMETRIC_UI

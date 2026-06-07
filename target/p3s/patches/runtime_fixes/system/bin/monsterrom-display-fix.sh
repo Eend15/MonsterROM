@@ -10,6 +10,21 @@ get_setting() {
     settings get "$1" "$2" 2>/dev/null
 }
 
+setting_missing() {
+    VALUE="$(get_setting "$1" "$2")"
+    [ -z "$VALUE" ] || [ "$VALUE" = "null" ]
+}
+
+seed_defaults() {
+    put_setting system screen_resolution 2
+    put_setting global display_size_forced 1440,3200
+    put_setting global display_density_forced 548
+    put_setting secure refresh_rate_mode 1
+    put_setting system refresh_rate_mode 1
+    put_setting system peak_refresh_rate 120.0
+    put_setting system min_refresh_rate 0.0
+}
+
 current_size() {
     wm size 2>/dev/null | sed -n 's/.*Override size: //p' | tail -n 1
 }
@@ -46,28 +61,43 @@ sync_mode() {
             WIDTH=720
             HEIGHT=1600
             DENSITY=274
+            RESOLUTION=0
+            SF_ADAPTIVE=8
+            SF_STANDARD=10
             ;;
         1080x2400)
             WIDTH=1080
             HEIGHT=2400
             DENSITY=411
+            RESOLUTION=1
+            SF_ADAPTIVE=4
+            SF_STANDARD=6
             ;;
         *)
             WIDTH=1440
             HEIGHT=3200
             DENSITY=548
+            RESOLUTION=2
+            SF_ADAPTIVE=0
+            SF_STANDARD=2
             ;;
     esac
+
+    put_setting system screen_resolution "$RESOLUTION"
+    put_setting global display_size_forced "${WIDTH},${HEIGHT}"
+    put_setting global display_density_forced "$DENSITY"
 
     MODE="$(refresh_mode)"
     if [ "$MODE" = "0" ]; then
         FPS=60
+        SF_MODE="$SF_STANDARD"
         put_setting system peak_refresh_rate 60.0
         put_setting system min_refresh_rate 60.0
         put_setting secure refresh_rate_mode 0
         put_setting system refresh_rate_mode 0
     else
-        FPS=120
+        FPS=0
+        SF_MODE="$SF_ADAPTIVE"
         put_setting system peak_refresh_rate 120.0
         put_setting system min_refresh_rate 0.0
         put_setting secure refresh_rate_mode 1
@@ -84,10 +114,16 @@ sync_mode() {
         wm density "$DENSITY" >/dev/null 2>&1 || true
     fi
 
-    cmd display set-user-preferred-display-mode "$WIDTH" "$HEIGHT" "$FPS" 0 >/dev/null 2>&1 ||
+    cmd display set-user-preferred-display-mode "$WIDTH" "$HEIGHT" "$FPS" 0 true >/dev/null 2>&1 ||
+        cmd display set-user-preferred-display-mode "$WIDTH" "$HEIGHT" "$FPS" 0 >/dev/null 2>&1 ||
         cmd display set-user-preferred-display-mode "$WIDTH" "$HEIGHT" "$FPS" >/dev/null 2>&1 ||
         true
+    service call SurfaceFlinger 1035 i32 "$SF_MODE" >/dev/null 2>&1 ||
+        service call SurfaceFlinger 1035 "$SF_MODE" >/dev/null 2>&1 ||
+        true
 }
+
+seed_defaults
 
 I=0
 while [ "$I" -lt 6 ]; do

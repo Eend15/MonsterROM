@@ -1,14 +1,71 @@
 SKIPUNZIP=1
 
-# Use p3s PermissionController overlays. The S25 FE overlays can crash the
-# grant dialog on p3s, while deleting them falls back to the AOSP permission UI.
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "product" "overlay/GooglePermissionControllerFrameworkOverlay.apk" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "product" "overlay/GooglePermissionControllerOverlay.apk" 0 0 644 "u:object_r:system_file:s0"
+# Bake the working ADB/PermissionController module contents into the ROM image
+# itself instead of installing it as a /data/adb module.
+ADD_TO_WORK_DIR "$MODPATH" "product" "overlay/GooglePermissionControllerFrameworkOverlay.apk" 0 0 644 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "$MODPATH" "product" "overlay/GooglePermissionControllerOverlay.apk" 0 0 644 "u:object_r:system_file:s0"
 
 ADD_TO_WORK_DIR "$MODPATH" "system" "system/bin/monsterrom-usb-fix.sh" 0 2000 755 "u:object_r:system_file:s0"
 ADD_TO_WORK_DIR "$MODPATH" "system" "system/bin/monsterrom-display-fix.sh" 0 2000 755 "u:object_r:system_file:s0"
 ADD_TO_WORK_DIR "$MODPATH" "system" "system/bin/heatmap" 0 2000 755 "u:object_r:system_file:s0"
 ADD_TO_WORK_DIR "$MODPATH" "system" "system/etc/init/monsterrom-usb-fix.rc" 0 0 644 "u:object_r:system_file:s0"
+
+# Keep p3s stock 32-bit Wi-Fi Display compatibility blobs. The S25FE source
+# stack is 64-bit-only here, but p3s stock ships these WFD/HDCP fallbacks and
+# Smart View can hit them when screen mirroring starts.
+ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib/libremotedisplay_wfd.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib/libremotedisplayservice.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib/libhdcp2.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib/libstagefright_hdcp.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib/libsecuibc.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib/libtsmux.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib/librepeater.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib/wfd_log.so" 0 0 644 "u:object_r:system_lib_file:s0"
+ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/lib/vendor.samsung.hardware.security.hdcp.wifidisplay-V2-ndk.so" 0 0 644 "u:object_r:system_lib_file:s0"
+
+PATCH_P3S_SMARTVIEW_STAGEFRIGHT()
+{
+    local LIB="$WORK_DIR/system/system/lib64/libstagefright.so"
+    local OFFSET=$((0xecce4))
+    local ORIG
+
+    if [ ! -f "$LIB" ]; then
+        LOG "- Skipping p3s Smart View libstagefright patch: missing $LIB"
+        return 0
+    fi
+
+    ORIG="$(od -An -tx1 -N4 -j "$OFFSET" "$LIB" 2>/dev/null | tr -d ' \n')"
+    case "$ORIG" in
+        c21f8052)
+            LOG "- p3s Smart View libstagefright fread limit already patched"
+            ;;
+        02408052)
+            # reconfigEncoder4OtherApps() reads a short WFD profile into a
+            # 255-byte stack buffer. The ported blob passes 512 to fread_chk,
+            # which aborts on Android 16. Cap it at 254 and leave room for NUL.
+            printf '\302\037\200\122' | dd of="$LIB" bs=1 seek="$OFFSET" count=4 conv=notrunc 2>/dev/null || \
+                ABORT "Failed to patch p3s Smart View libstagefright fread limit"
+            LOG "- Patching p3s Smart View libstagefright fread limit for remotedisplay"
+            ;;
+        *)
+            ABORT "Unexpected p3s Smart View libstagefright bytes at 0xecce4: $ORIG"
+            ;;
+    esac
+}
+PATCH_P3S_SMARTVIEW_STAGEFRIGHT
+unset -f PATCH_P3S_SMARTVIEW_STAGEFRIGHT
+
+SMARTVIEW_SEPOLICY="$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
+if [ -f "$SMARTVIEW_SEPOLICY" ]; then
+    for RULE in \
+        "(allow remotedisplay_30_0 media_quality_service (service_manager (find)))"; do
+        if ! grep -q -F "$RULE" "$SMARTVIEW_SEPOLICY"; then
+            echo "$RULE" >> "$SMARTVIEW_SEPOLICY"
+            LOG "- Adding Smart View SELinux rule: $RULE"
+        fi
+    done
+fi
+unset SMARTVIEW_SEPOLICY RULE
 
 ADB_SEPOLICY="$WORK_DIR/$(if $TARGET_OS_BUILD_SYSTEM_EXT_PARTITION; then echo "system_ext"; else echo "system/system/system_ext"; fi)/etc/selinux/system_ext_sepolicy.cil"
 if [ -f "$ADB_SEPOLICY" ]; then
@@ -84,6 +141,39 @@ if [ -f "$ADB_SEPOLICY" ]; then
     done
 fi
 unset ADB_SEPOLICY RULE
+
+ADB_KSU_SEPOLICY="$WORK_DIR/$(if $TARGET_OS_BUILD_SYSTEM_EXT_PARTITION; then echo "system_ext"; else echo "system/system/system_ext"; fi)/etc/selinux/system_ext_sepolicy.cil"
+ADB_VENDOR_SEPOLICY="$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
+ADB_PLAT_SEPOLICY="$WORK_DIR/system/system/etc/selinux/plat_sepolicy.cil"
+if [ -f "$ADB_KSU_SEPOLICY" ] && grep -q -h -F "(type ksu)" "$ADB_VENDOR_SEPOLICY" "$ADB_PLAT_SEPOLICY" 2>/dev/null; then
+    for RULE in \
+        "(allow ksu usb_configfs (dir (ioctl read write create getattr setattr lock rename open add_name remove_name reparent search rmdir)))" \
+        "(allow ksu usb_configfs (file (ioctl read write create getattr setattr lock append map open unlink rename)))" \
+        "(allow ksu usb_configfs (lnk_file (ioctl read write create getattr setattr lock append map open unlink rename)))" \
+        "(allow ksu configfs (dir (ioctl read write create getattr setattr lock rename open add_name remove_name reparent search rmdir)))" \
+        "(allow ksu configfs (file (ioctl read write create getattr setattr lock append map open unlink rename)))" \
+        "(allow ksu configfs (lnk_file (ioctl read write create getattr setattr lock append map open unlink rename)))" \
+        "(allow ksu sysfs_udc (file (read write getattr open)))" \
+        "(allow ksu usb_control_prop (property_service (set)))" \
+        "(allow ksu usb_control_prop (file (read getattr map open)))" \
+        "(allow ksu usb_config_prop (property_service (set)))" \
+        "(allow ksu usb_config_prop (file (read getattr map open)))" \
+        "(allow ksu ffs_control_prop (property_service (set)))" \
+        "(allow ksu ffs_control_prop (file (read getattr map open)))" \
+        "(allow ksu adbd_config_prop (property_service (set)))" \
+        "(allow ksu adbd_config_prop (file (read getattr map open)))" \
+        "(allow ksu adbd_prop (property_service (set)))" \
+        "(allow ksu adbd_prop (file (read getattr map open)))" \
+        "(allow ksu self (tcp_socket (ioctl read write create getattr setattr lock append map bind connect listen accept getopt setopt shutdown name_bind node_bind name_connect)))" \
+        "(allow ksu node (tcp_socket (node_bind)))" \
+        "(allow ksu port (tcp_socket (name_bind name_connect)))"; do
+        if ! grep -q -F "$RULE" "$ADB_KSU_SEPOLICY"; then
+            echo "$RULE" >> "$ADB_KSU_SEPOLICY"
+            LOG "- Adding module-derived KernelSU ADB SELinux rule: $RULE"
+        fi
+    done
+fi
+unset ADB_KSU_SEPOLICY ADB_VENDOR_SEPOLICY ADB_PLAT_SEPOLICY RULE
 
 ADB_PROPERTY_CONTEXTS="$WORK_DIR/system/system/etc/selinux/plat_property_contexts"
 if [ -f "$ADB_PROPERTY_CONTEXTS" ] && ! grep -q -F 'ctl.start$mdnsd' "$ADB_PROPERTY_CONTEXTS"; then
