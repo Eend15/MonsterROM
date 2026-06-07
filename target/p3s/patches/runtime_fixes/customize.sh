@@ -133,6 +133,21 @@ if [ -f "$ADB_SEPOLICY" ]; then
         "(allow su node (tcp_socket (node_bind)))" \
         "(allow su port (tcp_socket (name_bind name_connect)))" \
         "(allow su self (unix_stream_socket (ioctl read write create getattr setattr lock append map bind connect listen accept getopt setopt shutdown)))" \
+        "(allow su self (capability (dac_override dac_read_search sys_admin sys_rawio)))" \
+        "(allow su servicemanager (binder (call transfer)))" \
+        "(allow su hwservicemanager (binder (call transfer)))" \
+        "(allow su vndservicemanager (binder (call transfer)))" \
+        "(allow su system_server (binder (call transfer)))" \
+        "(allow su surfaceflinger (binder (call transfer)))" \
+        "(allow su servicemanager (service_manager (list)))" \
+        "(allow su service_manager_type (service_manager (find)))" \
+        "(allow su hwservice_manager_type (hwservice_manager (find)))" \
+        "(allow su vndservice_manager_type (service_manager (find)))" \
+        "(allow su logd (unix_stream_socket (connectto)))" \
+        "(allow su logd_socket (sock_file (write read getattr open)))" \
+        "(allow su logdr_socket (sock_file (write read getattr open)))" \
+        "(allow su logdw_socket (sock_file (write read getattr open)))" \
+        "(allow su logcat_service (service_manager (find)))" \
         "(allow su adbd_socket (sock_file (ioctl read write getattr lock append map open watch watch_reads)))" \
         "(allow su system_file (dir (ioctl read getattr lock search open)))" \
         "(allow su system_file (file (ioctl read getattr lock map execute execute_no_trans open)))" \
