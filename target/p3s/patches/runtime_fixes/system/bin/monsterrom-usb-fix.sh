@@ -15,13 +15,17 @@ configure_usb_mtp_adb() {
     local G=/config/usb_gadget/g1
     local C="$G/configs/b.1"
     local UDC
+    local CURRENT_UDC
     UDC="$(getprop sys.usb.controller)"
+    CURRENT_UDC="$(cat "$G/UDC" 2>/dev/null || true)"
 
     [ -d "$G" ] || return 0
     [ "$UDC" ] || return 0
 
     echo "direct configfs bind: controller=$UDC"
-    echo none > "$G/UDC" 2>/dev/null || true
+    if [ -n "$CURRENT_UDC" ]; then
+        echo none > "$G/UDC" 2>/dev/null || true
+    fi
     rm -f "$C/f1" "$C/f2" "$C/f3" "$C/f4" "$C/f5" "$G/os_desc/b.1" 2>/dev/null || true
     echo mtp_acm_adb > "$C/strings/0x409/configuration" 2>/dev/null || true
     echo 0x04E8 > "$G/idVendor" 2>/dev/null || true
@@ -31,6 +35,12 @@ configure_usb_mtp_adb() {
     ln -s "$G/functions/ffs.adb" "$C/f3" 2>/dev/null || true
     ln -s "$G/functions/ss_mon.mtp" "$C/f5" 2>/dev/null || true
     ln -s "$C" "$G/os_desc/b.1" 2>/dev/null || true
+
+    if [ "$(getprop sys.usb.ffs.ready)" != "1" ]; then
+        echo "FunctionFS still not ready; leaving gadget for init.usb retry"
+        return 0
+    fi
+
     echo "$UDC" > "$G/UDC" 2>/dev/null || true
     setprop sys.usb.state mtp,adb 2>/dev/null || true
 }
@@ -79,10 +89,16 @@ while [ "$(getprop sys.usb.ffs.ready)" != "1" ] && [ "$i" -lt 15 ]; do
 done
 
 if [ "$(getprop sys.usb.ffs.ready)" != "1" ]; then
-    echo "sys.usb.ffs.ready stayed 0; forcing init trigger after adbd restart"
-    setprop sys.usb.ffs.ready 1 2>/dev/null
-    sleep 2
+    echo "sys.usb.ffs.ready stayed 0 after first restart; retrying adbd without forcing ready"
+    setprop ctl.stop adbd 2>/dev/null
+    sleep 1
+    setprop ctl.start adbd 2>/dev/null
     setprop sys.usb.config mtp,adb 2>/dev/null
+    i=0
+    while [ "$(getprop sys.usb.ffs.ready)" != "1" ] && [ "$i" -lt 20 ]; do
+        sleep 1
+        i=$((i + 1))
+    done
 fi
 
 configure_usb_mtp_adb

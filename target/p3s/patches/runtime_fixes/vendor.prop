@@ -1,3 +1,4 @@
 debug.sf.show_refresh_rate_overlay_render_rate=true
-persist.sys.usb.config=mtp
+persist.sys.usb.config=mtp,adb
+persist.vendor.usb.config=mtp,adb
 ro.adb.secure=1

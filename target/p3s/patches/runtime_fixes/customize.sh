@@ -10,6 +10,20 @@ ADD_TO_WORK_DIR "$MODPATH" "system" "system/bin/monsterrom-display-fix.sh" 0 200
 ADD_TO_WORK_DIR "$MODPATH" "system" "system/bin/heatmap" 0 2000 755 "u:object_r:shell_exec:s0"
 ADD_TO_WORK_DIR "$MODPATH" "system" "system/etc/init/monsterrom-usb-fix.rc" 0 0 644 "u:object_r:system_file:s0"
 
+# The shared debug patch deliberately makes adbd insecure for development.
+# p3s needs Samsung's normal secure-auth ADB path, otherwise MTP/USB ADB and
+# Wireless debugging auth get stuck waiting for sockets that never work.
+SET_PROP "system" "ro.adb.secure" "1"
+SET_PROP "vendor" "ro.adb.secure" "1"
+SET_PROP "system" "ro.secure" "1"
+SET_PROP "system" "ro.debuggable" "0"
+SET_PROP "system" "service.adb.root" "0"
+SET_PROP "system" "persist.adb.tls_server.enable" "1"
+SET_PROP "system" "persist.sys.usb.config" "mtp,adb"
+SET_PROP "product" "persist.sys.usb.config" "mtp,adb"
+SET_PROP "vendor" "persist.sys.usb.config" "mtp,adb"
+SET_PROP "vendor" "persist.vendor.usb.config" "mtp,adb"
+
 # Keep p3s stock 32-bit Wi-Fi Display compatibility blobs. The S25FE source
 # stack is 64-bit-only here, but p3s stock ships these WFD/HDCP fallbacks and
 # Smart View can hit them when screen mirroring starts.
@@ -110,6 +124,9 @@ if [ -f "$ADB_SEPOLICY" ]; then
         "(allow su device_logging_prop (file (read getattr map open)))" \
         "(allow su serialno_prop (file (read getattr map open)))" \
         "(allow su test_harness_prop (file (read getattr map open)))" \
+        "(allow su shell_prop (property_service (set)))" \
+        "(allow su shell_prop (file (read getattr map open)))" \
+        "(allow su system_adbd_prop (property_service (set)))" \
         "(allow su system_adbd_prop (file (read getattr map open)))" \
         "(allow su init_service_status_prop (file (read getattr map open)))" \
         "(allow su init_service_status_private_prop (file (read getattr map open)))" \
@@ -137,8 +154,17 @@ if [ -f "$ADB_SEPOLICY" ]; then
         "(allow su servicemanager (binder (call transfer)))" \
         "(allow su hwservicemanager (binder (call transfer)))" \
         "(allow su vndservicemanager (binder (call transfer)))" \
+        "(allow servicemanager su (binder (transfer)))" \
+        "(allow hwservicemanager su (binder (transfer)))" \
+        "(allow vndservicemanager su (binder (transfer)))" \
+        "(allow su servicemanager (fd (use)))" \
+        "(allow su hwservicemanager (fd (use)))" \
+        "(allow su vndservicemanager (fd (use)))" \
         "(allow su system_server (binder (call transfer)))" \
         "(allow su surfaceflinger (binder (call transfer)))" \
+        "(allow su binder_device (chr_file (ioctl read write getattr open map)))" \
+        "(allow su hwbinder_device (chr_file (ioctl read write getattr open map)))" \
+        "(allow su vndbinder_device (chr_file (ioctl read write getattr open map)))" \
         "(allow su servicemanager (service_manager (list)))" \
         "(allow su service_manager_type (service_manager (find)))" \
         "(allow su hwservice_manager_type (hwservice_manager (find)))" \

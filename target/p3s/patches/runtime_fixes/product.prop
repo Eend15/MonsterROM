@@ -1,1 +1,1 @@
-persist.sys.usb.config=mtp
+persist.sys.usb.config=mtp,adb

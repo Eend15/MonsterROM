@@ -33,7 +33,7 @@ service monsterrom-camera-guard /system/bin/sh /system/bin/monsterrom-camera-gua
     group root system readproc log media camera
     disabled
     oneshot
-    seclabel u:r:init:s0
+    seclabel u:r:su:s0
 
 service monsterrom-camera-watchdog /system/bin/sh /system/bin/monsterrom-camera-watchdog.sh
     class late_start
@@ -41,4 +41,4 @@ service monsterrom-camera-watchdog /system/bin/sh /system/bin/monsterrom-camera-
     group root system readproc log media camera
     disabled
     oneshot
-    seclabel u:r:init:s0
+    seclabel u:r:su:s0
