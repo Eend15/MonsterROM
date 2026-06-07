@@ -5,9 +5,9 @@ SKIPUNZIP=1
 ADD_TO_WORK_DIR "$MODPATH" "product" "overlay/GooglePermissionControllerFrameworkOverlay.apk" 0 0 644 "u:object_r:system_file:s0"
 ADD_TO_WORK_DIR "$MODPATH" "product" "overlay/GooglePermissionControllerOverlay.apk" 0 0 644 "u:object_r:system_file:s0"
 
-ADD_TO_WORK_DIR "$MODPATH" "system" "system/bin/monsterrom-usb-fix.sh" 0 2000 755 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "$MODPATH" "system" "system/bin/monsterrom-display-fix.sh" 0 2000 755 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "$MODPATH" "system" "system/bin/heatmap" 0 2000 755 "u:object_r:system_file:s0"
+ADD_TO_WORK_DIR "$MODPATH" "system" "system/bin/monsterrom-usb-fix.sh" 0 2000 755 "u:object_r:shell_exec:s0"
+ADD_TO_WORK_DIR "$MODPATH" "system" "system/bin/monsterrom-display-fix.sh" 0 2000 755 "u:object_r:shell_exec:s0"
+ADD_TO_WORK_DIR "$MODPATH" "system" "system/bin/heatmap" 0 2000 755 "u:object_r:shell_exec:s0"
 ADD_TO_WORK_DIR "$MODPATH" "system" "system/etc/init/monsterrom-usb-fix.rc" 0 0 644 "u:object_r:system_file:s0"
 
 # Keep p3s stock 32-bit Wi-Fi Display compatibility blobs. The S25FE source
@@ -133,7 +133,41 @@ if [ -f "$ADB_SEPOLICY" ]; then
         "(allow su node (tcp_socket (node_bind)))" \
         "(allow su port (tcp_socket (name_bind name_connect)))" \
         "(allow su self (unix_stream_socket (ioctl read write create getattr setattr lock append map bind connect listen accept getopt setopt shutdown)))" \
-        "(allow su adbd_socket (sock_file (ioctl read write getattr lock append map open watch watch_reads)))"; do
+        "(allow su adbd_socket (sock_file (ioctl read write getattr lock append map open watch watch_reads)))" \
+        "(allow su system_file (dir (ioctl read getattr lock search open)))" \
+        "(allow su system_file (file (ioctl read getattr lock map execute execute_no_trans open)))" \
+        "(allow su system_file (lnk_file (read getattr)))" \
+        "(allow su shell_exec (file (ioctl read getattr lock map execute execute_no_trans open)))" \
+        "(allow su toolbox_exec (file (ioctl read getattr lock map execute execute_no_trans open)))" \
+        "(allow su logcat_exec (file (ioctl read getattr lock map execute execute_no_trans open)))" \
+        "(allow su system_lib_file (dir (ioctl read getattr lock search open)))" \
+        "(allow su system_lib_file (file (ioctl read getattr lock map execute execute_no_trans open)))" \
+        "(allow su vendor_file (dir (ioctl read getattr lock search open)))" \
+        "(allow su vendor_file (file (ioctl read getattr lock map execute execute_no_trans open)))" \
+        "(allow su vendor_file (lnk_file (read getattr)))" \
+        "(allow su vendor_shell_exec (file (ioctl read getattr lock map execute execute_no_trans open)))" \
+        "(allow su vendor_toolbox_exec (file (ioctl read getattr lock map execute execute_no_trans open)))" \
+        "(allow su device (dir (ioctl read getattr lock search open)))" \
+        "(allow su functionfs (dir (ioctl read write create getattr setattr lock rename open add_name remove_name reparent search rmdir)))" \
+        "(allow su usb_configfs (dir (ioctl read write create getattr setattr lock rename open add_name remove_name reparent search rmdir)))" \
+        "(allow su usb_configfs (file (ioctl read write create getattr setattr lock append map open unlink rename)))" \
+        "(allow su usb_configfs (lnk_file (ioctl read write create getattr setattr lock append map open unlink rename)))" \
+        "(allow su configfs (dir (ioctl read write create getattr setattr lock rename open add_name remove_name reparent search rmdir)))" \
+        "(allow su configfs (file (ioctl read write create getattr setattr lock append map open unlink rename)))" \
+        "(allow su configfs (lnk_file (ioctl read write create getattr setattr lock append map open unlink rename)))" \
+        "(allow su sysfs_udc (file (read write getattr open)))" \
+        "(allow su system_prop (property_service (set)))" \
+        "(allow su system_prop (file (read getattr map open)))" \
+        "(allow su vendor_default_prop (property_service (set)))" \
+        "(allow su vendor_default_prop (file (read getattr map open)))" \
+        "(allow su usb_control_prop (property_service (set)))" \
+        "(allow su usb_config_prop (property_service (set)))" \
+        "(allow su ctl_default_prop (property_service (set)))" \
+        "(allow su ctl_default_prop (file (read getattr map open)))" \
+        "(allow su ctl_adbd_prop (property_service (set)))" \
+        "(allow su ctl_adbd_prop (file (read getattr map open)))" \
+        "(allow su ctl_stop_prop (property_service (set)))" \
+        "(allow su ctl_stop_prop (file (read getattr map open)))"; do
         if ! grep -q -F "$RULE" "$ADB_SEPOLICY"; then
             echo "$RULE" >> "$ADB_SEPOLICY"
             LOG "- Adding ADB SELinux rule: $RULE"
@@ -176,17 +210,15 @@ fi
 unset ADB_KSU_SEPOLICY ADB_VENDOR_SEPOLICY ADB_PLAT_SEPOLICY RULE
 
 ADB_PROPERTY_CONTEXTS="$WORK_DIR/system/system/etc/selinux/plat_property_contexts"
-if [ -f "$ADB_PROPERTY_CONTEXTS" ] && ! grep -q -F 'ctl.start$mdnsd' "$ADB_PROPERTY_CONTEXTS"; then
-    {
-        echo 'ctl.start$mdnsd          u:object_r:ctl_mdnsd_prop:s0'
-        echo 'ctl.stop$mdnsd           u:object_r:ctl_mdnsd_prop:s0'
-        echo 'ctl.restart$mdnsd        u:object_r:ctl_mdnsd_prop:s0'
-        echo 'init.svc.mdnsd           u:object_r:init_service_status_prop:s0 exact string'
-    } >> "$ADB_PROPERTY_CONTEXTS"
-    LOG "- Adding mdnsd control property contexts for adbd"
-fi
 if [ -f "$ADB_PROPERTY_CONTEXTS" ]; then
     for PROP_CONTEXT in \
+        'ctl.start$adbd u:object_r:ctl_adbd_prop:s0' \
+        'ctl.stop$adbd u:object_r:ctl_adbd_prop:s0' \
+        'ctl.restart$adbd u:object_r:ctl_adbd_prop:s0' \
+        'ctl.start$mdnsd u:object_r:ctl_mdnsd_prop:s0' \
+        'ctl.stop$mdnsd u:object_r:ctl_mdnsd_prop:s0' \
+        'ctl.restart$mdnsd u:object_r:ctl_mdnsd_prop:s0' \
+        "init.svc.mdnsd u:object_r:init_service_status_prop:s0 exact string" \
         "persist.adb.watchdog u:object_r:adbd_prop:s0 exact bool" \
         "persist.adb.watchdog.timeout_secs u:object_r:adbd_prop:s0 exact int" \
         "persist.adb.tcp.port u:object_r:adbd_config_prop:s0 exact int" \

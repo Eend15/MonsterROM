@@ -25,6 +25,15 @@ seed_defaults() {
     put_setting system min_refresh_rate 0.0
 }
 
+wait_for_boot() {
+    I=0
+    while [ "$(getprop sys.boot_completed)" != "1" ] && [ "$I" -lt 90 ]; do
+        sleep 2
+        I=$((I + 1))
+    done
+    sleep 10
+}
+
 current_size() {
     wm size 2>/dev/null | sed -n 's/.*Override size: //p' | tail -n 1
 }
@@ -123,10 +132,13 @@ sync_mode() {
         true
 }
 
-seed_defaults
+wait_for_boot
 
 I=0
-while [ "$I" -lt 6 ]; do
+while [ "$I" -lt 120 ]; do
+    if [ "$I" -lt 18 ]; then
+        seed_defaults
+    fi
     sync_mode
     sleep 5
     I=$((I + 1))

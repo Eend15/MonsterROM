@@ -1,11 +1,37 @@
 on post-fs-data
+    setprop persist.sys.usb.config mtp,adb
+    setprop persist.vendor.usb.config mtp,adb
     start monsterrom-usb-fix
 
+on boot
+    setprop persist.sys.usb.config mtp,adb
+    setprop persist.vendor.usb.config mtp,adb
+    setprop sys.usb.config mtp,adb
+
 on property:sys.boot_completed=1
+    setprop persist.sys.usb.config mtp,adb
+    setprop persist.vendor.usb.config mtp,adb
+    setprop sys.usb.config mtp,adb
+    setprop ctl.start adbd
+    setprop ctl.start mdnsd
     start monsterrom-usb-fix
     start monsterrom-display-fix
 
 on property:vendor.boot_completed=1
+    setprop persist.sys.usb.config mtp,adb
+    setprop persist.vendor.usb.config mtp,adb
+    setprop sys.usb.config mtp,adb
+    setprop ctl.start adbd
+    setprop ctl.start mdnsd
+    start monsterrom-usb-fix
+    start monsterrom-display-fix
+
+on property:dev.bootcomplete=1
+    setprop persist.sys.usb.config mtp,adb
+    setprop persist.vendor.usb.config mtp,adb
+    setprop sys.usb.config mtp,adb
+    setprop ctl.start adbd
+    setprop ctl.start mdnsd
     start monsterrom-usb-fix
     start monsterrom-display-fix
 
@@ -15,16 +41,21 @@ on property:persist.sys.usb.config=adb
     setprop sys.usb.config mtp,adb
 
 on property:persist.sys.usb.config=none
-    setprop persist.sys.usb.config mtp
-    setprop persist.vendor.usb.config mtp
-    setprop sys.usb.config mtp
+    setprop persist.sys.usb.config mtp,adb
+    setprop persist.vendor.usb.config mtp,adb
+    setprop sys.usb.config mtp,adb
 
 on property:persist.sys.usb.config=sec_charging
-    setprop persist.sys.usb.config mtp
-    setprop persist.vendor.usb.config mtp
-    setprop sys.usb.config mtp
+    setprop persist.sys.usb.config mtp,adb
+    setprop persist.vendor.usb.config mtp,adb
+    setprop sys.usb.config mtp,adb
 
 on property:persist.sys.usb.config=sec_charging,adb
+    setprop persist.sys.usb.config mtp,adb
+    setprop persist.vendor.usb.config mtp,adb
+    setprop sys.usb.config mtp,adb
+
+on property:persist.sys.usb.config=mtp
     setprop persist.sys.usb.config mtp,adb
     setprop persist.vendor.usb.config mtp,adb
     setprop sys.usb.config mtp,adb
@@ -35,11 +66,16 @@ on property:sys.usb.config=adb
     setprop sys.usb.config mtp,adb
 
 on property:sys.usb.config=sec_charging
-    setprop persist.sys.usb.config mtp
-    setprop persist.vendor.usb.config mtp
-    setprop sys.usb.config mtp
+    setprop persist.sys.usb.config mtp,adb
+    setprop persist.vendor.usb.config mtp,adb
+    setprop sys.usb.config mtp,adb
 
 on property:sys.usb.config=sec_charging,adb
+    setprop persist.sys.usb.config mtp,adb
+    setprop persist.vendor.usb.config mtp,adb
+    setprop sys.usb.config mtp,adb
+
+on property:sys.usb.config=mtp
     setprop persist.sys.usb.config mtp,adb
     setprop persist.vendor.usb.config mtp,adb
     setprop sys.usb.config mtp,adb

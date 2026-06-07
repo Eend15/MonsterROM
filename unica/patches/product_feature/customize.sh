@@ -373,7 +373,7 @@ PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS()
                 print ""
                 print "    move-result-object v6"
                 print ""
-                print "    const/4 v7, 0x5"
+                print "    const/4 v7, 0x6"
                 print ""
                 print "    new-array v7, v7, [Ljava/lang/String;"
                 print ""
@@ -402,6 +402,14 @@ PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS()
                 print "    aput-object v9, v7, v8"
                 print ""
                 print "    const/4 v8, 0x4"
+                print ""
+                print "    # MonsterROM p3s: typed SurfaceFlinger mode argument."
+                print ""
+                print "    const-string v9, \"i32\""
+                print ""
+                print "    aput-object v9, v7, v8"
+                print ""
+                print "    const/4 v8, 0x5"
                 print ""
                 print "    invoke-static {v13}, Ljava/lang/Integer;->toString(I)Ljava/lang/String;"
                 print ""
@@ -439,6 +447,26 @@ PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS()
         }
         mv "$DISPLAY_UTILS_SMALI.tmp" "$DISPLAY_UTILS_SMALI"
         LOG "- Adding p3s exact HD/FHD/QHD size-density/mode helper"
+    fi
+
+    if grep -q -F 'const-string v9, "1035"' "$DISPLAY_UTILS_SMALI" && grep -q -F 'const/4 v7, 0x5' "$DISPLAY_UTILS_SMALI" && ! grep -q -F "MonsterROM p3s: typed SurfaceFlinger mode argument" "$DISPLAY_UTILS_SMALI"; then
+        perl -0pi -e 's~(    const/4 v7, 0x)5(
+
+    new-array v7, v7, \[Ljava/lang/String;
+.*?    const/4 v8, 0x4
+
+)    invoke-static \{v13\}, Ljava/lang/Integer;->toString\(I\)Ljava/lang/String;~${1}6${2}    # MonsterROM p3s: typed SurfaceFlinger mode argument.
+    const-string v9, "i32"
+
+    aput-object v9, v7, v8
+
+    const/4 v8, 0x5
+
+    invoke-static {v13}, Ljava/lang/Integer;->toString(I)Ljava/lang/String;~s' "$DISPLAY_UTILS_SMALI"
+        if ! grep -q -F "MonsterROM p3s: typed SurfaceFlinger mode argument" "$DISPLAY_UTILS_SMALI"; then
+            ABORT "Failed to type p3s SurfaceFlinger display mode service argument"
+        fi
+        LOG "- Typing p3s SurfaceFlinger display mode service argument"
     fi
 
     if ! grep -q -F "MonsterROM p3s: apply selected refresh mode to real display" "$HIGH_REFRESH_APPLY_SMALI"; then
