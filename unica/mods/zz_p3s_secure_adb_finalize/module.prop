@@ -1,0 +1,5 @@
+name=p3s secure ADB finalize
+author=Codex
+description=Re-apply p3s secure ADB and MTP defaults after debug mods
+version=1.0
+support=
