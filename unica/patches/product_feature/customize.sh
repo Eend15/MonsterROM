@@ -218,6 +218,22 @@ PATCH_P3S_DYNAMIC_RESOLUTION_SETTINGS()
         LOG "- Pointing p3s resolution controller at visible radio preference"
     fi
 
+    if ! grep -q -F "MonsterROM p3s: keep visual resolution labels tied to native p3s modes" "$SCREEN_FRAGMENT_SMALI"; then
+        perl -0pi -e 's~(    :goto_4\n)~${1}    # MonsterROM p3s: keep visual resolution labels tied to native p3s modes.\n    const/16 p1, 0x640\n\n    const/16 v2, 0x2d0\n\n    invoke-static {v5, p1, v2}, Lcom/samsung/android/settings/display/ScreenResolutionFragment;->formatDimensions(Ljava/text/NumberFormat;II)Ljava/lang/String;\n\n    move-result-object p1\n\n    const/16 v4, 0x960\n\n    const/16 v2, 0x438\n\n    invoke-static {v5, v4, v2}, Lcom/samsung/android/settings/display/ScreenResolutionFragment;->formatDimensions(Ljava/text/NumberFormat;II)Ljava/lang/String;\n\n    move-result-object v4\n\n    const/16 v2, 0xc80\n\n    const/16 v6, 0x5a0\n\n    invoke-static {v5, v2, v6}, Lcom/samsung/android/settings/display/ScreenResolutionFragment;->formatDimensions(Ljava/text/NumberFormat;II)Ljava/lang/String;\n\n    move-result-object v2\n\n~' "$SCREEN_FRAGMENT_SMALI"
+        if ! grep -q -F "MonsterROM p3s: keep visual resolution labels tied to native p3s modes" "$SCREEN_FRAGMENT_SMALI"; then
+            ABORT "Failed to pin p3s screen resolution fragment labels"
+        fi
+        LOG "- Pinning p3s screen resolution fragment labels to native modes"
+    fi
+
+    if ! grep -q -F "MonsterROM p3s: keep controller visual resolution labels tied to native modes" "$CONTROLLER_SMALI"; then
+        perl -0pi -e 's~(    :cond_4\n)~${1}    # MonsterROM p3s: keep controller visual resolution labels tied to native modes.\n    const-string v3, "1600 x 720"\n\n    const-string v6, "2400 x 1080"\n\n    const-string v7, "3200 x 1440"\n\n~' "$CONTROLLER_SMALI"
+        if ! grep -q -F "MonsterROM p3s: keep controller visual resolution labels tied to native modes" "$CONTROLLER_SMALI"; then
+            ABORT "Failed to pin p3s screen resolution controller labels"
+        fi
+        LOG "- Pinning p3s screen resolution controller labels to native modes"
+    fi
+
     if ! grep -q "^\\.method public static applyP3sSelectedScreenResolution(Landroid/content/Context;I)V" "$DISPLAY_UTILS_SMALI"; then
         awk '
             BEGIN { inserted = 0 }

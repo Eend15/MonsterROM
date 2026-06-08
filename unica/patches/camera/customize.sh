@@ -55,10 +55,20 @@ if [[ "$TARGET_CODENAME" == "p3s" ]] && [[ "$CAMERA_CONFIG_VENDOR_LIB_INFO" != *
     LOG "- Adding p3s camera image codec vendor-lib nodes"
     CAMERA_CONFIG_VENDOR_LIB_INFO+=",image_codec.samsung.v1,image_codec.samsung.v2"
 fi
+if [[ "$TARGET_CODENAME" == "p3s" ]] && [[ "$CAMERA_CONFIG_VENDOR_LIB_INFO" == *"facial_restoration.arcsoft.v1"* ]]; then
+    LOG "- Disabling p3s camera face restoration post-processing"
+    CAMERA_CONFIG_VENDOR_LIB_INFO="${CAMERA_CONFIG_VENDOR_LIB_INFO//,facial_restoration.arcsoft.v1/}"
+    CAMERA_CONFIG_VENDOR_LIB_INFO="${CAMERA_CONFIG_VENDOR_LIB_INFO//facial_restoration.arcsoft.v1,/}"
+    CAMERA_CONFIG_VENDOR_LIB_INFO="${CAMERA_CONFIG_VENDOR_LIB_INFO//facial_restoration.arcsoft.v1/}"
+fi
 if [ "$CAMERA_CONFIG_VENDOR_LIB_INFO" ]; then
     SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_CAMERA_CONFIG_VENDOR_LIB_INFO" "$CAMERA_CONFIG_VENDOR_LIB_INFO"
 else
     ABORT "SEC_FLOATING_FEATURE_CAMERA_CONFIG_VENDOR_LIB_INFO config not found in source firmware floating_feature.xml"
+fi
+if [[ "$TARGET_CODENAME" == "p3s" ]] && grep -q "facial_restoration.arcsoft.v1" "$WORK_DIR/vendor/etc/floating_feature.xml" 2> /dev/null; then
+    LOG "- Removing p3s camera face restoration from vendor floating feature"
+    EVAL "sed -i 's/,facial_restoration\\.arcsoft\\.v1//g; s/facial_restoration\\.arcsoft\\.v1,//g; s/facial_restoration\\.arcsoft\\.v1//g' \"$WORK_DIR/vendor/etc/floating_feature.xml\""
 fi
 unset CAMERA_CONFIG_VENDOR_LIB_INFO P3S_CAMERA_CONFIG_VENDOR_LIB_INFO
 LOG_STEP_OUT
