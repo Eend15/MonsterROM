@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.coordinatorlayout.widget.CoordinatorLayout android:orientation="vertical" android:id="@id/coordinator_layout" android:layout_width="match_parent" android:layout_height="match_parent">
+        <com.google.android.material.appbar.AppBarLayout android:id="@id/appbar" android:layout_width="match_parent" android:layout_height="match_parent" android:elevation="0.0dp" app:expanded="false">
+            <com.google.android.material.appbar.CollapsingToolbarLayout android:id="@id/toolbar_layout" android:layout_width="match_parent" android:layout_height="match_parent" android:minHeight="?android:actionBarSize" app:layout_scrollFlags="scroll|exitUntilCollapsed">
+                <View android:layout_gravity="bottom" android:background="@android:color/transparent" android:visibility="invisible" android:layout_width="match_parent" android:layout_height="?actionBarSize" app:background="@android:color/transparent" />
+            </com.google.android.material.appbar.CollapsingToolbarLayout>
+        </com.google.android.material.appbar.AppBarLayout>
+        <androidx.core.widget.NestedScrollView android:id="@id/ratio_scrollview" android:background="@color/theme_background_color" android:layout_width="match_parent" android:layout_height="match_parent" app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="match_parent">
+                <LinearLayout android:orientation="horizontal" android:id="@id/content_start" android:layout_width="0.0dp" android:layout_height="match_parent" android:layout_weight="0.0" />
+                <LinearLayout android:orientation="vertical" android:id="@id/content" android:layout_width="0.0dp" android:layout_height="match_parent" android:layout_weight="1.0">
+                    <LinearLayout android:orientation="vertical" android:id="@id/aspect_ratio_description" android:background="@color/list_background_color" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <com.samsung.android.smartmirroring.wrapper.WrapContentHeightViewPager android:id="@id/pager" android:focusable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:importantForAccessibility="noHideDescendants" />
+                    </LinearLayout>
+                    <LinearLayout android:gravity="center" android:orientation="horizontal" android:id="@id/point_area" android:focusable="false" android:layout_width="match_parent" android:layout_height="@dimen/indicator_height" android:importantForAccessibility="noHideDescendants" android:layoutDirection="ltr" />
+                    <LinearLayout android:orientation="vertical" android:id="@id/radio_background" android:background="@color/list_background_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="@drawable/labs_background_ripple_effect">
+                        <FrameLayout android:id="@id/radio_menu" android:layout_width="match_parent" android:layout_height="0.0dp" android:layout_weight="1.0" />
+                    </LinearLayout>
+                </LinearLayout>
+                <LinearLayout android:orientation="horizontal" android:id="@id/content_end" android:layout_width="0.0dp" android:layout_height="match_parent" android:layout_weight="0.0" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+        <com.google.android.material.oneui.floatingactioncontainer.FloatingToolbarLayout android:id="@id/sesl_floating_toolbar_layout" android:clipChildren="false" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:clipToOutline="false" app:layout_anchor="@id/appbar">
+            <androidx.appcompat.widget.Toolbar android:layout_gravity="bottom" android:id="@id/action_bar" android:layout_width="match_parent" android:layout_height="?android:actionBarSize" app:layout_collapseMode="pin" />
+        </com.google.android.material.oneui.floatingactioncontainer.FloatingToolbarLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>

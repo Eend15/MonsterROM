@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ripple android:color="@color/multi_view_button_ripple_color"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/sliding_multiview_item_control" />
+            <corners android:radius="@dimen/floating_menu_elevation" />
+            <stroke android:width="@dimen/multi_view_background_stroke_size" android:color="@color/multi_view_background_stroke_color" />
+        </shape>
+    </item>
+</ripple>

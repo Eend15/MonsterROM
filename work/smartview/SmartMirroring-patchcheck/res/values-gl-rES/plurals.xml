@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="dlg_naming_limit">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">Non se pode inserir máis de %d carácter.</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">N/A</item>
+        <item quantity="many">N/A</item>
+        <item quantity="other">Non se poden inserir máis de %d caracteres.</item>
+    </plurals>
+    <plurals name="limit_shortcut_description">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">Non se pode engadir máis de %d atallo de Smart View á pantalla Inicio.</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">N/A</item>
+        <item quantity="many">N/A</item>
+        <item quantity="other">Non se poden engadir máis de %d atallos de Smart View á pantalla Inicio.</item>
+    </plurals>
+</resources>

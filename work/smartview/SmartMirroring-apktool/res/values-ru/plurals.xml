@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="dlg_naming_limit">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">Невозможно ввести более %d символа.</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">Невозможно ввести более %d символов.</item>
+        <item quantity="many">Невозможно ввести более %d символов.</item>
+        <item quantity="other">Невозможно ввести более %d символа.</item>
+    </plurals>
+    <plurals name="limit_shortcut_description">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">На главный экран можно добавить не больше %d ярлыка Smart View.</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">На главный экран можно добавить не больше %d ярлыков Smart View.</item>
+        <item quantity="many">На главный экран можно добавить не больше %d ярлыков Smart View.</item>
+        <item quantity="other">На главный экран можно добавить не больше %d ярлыка Smart View.</item>
+    </plurals>
+</resources>

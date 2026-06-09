@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.samsung.android.smartmirroring.settings.CustomPreferenceCategory android:title="@string/preference_mirror_screen" android:key="category_mirror_screen">
+        <com.samsung.android.smartmirroring.settings.CustomSwitchPreference android:title="@string/sliding_view_title_rotate_tv_title" android:key="settings_sero_auto_rotation" android:summary="@string/sliding_view_title_rotate_tv_description" />
+        <com.samsung.android.smartmirroring.settings.CustomPreference android:title="@string/aspect_ratio_page_title" android:key="aspect_ratio" android:summary="@string/aspect_ratio_button_description" />
+        <com.samsung.android.smartmirroring.settings.CustomSwitchPreference android:title="@string/hide_notifications_on_tv_title" android:key="hide_notifications_on_tv" android:summary="@string/hide_notifications_on_tv_description" />
+        <com.samsung.android.smartmirroring.settings.CustomSwitchPreference android:title="@string/keep_phone_screen_on_title" android:key="keep_screen_on" />
+    </com.samsung.android.smartmirroring.settings.CustomPreferenceCategory>
+    <androidx.preference.PreferenceCategory>
+        <com.samsung.android.smartmirroring.settings.CustomPreference android:title="@string/preference_labs" android:key="smartview_labs" />
+    </androidx.preference.PreferenceCategory>
+    <androidx.preference.PreferenceCategory android:key="category_general">
+        <com.samsung.android.smartmirroring.settings.CustomPreference android:title="@string/contact_us_title" android:key="contact_us" />
+        <com.samsung.android.smartmirroring.settings.CustomPreference android:title="@string/about_smart_view_title" android:key="about_smart_view" />
+    </androidx.preference.PreferenceCategory>
+    <androidx.preference.PreferenceCategory android:key="bottom_area" />
+</androidx.preference.PreferenceScreen>

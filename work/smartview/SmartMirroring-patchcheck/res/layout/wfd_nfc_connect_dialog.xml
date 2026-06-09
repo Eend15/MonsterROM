@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:id="@id/wfd_autoconnect_dlg" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:layout_gravity="center" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="@dimen/connecting_dialog_height" android:layout_marginTop="@dimen/connecting_dialog_margin_top" android:layout_marginBottom="@dimen/connecting_dialog_margin_bottom">
+        <View android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_weight="1.0" />
+        <LinearLayout android:gravity="center" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <ImageView android:id="@id/send_device" android:background="@raw/smart_view_ic_popup_phone" android:layout_width="@dimen/connecting_dialog_height" android:layout_height="@dimen/connecting_dialog_height" android:scaleType="fitXY" android:contentDescription="@null" android:backgroundTint="@color/connecting_popup_source_device" />
+            <ImageView android:layout_gravity="center" android:id="@id/connect_animator" android:background="@drawable/wfd_auto_connect_animation" android:layout_width="@dimen/connecting_dialog_icon_size" android:layout_height="@dimen/connecting_dialog_icon_size" android:contentDescription="@null" android:backgroundTint="@color/connecting_popup_source_device" />
+            <ImageView android:id="@id/receive_device" android:background="@raw/smart_view_ic_popup_tv" android:layout_width="@dimen/connecting_dialog_height" android:layout_height="@dimen/connecting_dialog_height" android:scaleType="fitXY" android:contentDescription="@null" android:backgroundTint="@color/connecting_popup_sink_device" />
+        </LinearLayout>
+        <View android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_weight="1.0" />
+    </LinearLayout>
+</ScrollView>

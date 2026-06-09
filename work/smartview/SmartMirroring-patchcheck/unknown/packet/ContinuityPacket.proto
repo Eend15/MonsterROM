@@ -1,0 +1,11 @@
+syntax = "proto3";
+package com.samsung.android.mcf.continuity;
+option java_package = "com.samsung.android.mcf.continuity.impl.common";
+option java_outer_classname = "ProtoContinuityPacket";
+option optimize_for = LITE_RUNTIME;
+
+message ContinuityPacket {
+  int32 type = 1;
+  int32 id = 2;
+  bytes payload = 3;
+}

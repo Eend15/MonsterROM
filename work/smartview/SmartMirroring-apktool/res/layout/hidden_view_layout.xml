@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@id/hidden_view_frame" android:tag="layout/hidden_view_layout_0" android:background="@drawable/hidden_view_bg" android:visibility="gone" android:keepScreenOn="true" android:elevation="@dimen/app_cast_background_elevation" style="@style/touch_view_hidden_view_layout"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <RelativeLayout android:id="@id/control_bar" style="@style/touch_view_control_bar_layout">
+        <LinearLayout android:id="@id/back_btn_layout" style="@style/touch_view_back_btn_layout">
+            <ImageView android:gravity="center" android:id="@id/back_btn" android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/ic_back" android:contentDescription="@string/app_cast_back_button" />
+        </LinearLayout>
+        <LinearLayout android:id="@id/min_btn_layout" android:layout_toLeftOf="@id/max_btn_layout" style="@style/touch_view_max_min_btn_layout">
+            <ImageView android:gravity="center" android:id="@id/min_btn" android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/ic_minimize" android:contentDescription="@string/app_cast_minimize_button" />
+        </LinearLayout>
+        <LinearLayout android:id="@id/max_btn_layout" android:layout_alignParentRight="true" style="@style/touch_view_max_min_btn_layout">
+            <ImageView android:gravity="center" android:id="@id/max_btn" android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/ic_mirroring" android:contentDescription="@string/app_cast_expand_button" />
+        </LinearLayout>
+    </RelativeLayout>
+    <FrameLayout android:id="@id/hidden_surface_view_frame" android:background="@drawable/hidden_texture_view_bg" android:layoutDirection="ltr" style="@style/touch_view_hidden_surface_background_layout">
+        <SurfaceView android:id="@id/hidden_surface_view" style="@style/touch_view_hidden_surface_layout" />
+    </FrameLayout>
+</LinearLayout>

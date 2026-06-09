@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="dlg_naming_limit">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">Nu se poate introduce mai mult de %d caracter.</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">Nu se pot introduce mai mult de %d caractere.</item>
+        <item quantity="many">N/A</item>
+        <item quantity="other">Nu se pot introduce mai mult de %d caractere.</item>
+    </plurals>
+    <plurals name="limit_shortcut_description">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">Nu puteți adăuga mai mult de %d comandă rapidă Smart View pe ecranul Acasă.</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">Nu puteți adăuga mai mult de %d comenzi rapide Smart View pe ecranul Acasă.</item>
+        <item quantity="many">N/A</item>
+        <item quantity="other">Nu puteți adăuga mai mult de %d comenzi rapide Smart View pe ecranul Acasă.</item>
+    </plurals>
+</resources>

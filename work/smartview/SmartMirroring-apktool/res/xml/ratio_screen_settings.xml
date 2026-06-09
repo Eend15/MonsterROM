@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.samsung.android.smartmirroring.wrapper.RadioButtonPreference android:title="@string/aspect_ratio_page_full_screen_on_phone" android:key="mobile_full_screen" />
+    <com.samsung.android.smartmirroring.wrapper.RadioButtonPreference android:title="@string/aspect_ratio_page_full_screen_on_connected_device" android:key="display_full_screen" />
+</androidx.preference.PreferenceScreen>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@color/welcome_background_color" android:fitsSystemWindows="true" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <View android:id="@id/first_margin" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <TextView android:textSize="@dimen/welcome_intro_main_text" android:textColor="@color/welcome_main_title_text_color" android:gravity="center_horizontal" android:id="@id/smart_view_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/smart_mirroring_title" android:fontFamily="sec" android:textFontWeight="700" />
+    <ScrollView android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true" android:layout_weight="1.0" android:fadeScrollbars="true">
+        <LinearLayout android:gravity="start|top" android:orientation="vertical" android:id="@id/contents_layout" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_centerInParent="true" android:paddingHorizontal="@dimen/welcome_text_padding_horizontal">
+            <View android:id="@id/second_margin" android:layout_width="match_parent" android:layout_height="match_parent" />
+            <TextView android:textSize="@dimen/welcome_intro_title_text" android:textColor="@color/welcome_intro_title_text_color" android:id="@id/first_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/welcome_intro_title_margin_bottom" android:text="@string/welcome_intro_first_title" android:fontFamily="sec" android:textFontWeight="600" />
+            <TextView android:textSize="@dimen/welcome_intro_description_text" android:textColor="@color/welcome_intro_description_text_color" android:id="@id/first_description" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/welcome_intro_first_description" android:lineSpacingExtra="@dimen/welcome_text_line_space" android:fontFamily="sec" android:textFontWeight="400" />
+            <View android:id="@id/third_margin" android:layout_width="match_parent" android:layout_height="match_parent" />
+            <TextView android:textSize="@dimen/welcome_intro_title_text" android:textColor="@color/welcome_intro_title_text_color" android:id="@id/third_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/welcome_intro_title_margin_bottom" android:text="@string/welcome_intro_third_title" android:fontFamily="sec" android:textFontWeight="600" />
+            <TextView android:textSize="@dimen/welcome_intro_description_text" android:textColor="@color/welcome_intro_description_text_color" android:id="@id/third_description" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/welcome_intro_third_description_margin_bottom" android:text="@string/welcome_intro_third_description" android:lineSpacingExtra="@dimen/welcome_text_line_space" android:fontFamily="sec" android:textFontWeight="400" />
+        </LinearLayout>
+    </ScrollView>
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <View android:id="@id/button_margin_top" android:layout_width="match_parent" android:layout_height="0.0dp" />
+        <Button android:textSize="@dimen/welcome_button_text_size" android:textColor="@color/welcome_intro_next_button_text_color" android:layout_gravity="center_horizontal" android:id="@id/next_button" android:background="@drawable/welcome_button_background" android:layout_width="wrap_content" android:layout_height="@dimen/welcome_intro_next_button_height" android:foreground="@drawable/welcome_button_ripple_effect" android:minWidth="@dimen/welcome_intro_next_button_width" android:text="@string/welcome_continue" android:layout_alignParentBottom="true" android:fontFamily="sec" android:textAlignment="center" android:textFontWeight="600" />
+        <View android:id="@id/button_margin_bottom" android:layout_width="match_parent" android:layout_height="0.0dp" />
+    </LinearLayout>
+</LinearLayout>

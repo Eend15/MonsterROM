@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="horizontal" android:background="@color/black_screen_help_background_color" android:layout_width="match_parent" android:layout_height="match_parent" android:weightSum="2.0"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <View android:layout_width="0.0dp" android:layout_height="match_parent" android:layout_weight="1.0" />
+    <LinearLayout android:layout_gravity="bottom" android:orientation="vertical" android:layout_width="@dimen/black_screen_help_bottom_layout_width" android:layout_height="match_parent" android:weightSum="2.0">
+        <View android:layout_width="match_parent" android:layout_height="0.0dp" android:layout_weight="1.0" />
+        <TextView android:textSize="@dimen/black_screen_help_text_size" android:textStyle="normal" android:textColor="@color/black_screen_help_text_color" android:gravity="center" android:id="@id/black_screen_detail_guide_top" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/help_blackscreen_body_text" android:fontFamily="sec" />
+        <ImageView android:layout_gravity="center" android:layout_width="@dimen/black_screen_help_cue_swipe_width" android:layout_height="@dimen/black_screen_help_cue_swipe_height" android:layout_marginTop="@dimen/black_screen_help_margin" android:layout_marginBottom="@dimen/black_screen_help_margin" android:src="@drawable/help_overaly_cue_swipe" android:contentDescription="@null" />
+        <TextView android:textStyle="normal" android:textColor="@color/black_screen_help_text_color" android:gravity="center" android:id="@id/black_screen_detail_guide_bottom" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/help_blackscreen_bottom_text" android:fontFamily="sec" />
+        <View android:layout_width="match_parent" android:layout_height="0.0dp" android:layout_weight="1.0" />
+        <RelativeLayout android:layout_gravity="center" android:layout_width="@dimen/black_screen_help_button_ok_width" android:layout_height="@dimen/black_screen_help_button_ok_height" android:layout_marginBottom="@dimen/black_screen_padding">
+            <ImageView android:layout_gravity="center_horizontal" android:id="@id/help_blackscreen_btn" android:background="@drawable/help_blackscreen_ok_button" android:layout_width="match_parent" android:layout_height="match_parent" android:contentDescription="@null" />
+            <TextView android:textSize="@dimen/black_screen_help_button_ok_text_size" android:textStyle="bold" android:textColor="@color/black_screen_help_text_color" android:gravity="center" android:id="@id/help_blackscreen_ok_text" android:layout_width="match_parent" android:layout_height="match_parent" android:text="@string/dlg_ok" android:fontFamily="sec" />
+        </RelativeLayout>
+    </LinearLayout>
+    <View android:layout_width="0.0dp" android:layout_height="match_parent" android:layout_weight="1.0" />
+</LinearLayout>

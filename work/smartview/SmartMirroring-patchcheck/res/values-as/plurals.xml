@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="dlg_naming_limit">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">%d টাতকৈ অধিক বৰ্ণ প্ৰৱিষ্ট কৰিব নোৱাৰে।</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">N/A</item>
+        <item quantity="many">N/A</item>
+        <item quantity="other">%d টাতকৈ অধিক বৰ্ণ প্ৰৱিষ্ট কৰিব নোৱাৰে।</item>
+    </plurals>
+    <plurals name="limit_shortcut_description">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">হোম স্ক্ৰীণত %d টা Smart View চৰ্টকাটতকৈ অধিক যোগ কৰিব নোৱাৰে।</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">N/A</item>
+        <item quantity="many">N/A</item>
+        <item quantity="other">হোম স্ক্ৰীণত %d টা Smart View চৰ্টকাটতকৈ অধিক যোগ কৰিব নোৱাৰে।</item>
+    </plurals>
+</resources>

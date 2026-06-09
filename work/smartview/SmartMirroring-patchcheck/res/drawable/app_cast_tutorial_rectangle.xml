@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape android:shape="rectangle"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <stroke android:width="@dimen/app_cast_tutorial_stroke" android:color="@color/app_cast_tutorial_shape_color" />
+    <size android:height="@dimen/app_cast_tutorial_rectangle_height" android:width="@dimen/app_cast_tutorial_rectangle_width" />
+</shape>

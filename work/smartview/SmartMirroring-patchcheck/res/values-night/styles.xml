@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppPreferenceTheme" parent="@style/Theme.AppCompat.DayNight">
+        <item name="android:statusBarColor">@color/light_theme_background_color</item>
+        <item name="android:navigationBarColor">@color/light_theme_background_color</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="Theme.AppCompat.DayNight" parent="@style/Theme.AppCompat" />
+    <style name="Theme.AppCompat.DayNight.DarkActionBar" parent="@style/Theme.AppCompat" />
+    <style name="Theme.AppCompat.DayNight.Dialog" parent="@style/Theme.AppCompat.Dialog" />
+    <style name="Theme.AppCompat.DayNight.Dialog.Alert" parent="@style/Theme.AppCompat.Dialog.Alert" />
+    <style name="Theme.AppCompat.DayNight.Dialog.MinWidth" parent="@style/Theme.AppCompat.Dialog.MinWidth" />
+    <style name="Theme.AppCompat.DayNight.DialogWhenLarge" parent="@style/Theme.AppCompat.DialogWhenLarge" />
+    <style name="Theme.AppCompat.DayNight.NoActionBar" parent="@style/Theme.AppCompat.NoActionBar" />
+    <style name="Theme.MaterialComponents.DayNight" parent="@style/Theme.MaterialComponents" />
+    <style name="Theme.MaterialComponents.DayNight.BottomSheetDialog" parent="@style/Theme.MaterialComponents.BottomSheetDialog" />
+    <style name="Theme.MaterialComponents.DayNight.Bridge" parent="@style/Theme.MaterialComponents.Bridge" />
+    <style name="Theme.MaterialComponents.DayNight.DarkActionBar" parent="@style/Theme.MaterialComponents" />
+    <style name="Theme.MaterialComponents.DayNight.DarkActionBar.Bridge" parent="@style/Theme.MaterialComponents.Bridge" />
+    <style name="Theme.MaterialComponents.DayNight.Dialog" parent="@style/Theme.MaterialComponents.Dialog" />
+    <style name="Theme.MaterialComponents.DayNight.Dialog.Alert" parent="@style/Theme.MaterialComponents.Dialog.Alert" />
+    <style name="Theme.MaterialComponents.DayNight.Dialog.Alert.Bridge" parent="@style/Theme.MaterialComponents.Dialog.Alert.Bridge" />
+    <style name="Theme.MaterialComponents.DayNight.Dialog.Bridge" parent="@style/Theme.MaterialComponents.Dialog.Bridge" />
+    <style name="Theme.MaterialComponents.DayNight.Dialog.FixedSize" parent="@style/Theme.MaterialComponents.Dialog.FixedSize" />
+    <style name="Theme.MaterialComponents.DayNight.Dialog.FixedSize.Bridge" parent="@style/Theme.MaterialComponents.Dialog.FixedSize.Bridge" />
+    <style name="Theme.MaterialComponents.DayNight.Dialog.MinWidth" parent="@style/Theme.MaterialComponents.Dialog.MinWidth" />
+    <style name="Theme.MaterialComponents.DayNight.Dialog.MinWidth.Bridge" parent="@style/Theme.MaterialComponents.Dialog.MinWidth.Bridge" />
+    <style name="Theme.MaterialComponents.DayNight.DialogWhenLarge" parent="@style/Theme.MaterialComponents.DialogWhenLarge" />
+    <style name="Theme.MaterialComponents.DayNight.NoActionBar" parent="@style/Theme.MaterialComponents.NoActionBar" />
+    <style name="Theme.MaterialComponents.DayNight.NoActionBar.Bridge" parent="@style/Theme.MaterialComponents.NoActionBar.Bridge" />
+    <style name="WelcomeTheme" parent="@style/Theme.AppCompat.NoActionBar">
+        <item name="android:statusBarColor">@color/welcome_background_color</item>
+        <item name="android:navigationBarColor">@color/welcome_background_color</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+    <style name="about_permissions_layout_theme" parent="@style/Theme.AppCompat.DayNight">
+        <item name="android:windowBackground">@color/about_permissions_layout_color</item>
+        <item name="android:statusBarColor">@color/about_permissions_layout_color</item>
+        <item name="android:navigationBarColor">@color/about_permissions_layout_color</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="actionBarStyle">@style/actionbar_about_permission</item>
+    </style>
+    <style name="about_smart_view_theme" parent="@style/Theme.AppCompat.DayNight">
+        <item name="android:windowBackground">@color/about_page_background_color</item>
+        <item name="android:statusBarColor">@color/about_page_background_color</item>
+        <item name="android:navigationBarColor">@color/about_page_background_color</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="full_screen_layout_theme" parent="@style/Theme.AppCompat.DayNight">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:statusBarColor">@color/light_theme_background_color</item>
+        <item name="android:navigationBarColor">@color/light_theme_background_color</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="actionBarStyle">@style/ActionBar</item>
+    </style>
+    <style name="labs_theme" parent="@style/Theme.AppCompat.DayNight">
+        <item name="android:windowBackground">@color/light_theme_background_color</item>
+        <item name="android:statusBarColor">@color/light_theme_background_color</item>
+        <item name="android:navigationBarColor">@color/light_theme_background_color</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="screen_sharing_theme" parent="@style/Theme.AppCompat.DayNight">
+        <item name="android:background">@color/light_theme_background_color</item>
+        <item name="android:statusBarColor">@color/light_theme_background_color</item>
+        <item name="android:navigationBarColor">@color/light_theme_background_color</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+    <style name="setting_layout_theme" parent="@style/Theme.AppCompat.DayNight">
+        <item name="android:windowBackground">@color/light_theme_background_color</item>
+        <item name="android:statusBarColor">@color/light_theme_background_color</item>
+        <item name="android:navigationBarColor">@color/light_theme_background_color</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="actionBarStyle">@style/ActionBar</item>
+    </style>
+</resources>

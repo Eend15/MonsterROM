@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.samsung.android.smartmirroring.controller.views.DateView android:gravity="center" android:orientation="horizontal" android:id="@id/date_layout" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="@dimen/black_screen_date_text_size" android:textColor="@color/black_screen_view_text_color" android:gravity="center" android:id="@id/date" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="sec" android:textFontWeight="@dimen/font_weight_normal" />
+</com.samsung.android.smartmirroring.controller.views.DateView>

@@ -69,6 +69,55 @@ PATCH_P3S_SMARTVIEW_STAGEFRIGHT()
 PATCH_P3S_SMARTVIEW_STAGEFRIGHT
 unset -f PATCH_P3S_SMARTVIEW_STAGEFRIGHT
 
+PATCH_P3S_SMARTVIEW_WFD_NOHDCP()
+{
+    local LIB="$WORK_DIR/system/system/lib64/libremotedisplay_wfd.so"
+    local OFFSET
+    local ORIG
+
+    if [ ! -f "$LIB" ]; then
+        LOG "- Skipping p3s Smart View WFD patch: missing $LIB"
+        return 0
+    fi
+
+    # Stop the S25FE WFD source from advertising/using HDCP on p3s. The
+    # unlocked p3s trustlet reports the HDCP key as invalid, which lets the TV
+    # connect but tears down mirroring before frames appear.
+    OFFSET=$((0x171d50))
+    ORIG="$(od -An -tx1 -N4 -j "$OFFSET" "$LIB" 2>/dev/null | tr -d ' \n')"
+    case "$ORIG" in
+        05000014)
+            LOG "- p3s Smart View WFD content-protection query already patched"
+            ;;
+        a1000054)
+            printf '\005\000\000\024' | dd of="$LIB" bs=1 seek="$OFFSET" count=4 conv=notrunc 2>/dev/null || \
+                ABORT "Failed to patch p3s Smart View WFD content-protection query"
+            LOG "- Patching p3s Smart View WFD content-protection query"
+            ;;
+        *)
+            ABORT "Unexpected p3s Smart View WFD bytes at 0x171d50: $ORIG"
+            ;;
+    esac
+
+    OFFSET=$((0x172d60))
+    ORIG="$(od -An -tx1 -N4 -j "$OFFSET" "$LIB" 2>/dev/null | tr -d ' \n')"
+    case "$ORIG" in
+        1f2003d5)
+            LOG "- p3s Smart View WFD HDCP response branch already patched"
+            ;;
+        f6190036)
+            printf '\037\040\003\325' | dd of="$LIB" bs=1 seek="$OFFSET" count=4 conv=notrunc 2>/dev/null || \
+                ABORT "Failed to patch p3s Smart View WFD HDCP response branch"
+            LOG "- Patching p3s Smart View WFD HDCP response branch"
+            ;;
+        *)
+            ABORT "Unexpected p3s Smart View WFD bytes at 0x172d60: $ORIG"
+            ;;
+    esac
+}
+PATCH_P3S_SMARTVIEW_WFD_NOHDCP
+unset -f PATCH_P3S_SMARTVIEW_WFD_NOHDCP
+
 SMARTVIEW_SEPOLICY="$WORK_DIR/vendor/etc/selinux/vendor_sepolicy.cil"
 if [ -f "$SMARTVIEW_SEPOLICY" ]; then
     for RULE in \

@@ -1,0 +1,22 @@
+version: v3.0.2-SNAPSHOT
+apkFileName: SmartMirroring.apk
+usesFramework:
+  ids:
+  - 1
+  tag: S731BXXS6BZE2
+sdkInfo:
+  minSdkVersion: 32
+  targetSdkVersion: 36
+versionInfo:
+  versionCode: 822728000
+  versionName: 8.2.27.28
+resourcesInfo:
+  packageId: 127
+doNotCompress:
+- arsc
+- dex
+- png
+- so
+- webp
+- assets/dexopt/baseline.prof
+- assets/dexopt/baseline.profm

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:background="?listChoiceBackgroundIndicator" android:clickable="true" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="@dimen/settings_pref_padding_horizontal" android:paddingVertical="@dimen/settings_pref_padding_vertical"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="vertical" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_weight="1.0">
+        <TextView android:textSize="@dimen/settings_pref_title_text_size" android:textStyle="normal" android:textColor="@color/settings_pref_title_color" android:id="@id/settings_pref_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:fontFamily="sec-roboto-light" />
+        <TextView android:textSize="@dimen/settings_pref_subtext_size" android:textStyle="normal" android:textColor="@color/settings_pref_subtext_color" android:id="@id/settings_pref_description" android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="2" android:fontFamily="sec-roboto-light" />
+    </LinearLayout>
+    <View android:background="@color/settings_pref_divider_color" android:layout_width="@dimen/settings_pref_divider_width" android:layout_height="@dimen/settings_pref_divider_height" android:layout_marginStart="@dimen/settings_pref_divider_margin_start" android:layout_marginEnd="@dimen/settings_pref_divider_margin_end" />
+    <androidx.appcompat.widget.SwitchCompat android:layout_gravity="end|center" android:id="@id/id_settings_pref_switch" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+</LinearLayout>

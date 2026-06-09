@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:layout_gravity="center" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="@dimen/connecting_dialog_height" android:layout_marginTop="@dimen/connecting_dialog_margin_top" android:layout_marginBottom="@dimen/connecting_dialog_margin_bottom">
+        <LinearLayout android:gravity="center" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="@dimen/cdm_dialog_padding_horizontal">
+            <LinearLayout android:gravity="center" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="match_parent">
+                <LinearLayout android:gravity="center" android:layout_width="wrap_content" android:layout_height="match_parent">
+                    <ImageView android:id="@id/icon_device_image_view" android:layout_width="@dimen/naming_icon_size" android:layout_height="@dimen/naming_icon_size" android:src="@drawable/ic_smartview" style="@style/shortcut_device_icon" />
+                </LinearLayout>
+                <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+                    <TextView android:textSize="@dimen/shortcut_dialog_text_size" android:textColor="@color/shortcut_naming_title_text_color" android:gravity="start" android:id="@id/naming_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/shortcut_dialog_text_margin_left" android:text="@string/dlg_naming_description" android:importantForAccessibility="yes" android:fontFamily="sec" android:textFontWeight="400" />
+                    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <EditText android:textColor="@color/shortcut_naming_text_color" android:gravity="start" android:id="@id/device_name_textview" android:layout_width="match_parent" android:layout_height="wrap_content" android:importantForAccessibility="yes" android:fontFamily="sec" android:textFontWeight="400" />
+                        <TextView android:textSize="@dimen/shortcut_dialog_text_size" android:textColor="@color/shortcut_naming_error_color" android:gravity="start" android:id="@id/error_device_name" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/shortcut_dialog_text_margin_left" android:importantForAccessibility="yes" android:fontFamily="sec" android:textFontWeight="400" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

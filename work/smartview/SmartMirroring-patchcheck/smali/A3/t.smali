@@ -1,0 +1,410 @@
+.class public final LA3/t;
+.super Ls3/k;
+.source "SourceFile"
+
+# interfaces
+.implements Lr3/a;
+
+
+# instance fields
+.field public final synthetic i:I
+
+.field public final synthetic j:LA3/A;
+
+
+# direct methods
+.method public synthetic constructor <init>(LA3/A;I)V
+    .locals 0
+
+    iput p2, p0, LA3/t;->i:I
+
+    iput-object p1, p0, LA3/t;->j:LA3/A;
+
+    const/4 p1, 0x0
+
+    invoke-direct {p0, p1}, Ls3/k;-><init>(I)V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method public final d()Ljava/lang/Object;
+    .locals 6
+
+    const/4 v0, 0x1
+
+    const/4 v1, 0x2
+
+    const-string v2, "descriptor.staticScope"
+
+    const/4 v3, 0x0
+
+    const/4 v4, 0x0
+
+    iget-object v5, p0, LA3/t;->j:LA3/A;
+
+    iget p0, p0, LA3/t;->i:I
+
+    packed-switch p0, :pswitch_data_0
+
+    new-instance p0, LA3/x;
+
+    invoke-direct {p0, v5}, LA3/x;-><init>(LA3/A;)V
+
+    return-object p0
+
+    :pswitch_0
+    iget-object p0, v5, LA3/A;->i:Ljava/lang/Class;
+
+    invoke-virtual {p0}, Ljava/lang/Class;->isAnonymousClass()Z
+
+    move-result p0
+
+    if-eqz p0, :cond_0
+
+    goto :goto_0
+
+    :cond_0
+    invoke-virtual {v5}, LA3/A;->s()Le4/b;
+
+    move-result-object p0
+
+    iget-boolean v0, p0, Le4/b;->c:Z
+
+    if-eqz v0, :cond_1
+
+    goto :goto_0
+
+    :cond_1
+    invoke-virtual {p0}, Le4/b;->b()Le4/c;
+
+    move-result-object p0
+
+    invoke-virtual {p0}, Le4/c;->b()Ljava/lang/String;
+
+    move-result-object v3
+
+    :goto_0
+    return-object v3
+
+    :pswitch_1
+    invoke-virtual {v5}, LA3/A;->t()LG3/e;
+
+    move-result-object p0
+
+    invoke-interface {p0}, LG3/e;->V()Lo4/n;
+
+    move-result-object p0
+
+    invoke-static {p0, v2}, Ls3/i;->d(Ljava/lang/Object;Ljava/lang/String;)V
+
+    invoke-virtual {v5, p0, v1}, LA3/F;->j(Lo4/n;I)Ljava/util/List;
+
+    move-result-object p0
+
+    return-object p0
+
+    :pswitch_2
+    invoke-virtual {v5}, LA3/A;->t()LG3/e;
+
+    move-result-object p0
+
+    invoke-interface {p0}, LG3/e;->q()Lv4/z;
+
+    move-result-object p0
+
+    invoke-virtual {p0}, Lv4/v;->p0()Lo4/n;
+
+    move-result-object p0
+
+    invoke-virtual {v5, p0, v1}, LA3/F;->j(Lo4/n;I)Ljava/util/List;
+
+    move-result-object p0
+
+    return-object p0
+
+    :pswitch_3
+    sget p0, LA3/A;->k:I
+
+    invoke-virtual {v5}, LA3/A;->s()Le4/b;
+
+    move-result-object p0
+
+    iget-object v0, v5, LA3/A;->j:LA3/v0;
+
+    invoke-virtual {v0}, LA3/v0;->d()Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, LA3/x;
+
+    invoke-virtual {v0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
+
+    sget-object v1, LA3/C;->b:[Lx3/s;
+
+    aget-object v1, v1, v4
+
+    iget-object v0, v0, LA3/C;->a:LA3/u0;
+
+    invoke-virtual {v0}, LA3/u0;->d()Ljava/lang/Object;
+
+    move-result-object v0
+
+    const-string v1, "<get-moduleData>(...)"
+
+    invoke-static {v0, v1}, Ls3/i;->d(Ljava/lang/Object;Ljava/lang/String;)V
+
+    check-cast v0, LL3/e;
+
+    iget-boolean v1, p0, Le4/b;->c:Z
+
+    iget-object v0, v0, LL3/e;->a:Lr4/i;
+
+    if-eqz v1, :cond_2
+
+    invoke-virtual {v0, p0}, Lr4/i;->b(Le4/b;)LG3/e;
+
+    move-result-object p0
+
+    goto :goto_1
+
+    :cond_2
+    iget-object v0, v0, Lr4/i;->b:LG3/y;
+
+    invoke-static {v0, p0}, LG3/w;->d(LG3/y;Le4/b;)LG3/e;
+
+    move-result-object p0
+
+    :goto_1
+    if-nez p0, :cond_5
+
+    iget-object p0, v5, LA3/A;->i:Ljava/lang/Class;
+
+    invoke-static {p0}, Lr2/a;->o(Ljava/lang/Class;)LL3/b;
+
+    move-result-object v0
+
+    if-eqz v0, :cond_3
+
+    iget-object v0, v0, LL3/b;->b:LY3/b;
+
+    iget-object v3, v0, LY3/b;->a:LY3/a;
+
+    :cond_3
+    if-nez v3, :cond_4
+
+    const/4 v0, -0x1
+
+    goto :goto_2
+
+    :cond_4
+    sget-object v0, LA3/y;->a:[I
+
+    invoke-virtual {v3}, Ljava/lang/Enum;->ordinal()I
+
+    move-result v1
+
+    aget v0, v0, v1
+
+    :goto_2
+    packed-switch v0, :pswitch_data_1
+
+    :pswitch_4
+    new-instance p0, LH4/g;
+
+    const/4 v0, 0x4
+
+    invoke-direct {p0, v0}, LH4/g;-><init>(I)V
+
+    throw p0
+
+    :pswitch_5
+    new-instance v0, LA3/s0;
+
+    new-instance v1, Ljava/lang/StringBuilder;
+
+    const-string v2, "Unknown class: "
+
+    invoke-direct {v1, v2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v1, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    const-string p0, " (kind = "
+
+    invoke-virtual {v1, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v1, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    const/16 p0, 0x29
+
+    invoke-virtual {v1, p0}, Ljava/lang/StringBuilder;->append(C)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object p0
+
+    invoke-direct {v0, p0, v4}, LA3/s0;-><init>(Ljava/lang/String;I)V
+
+    throw v0
+
+    :pswitch_6
+    new-instance v0, Ljava/lang/UnsupportedOperationException;
+
+    new-instance v1, Ljava/lang/StringBuilder;
+
+    const-string v2, "This class is an internal synthetic class generated by the Kotlin compiler, such as an anonymous class for a lambda, a SAM wrapper, a callable reference, etc. It\'s not a Kotlin class or interface, so the reflection library has no idea what declarations it has. Please use Java reflection to inspect this class: "
+
+    invoke-direct {v1, v2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v1, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object p0
+
+    invoke-direct {v0, p0}, Ljava/lang/UnsupportedOperationException;-><init>(Ljava/lang/String;)V
+
+    throw v0
+
+    :pswitch_7
+    new-instance v0, Ljava/lang/UnsupportedOperationException;
+
+    new-instance v1, Ljava/lang/StringBuilder;
+
+    const-string v2, "Packages and file facades are not yet supported in Kotlin reflection. Meanwhile please use Java reflection to inspect this class: "
+
+    invoke-direct {v1, v2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v1, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object p0
+
+    invoke-direct {v0, p0}, Ljava/lang/UnsupportedOperationException;-><init>(Ljava/lang/String;)V
+
+    throw v0
+
+    :pswitch_8
+    new-instance v0, LA3/s0;
+
+    new-instance v1, Ljava/lang/StringBuilder;
+
+    const-string v2, "Unresolved class: "
+
+    invoke-direct {v1, v2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+
+    invoke-virtual {v1, p0}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object p0
+
+    invoke-direct {v0, p0, v4}, LA3/s0;-><init>(Ljava/lang/String;I)V
+
+    throw v0
+
+    :cond_5
+    return-object p0
+
+    :pswitch_9
+    invoke-virtual {v5}, LA3/A;->t()LG3/e;
+
+    move-result-object p0
+
+    invoke-interface {p0}, LG3/e;->V()Lo4/n;
+
+    move-result-object p0
+
+    invoke-static {p0, v2}, Ls3/i;->d(Ljava/lang/Object;Ljava/lang/String;)V
+
+    invoke-virtual {v5, p0, v0}, LA3/F;->j(Lo4/n;I)Ljava/util/List;
+
+    move-result-object p0
+
+    return-object p0
+
+    :pswitch_a
+    invoke-virtual {v5}, LA3/A;->t()LG3/e;
+
+    move-result-object p0
+
+    invoke-interface {p0}, LG3/e;->q()Lv4/z;
+
+    move-result-object p0
+
+    invoke-virtual {p0}, Lv4/v;->p0()Lo4/n;
+
+    move-result-object p0
+
+    invoke-virtual {v5, p0, v0}, LA3/F;->j(Lo4/n;I)Ljava/util/List;
+
+    move-result-object p0
+
+    return-object p0
+
+    :pswitch_b
+    invoke-virtual {v5}, LA3/A;->g()Ljava/util/Collection;
+
+    move-result-object p0
+
+    new-instance v0, Ljava/util/ArrayList;
+
+    invoke-static {p0}, Lg3/l;->N(Ljava/lang/Iterable;)I
+
+    move-result v1
+
+    invoke-direct {v0, v1}, Ljava/util/ArrayList;-><init>(I)V
+
+    invoke-interface {p0}, Ljava/lang/Iterable;->iterator()Ljava/util/Iterator;
+
+    move-result-object p0
+
+    :goto_3
+    invoke-interface {p0}, Ljava/util/Iterator;->hasNext()Z
+
+    move-result v1
+
+    if-eqz v1, :cond_6
+
+    invoke-interface {p0}, Ljava/util/Iterator;->next()Ljava/lang/Object;
+
+    move-result-object v1
+
+    check-cast v1, LG3/i;
+
+    new-instance v2, LA3/I;
+
+    invoke-direct {v2, v5, v1}, LA3/I;-><init>(LA3/F;LG3/t;)V
+
+    invoke-virtual {v0, v2}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+
+    goto :goto_3
+
+    :cond_6
+    return-object v0
+
+    :pswitch_data_0
+    .packed-switch 0x0
+        :pswitch_b
+        :pswitch_a
+        :pswitch_9
+        :pswitch_3
+        :pswitch_2
+        :pswitch_1
+        :pswitch_0
+    .end packed-switch
+
+    :pswitch_data_1
+    .packed-switch -0x1
+        :pswitch_8
+        :pswitch_4
+        :pswitch_7
+        :pswitch_7
+        :pswitch_7
+        :pswitch_6
+        :pswitch_5
+        :pswitch_8
+    .end packed-switch
+.end method

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector android:height="96.0dp" android:width="96.0dp" android:viewportWidth="96.0" android:viewportHeight="96.0" aapt:fps="60"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt">
+    <group android:name="s1c2" android:scaleX="0.4" android:scaleY="0.4" android:translateX="48.0" android:translateY="48.0" aapt:layer_name="Progress_dot ParentLink">
+        <group android:name="c2" android:pivotX="120.0" android:pivotY="120.0" android:translateX="-120.0" android:translateY="-120.0" aapt:layer_name="Progress_dot">
+            <group android:name="c2s4" android:pivotX="28.25" android:pivotY="28.25" android:scaleX="0.95" android:scaleY="0.95" android:translateX="7.75" android:translateY="91.75" aapt:layer_name="Cir_0">
+                <group android:name="c2s4pg1" android:translateX="28.25" android:translateY="28.25" aapt:layer_name="Group 1">
+                    <path android:name="c2s4pg1p10" android:fillColor="@drawable/$sesl_vector_drawable_progress__0" android:pathData="M 0 -28 C 15.464 -28 28 -15.464 28 0 C 28 15.464 15.464 28 0 28 C -15.464 28 -28 15.464 -28 0 C -28 -15.464 -15.464 -28 0 -28 Z" android:fillAlpha="1.0" aapt:layer_name="Path 1" aapt:style_name="Gradient Fill 1" />
+                </group>
+            </group>
+            <group android:name="c2s3" android:pivotX="28.25" android:pivotY="28.25" android:scaleX="0.95" android:scaleY="0.95" android:translateX="91.75" android:translateY="7.75" aapt:layer_name="Cir_1">
+                <group android:name="c2s3pg1" android:translateX="28.25" android:translateY="28.25" aapt:layer_name="Group 1">
+                    <path android:name="c2s3pg1p10" android:fillColor="@drawable/$sesl_vector_drawable_progress__1" android:pathData="M 0 -28 C 15.464 -28 28 -15.464 28 0 C 28 15.464 15.464 28 0 28 C -15.464 28 -28 15.464 -28 0 C -28 -15.464 -15.464 -28 0 -28 Z" android:fillAlpha="1.0" aapt:layer_name="Path 1" aapt:style_name="Gradient Fill 1" />
+                </group>
+            </group>
+            <group android:name="c2s2" android:pivotX="28.25" android:pivotY="28.25" android:scaleX="0.95" android:scaleY="0.95" android:translateX="175.75" android:translateY="91.75" aapt:layer_name="Cir_2">
+                <group android:name="c2s2pg1" android:translateX="28.25" android:translateY="28.25" aapt:layer_name="Group 1">
+                    <path android:name="c2s2pg1p10" android:fillColor="@drawable/$sesl_vector_drawable_progress__2" android:pathData="M 0 -28 C 15.464 -28 28 -15.464 28 0 C 28 15.464 15.464 28 0 28 C -15.464 28 -28 15.464 -28 0 C -28 -15.464 -15.464 -28 0 -28 Z" android:fillAlpha="1.0" aapt:layer_name="Path 1" aapt:style_name="Gradient Fill 1" />
+                </group>
+            </group>
+            <group android:name="c2s1" android:pivotX="28.25" android:pivotY="28.25" android:scaleX="0.95" android:scaleY="0.95" android:translateX="91.75" android:translateY="175.75" aapt:layer_name="Cir_3">
+                <group android:name="c2s1pg1" android:translateX="28.25" android:translateY="28.25" aapt:layer_name="Group 1">
+                    <path android:name="c2s1pg1p10" android:fillColor="@drawable/$sesl_vector_drawable_progress__3" android:pathData="M 0 -28 C 15.464 -28 28 -15.464 28 0 C 28 15.464 15.464 28 0 28 C -15.464 28 -28 15.464 -28 0 C -28 -15.464 -15.464 -28 0 -28 Z" android:fillAlpha="1.0" aapt:layer_name="Path 1" aapt:style_name="Gradient Fill 1" />
+                </group>
+            </group>
+        </group>
+    </group>
+    <group android:name="s1" android:scaleX="0.4" android:scaleY="0.4" android:translateX="48.0" android:translateY="48.0" aapt:layer_name="Rotation">
+        <group android:name="s1pg1" aapt:layer_name="Rectangle 1" />
+    </group>
+</vector>

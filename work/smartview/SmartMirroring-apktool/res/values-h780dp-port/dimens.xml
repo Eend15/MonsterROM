@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="sesl_appbar_height_proportion">0.36</dimen>
+    <dimen name="sesl_appbar_viewpager_bottom_margin_weight">0.6</dimen>
+    <dimen name="sesl_appbar_viewpager_top_margin_weight">0.4</dimen>
+</resources>

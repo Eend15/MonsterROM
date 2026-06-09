@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="dlg_naming_limit">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">Można wprowadzić maksymalnie %d znak.</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">Można wprowadzić maksymalnie %d znaki.</item>
+        <item quantity="many">Można wprowadzić maksymalnie %d znaków.</item>
+        <item quantity="other">Można wprowadzić maksymalnie %d znaku.</item>
+    </plurals>
+    <plurals name="limit_shortcut_description">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">Nie można dodać więcej niż %d skrót Smart View do ekranu startowego.</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">Nie można dodać więcej niż %d skróty Smart View do ekranu startowego.</item>
+        <item quantity="many">Nie można dodać więcej niż %d skrótów Smart View do ekranu startowego.</item>
+        <item quantity="other">Nie można dodać więcej niż %d skrótu Smart View do ekranu startowego.</item>
+    </plurals>
+</resources>

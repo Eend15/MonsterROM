@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="dlg_naming_limit">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">Nije moguće unijeti više od %d znaka.</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">Nije moguće unijeti više od %d znaka.</item>
+        <item quantity="many">N/A</item>
+        <item quantity="other">Nije moguće unijeti više od %d znakova.</item>
+    </plurals>
+    <plurals name="limit_shortcut_description">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">Na početni zaslon nije moguće dodati više od %d prečaca Smart View.</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">Na početni zaslon nije moguće dodati više od %d prečaca Smart View.</item>
+        <item quantity="many">N/A</item>
+        <item quantity="other">Na početni zaslon nije moguće dodati više od %d prečaca Smart View.</item>
+    </plurals>
+</resources>

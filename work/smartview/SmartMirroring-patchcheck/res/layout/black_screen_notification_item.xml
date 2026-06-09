@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.samsung.android.smartmirroring.controller.views.NotificationItemView android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:gravity="center" android:id="@id/notification_item_layout" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="@dimen/black_screen_notification_item_divider">
+        <LinearLayout android:orientation="vertical" android:id="@id/notification_item_icon_view" android:layout_width="@dimen/black_screen_notification_item_icon_width_height" android:layout_height="@dimen/black_screen_notification_item_icon_width_height">
+            <ImageView android:layout_gravity="center" android:id="@id/notification_item_imageview" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" android:tint="#cccccc" />
+            <TextView android:textSize="@dimen/black_screen_notification_text_size" android:textColor="@color/black_screen_view_text_color" android:gravity="center" android:id="@id/notification_item_textview" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" android:includeFontPadding="false" android:fontFamily="sec" android:textAlignment="center" android:textFontWeight="@dimen/font_weight_normal" />
+        </LinearLayout>
+    </LinearLayout>
+</com.samsung.android.smartmirroring.controller.views.NotificationItemView>

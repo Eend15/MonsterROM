@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="dlg_naming_limit">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">Nelze zadat více než %d znak.</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">Nelze zadat více než %d znaky.</item>
+        <item quantity="many">Nelze zadat více než %d znaků.</item>
+        <item quantity="other">Nelze zadat více než %d znaků.</item>
+    </plurals>
+    <plurals name="limit_shortcut_description">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">Na domovskou obrazovku nelze přidat více než %d zástupce Smart View.</item>
+        <item quantity="two">N/A</item>
+        <item quantity="few">Na domovskou obrazovku nelze přidat více než %d zástupce Smart View.</item>
+        <item quantity="many">Na domovskou obrazovku nelze přidat více než %d zástupců Smart View.</item>
+        <item quantity="other">Na domovskou obrazovku nelze přidat více než %d zástupců Smart View.</item>
+    </plurals>
+</resources>

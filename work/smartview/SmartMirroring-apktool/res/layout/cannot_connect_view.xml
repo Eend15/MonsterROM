@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:paddingBottom="@dimen/cdm_main_description_margin_Bottom" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true" android:paddingHorizontal="@dimen/cdm_dialog_padding_horizontal"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:textSize="@dimen/cdm_main_description_text_size" android:textColor="@color/dialog_body_text_color" android:layout_gravity="center" android:id="@id/cannot_connect_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/cdm_main_description_margin_Top" android:includeFontPadding="false" android:fontFamily="sec" android:textFontWeight="400" />
+    </LinearLayout>
+</LinearLayout>

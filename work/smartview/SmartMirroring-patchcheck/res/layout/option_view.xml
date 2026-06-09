@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="vertical" android:id="@id/id_more_option_menu_layout" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="@dimen/floating_menu_default_width">
+        <LinearLayout android:id="@id/id_more_option_shadow_layout" android:background="@drawable/sliding_view_bg" android:visibility="visible" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="@dimen/floating_menu_elevation" android:elevation="@dimen/floating_menu_elevation_more_option">
+            <LinearLayout android:id="@id/id_more_option_captured_blur_layout" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                <LinearLayout android:id="@id/id_more_option_background_layout" android:visibility="visible" style="@style/more_option_background_layout">
+                    <LinearLayout android:id="@id/id_more_option_background_upper" style="@style/more_option_background_upper">
+                        <LinearLayout android:paddingStart="@dimen/sliding_view_horizontal" android:paddingEnd="@dimen/sliding_view_horizontal" style="@style/more_option_background_item">
+                            <RelativeLayout android:id="@id/id_more_option_head_layout" style="@style/more_option_head_layout">
+                                <RelativeLayout android:id="@id/id_more_option_setting_layout" android:foreground="@drawable/background_recoil_effect" style="@style/more_option_setting_layout">
+                                    <ImageView android:id="@id/id_more_option_setting_imageview" android:src="@drawable/more_option_icon" android:contentDescription="@string/dlg_settings" style="@style/more_option_settings_icon" />
+                                </RelativeLayout>
+                                <RelativeLayout android:id="@id/id_help_layout" android:foreground="@drawable/background_recoil_effect" android:layout_toStartOf="@id/id_more_option_setting_layout" style="@style/help_option_layout">
+                                    <ImageView android:id="@id/id_help_icon" android:background="@android:color/transparent" android:src="@drawable/help_info" android:contentDescription="@string/dlg_help" style="@style/help_icon" />
+                                </RelativeLayout>
+                                <TextView android:id="@id/id_more_option_head_textview" android:text="@string/smart_mirroring_title" android:layout_toStartOf="@id/id_help_layout" style="@style/more_option_head_text" />
+                            </RelativeLayout>
+                        </LinearLayout>
+                        <LinearLayout style="@style/more_option_background_item">
+                            <ScrollView android:scrollbarStyle="insideOverlay" android:id="@id/scroll_option_view" android:layout_width="match_parent" android:layout_height="wrap_content">
+                                <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:minWidth="@dimen/floating_menu_default_width">
+                                    <RelativeLayout android:id="@id/id_more_option_app_cast_layout" android:visibility="gone" style="@style/more_option_app_cast_button">
+                                        <LinearLayout android:id="@id/id_more_option_app_cast" android:foreground="@drawable/background_recoil_effect_help_option" android:layout_toStartOf="@id/app_cast_infor_layout" style="@style/more_option_button_sub">
+                                            <ImageView android:id="@id/id_more_option_app_cast_imageview" android:src="@drawable/ic_moreoption_appcast" style="@style/more_option_button_icon" />
+                                            <TextView android:id="@id/id_more_option_app_cast_textview" android:text="@string/dlg_cast_ps_only" style="@style/more_option_button_text_sub" />
+                                        </LinearLayout>
+                                        <RelativeLayout android:id="@id/app_cast_infor_layout" android:foreground="@drawable/background_recoil_effect" android:layout_marginEnd="@dimen/sliding_view_horizontal" style="@style/more_option_app_cast_infor_layout">
+                                            <ImageView android:id="@id/app_cast_infor" android:src="@drawable/ic_info" style="@style/more_option_infor_button_icon" />
+                                        </RelativeLayout>
+                                    </RelativeLayout>
+                                    <LinearLayout android:id="@id/id_more_option_change_aspect_ratio" android:foreground="@drawable/background_recoil_effect_help_option" style="@style/more_option_button">
+                                        <ImageView android:id="@id/id_more_option_change_aspect_ratio_imageview" android:src="@drawable/ic_aspect_ratio_full" style="@style/more_option_button_icon" />
+                                        <TextView android:id="@id/id_more_option_change_aspect_ratio_textview" android:text="@string/dlg_change_aspect_ratio" style="@style/more_option_button_text" />
+                                    </LinearLayout>
+                                    <LinearLayout android:id="@id/id_more_option_pause" android:foreground="@drawable/background_recoil_effect_help_option_dark" style="@style/more_option_button">
+                                        <ImageView android:id="@id/id_more_option_pause_imageview" android:src="@drawable/ic_moreoption_pause" style="@style/more_option_button_icon" />
+                                        <TextView android:id="@id/id_more_option_pause_textview" android:text="@string/floating_icon_tips_pause" style="@style/more_option_button_text" />
+                                    </LinearLayout>
+                                    <LinearLayout android:orientation="vertical" android:id="@id/id_more_option_multiview_layout" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content">
+                                        <RelativeLayout android:id="@id/id_sliding_view_multiview_head" android:layout_width="match_parent" android:layout_height="@dimen/floating_menu_item_height">
+                                            <LinearLayout android:gravity="center" android:orientation="horizontal" android:id="@id/id_multiView_mode_switch_layout" android:layout_width="match_parent" android:layout_height="match_parent" android:foreground="@drawable/background_recoil_effect_help_option" android:layout_toStartOf="@id/id_change_view_mode_switch" android:paddingHorizontal="@dimen/sliding_view_horizontal">
+                                                <ImageView android:id="@id/id_more_option_multiview_head_imageview" android:src="@drawable/ic_multi_view" style="@style/more_option_button_icon" />
+                                                <TextView android:id="@id/id_view_multiview_head_textview" android:text="@string/dlg_multiview_head" style="@style/more_option_button_text" />
+                                            </LinearLayout>
+                                            <androidx.appcompat.widget.SwitchCompat android:theme="@style/Theme.AppCompat" android:id="@id/id_change_view_mode_switch" android:paddingRight="@dimen/sliding_view_multiview_padding_right" android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_centerInParent="true" android:layout_alignParentEnd="true" />
+                                        </RelativeLayout>
+                                        <LinearLayout android:id="@id/id_more_option_multiview" android:visibility="gone" android:foreground="@drawable/background_recoil_effect_help_option" style="@style/more_option_button">
+                                            <ImageView android:id="@id/id_more_option_multiview_imageview" android:src="@drawable/ic_multi_view" style="@style/more_option_button_icon" />
+                                            <TextView android:id="@id/id_more_option_multiview_textview" android:text="@string/floating_icon_tips_multiview" style="@style/more_option_button_text" />
+                                        </LinearLayout>
+                                    </LinearLayout>
+                                    <LinearLayout android:id="@id/id_more_option_rotate_tv" android:visibility="gone" android:foreground="@drawable/background_recoil_effect_help_option" style="@style/more_option_button">
+                                        <ImageView android:id="@id/id_more_option_rotate_tv_imageview" android:src="@drawable/ic_moreoption_rotation" style="@style/more_option_button_icon" />
+                                        <TextView android:id="@id/id_more_option_rotate_tv_textview" android:text="@string/dlg_rotate_tv" style="@style/more_option_button_text" />
+                                    </LinearLayout>
+                                    <LinearLayout android:id="@id/id_more_option_add_shortcut_to_home" android:foreground="@drawable/background_recoil_effect_help_option" style="@style/more_option_button_shortcut">
+                                        <ImageView android:id="@id/id_more_option_add_shortcut_to_home_imageview" android:src="@drawable/ic_add_shortcut_to_home_plus_house" style="@style/more_option_button_icon" />
+                                        <LinearLayout android:id="@id/id_shortcut_to_home_textview_layout" android:weightSum="10.0" style="@style/more_option_button_shortcut_textview_layout">
+                                            <TextView android:id="@id/id_more_option_add_shortcut_to_home_textview" android:text="@string/dlg_add_shortcut_to_home" android:layout_weight="9.0" style="@style/more_option_shortcut_button_text" />
+                                            <ImageView android:layout_gravity="top" android:id="@id/id_more_option_setting_dot" android:src="@drawable/ic_dot_case" style="@style/shortcut_settings_badge_dot" />
+                                        </LinearLayout>
+                                    </LinearLayout>
+                                </LinearLayout>
+                            </ScrollView>
+                        </LinearLayout>
+                    </LinearLayout>
+                    <RelativeLayout android:id="@id/id_more_option_disconnect" android:background="@drawable/disconnect_background" android:foreground="@drawable/background_ripple_bottom" style="@style/more_option_disconnect_button">
+                        <TextView android:id="@id/id_more_option_disconnect_textview" android:text="@string/dlg_disconnect" style="@style/more_option_disconnect_button_text" />
+                    </RelativeLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

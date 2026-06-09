@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: MonsterROM <monsterrom@local>
+Date: Mon, 8 Jun 2026 23:00:00 +0200
+Subject: [PATCH] Force full-screen WFD mode on p3s
+
+---
+ smali/h2/s.smali | 2 +-
+ smali/h2/u.smali | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/smali/h2/s.smali b/smali/h2/s.smali
+index 0000000..0000000 100644
+--- a/smali/h2/s.smali
++++ b/smali/h2/s.smali
+@@ -187,7 +187,7 @@
+ 
+     const-string v1, "cdd_auto_run_multiview_option"
+ 
+-    const-string v4, "MULTI_VIEW"
++    const-string v4, "FULL_SCREEN"
+ 
+     invoke-virtual {v0, v1, v4}, Ljava/util/AbstractMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+ 
+diff --git a/smali/h2/u.smali b/smali/h2/u.smali
+index 0000000..0000000 100644
+--- a/smali/h2/u.smali
++++ b/smali/h2/u.smali
+@@ -714,7 +714,7 @@
+ 
+     const-string v1, "full"
+ 
+-    const-string v2, "multi"
++    const-string v2, "full"
+ 
+     if-eqz p1, :cond_0
+ 
+-- 
+2.43.0

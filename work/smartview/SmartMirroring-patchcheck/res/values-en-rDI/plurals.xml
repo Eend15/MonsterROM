@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="dlg_naming_limit">
+        <item quantity="zero">PLURAL_ZERO_SMR_BODY_CANT_ENTER_MORE_THAN_PD_CHARACTERS %d</item>
+        <item quantity="one">PLURAL_ONE_SMR_BODY_CANT_ENTER_MORE_THAN_PD_CHARACTERS %d</item>
+        <item quantity="two">PLURAL_TWO_SMR_BODY_CANT_ENTER_MORE_THAN_PD_CHARACTERS %d</item>
+        <item quantity="few">PLURAL_FEW_SMR_BODY_CANT_ENTER_MORE_THAN_PD_CHARACTERS %d</item>
+        <item quantity="many">PLURAL_MANY_SMR_BODY_CANT_ENTER_MORE_THAN_PD_CHARACTERS %d</item>
+        <item quantity="other">PLURAL_OTHER_SMR_BODY_CANT_ENTER_MORE_THAN_PD_CHARACTERS %d</item>
+    </plurals>
+    <plurals name="limit_shortcut_description">
+        <item quantity="zero">PLURAL_ZERO_SMR_BODY_CANT_ADD_MORE_THAN_PD_SMART_VIEW_SHORTCUTS_TO_THE_HOME_SCREEN %d</item>
+        <item quantity="one">PLURAL_ONE_SMR_BODY_CANT_ADD_MORE_THAN_PD_SMART_VIEW_SHORTCUTS_TO_THE_HOME_SCREEN %d</item>
+        <item quantity="two">PLURAL_TWO_SMR_BODY_CANT_ADD_MORE_THAN_PD_SMART_VIEW_SHORTCUTS_TO_THE_HOME_SCREEN %d</item>
+        <item quantity="few">PLURAL_FEW_SMR_BODY_CANT_ADD_MORE_THAN_PD_SMART_VIEW_SHORTCUTS_TO_THE_HOME_SCREEN %d</item>
+        <item quantity="many">PLURAL_MANY_SMR_BODY_CANT_ADD_MORE_THAN_PD_SMART_VIEW_SHORTCUTS_TO_THE_HOME_SCREEN %d</item>
+        <item quantity="other">PLURAL_OTHER_SMR_BODY_CANT_ADD_MORE_THAN_PD_SMART_VIEW_SHORTCUTS_TO_THE_HOME_SCREEN %d</item>
+    </plurals>
+</resources>

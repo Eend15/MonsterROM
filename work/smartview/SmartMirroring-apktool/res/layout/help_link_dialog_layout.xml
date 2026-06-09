@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:scrollbarThumbVertical="@color/scrollbar_color" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:fillViewport="true"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="vertical" android:paddingLeft="@dimen/help_link_dialog_layout_padding_left" android:paddingTop="@dimen/help_link_dialog_layout_padding_top" android:paddingRight="@dimen/help_link_dialog_layout_padding_left" android:paddingBottom="@dimen/help_link_dialog_layout_padding_bottom" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/help_link_subtitle_margin_bottom">
+            <TextView android:textSize="@dimen/help_link_dialog_text" android:textStyle="bold" android:textColor="@color/tips_title_text_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/help_link_dialog_subtitle_first" android:fontFamily="sec" android:textFontWeight="600" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/help_link_dialog_text_margin_bottom">
+            <TextView android:textAppearance="?android:textAppearanceListItemSecondary" android:textSize="@dimen/help_link_dialog_text" android:textColor="@color/dialog_body_text_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/help_link_dialog_description_first" android:fontFamily="sec" android:textFontWeight="400" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/help_link_subtitle_margin_bottom">
+            <TextView android:textSize="@dimen/help_link_dialog_text" android:textStyle="bold" android:textColor="@color/tips_title_text_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/help_link_dialog_subtitle_second" android:fontFamily="sec" android:textFontWeight="600" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/help_link_dialog_text_margin_bottom">
+            <TextView android:textAppearance="?android:textAppearanceListItemSecondary" android:textSize="@dimen/help_link_dialog_text" android:textColor="@color/dialog_body_text_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/help_link_dialog_description_second" android:fontFamily="sec" android:textFontWeight="400" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:id="@id/help_link_dialog_subtitle_third" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/help_link_subtitle_margin_bottom">
+            <TextView android:textSize="@dimen/help_link_dialog_text" android:textStyle="bold" android:textColor="@color/tips_title_text_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/labs_chrome_cast_title" android:fontFamily="sec" android:textFontWeight="600" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:id="@id/help_link_dialog_description_third" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:textAppearance="?android:textAppearanceListItemSecondary" android:textSize="@dimen/help_link_dialog_text" android:textColor="@color/dialog_body_text_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/help_link_dialog_description_third" android:fontFamily="sec" android:textFontWeight="400" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:textAppearance="?android:textAppearanceListItemSecondary" android:textSize="@dimen/help_link_dialog_text" android:textStyle="bold" android:id="@id/enable_chromecast" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:bufferType="spannable" android:text="@string/labs_chrome_cast_title" android:fontFamily="sec" android:textFontWeight="600" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:id="@id/help_link_dialog_subtitle_forth" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/help_link_subtitle_margin_bottom">
+            <TextView android:textSize="@dimen/help_link_dialog_text" android:textStyle="bold" android:textColor="@color/tips_title_text_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/help_link_dialog_subtitle_forth" android:fontFamily="sec" android:textFontWeight="600" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:id="@id/help_link_dialog_description_forth" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:textAppearance="?android:textAppearanceListItemSecondary" android:textSize="@dimen/help_link_dialog_text" android:textColor="@color/dialog_body_text_color" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/help_link_dialog_description_forth" android:fontFamily="sec" android:textFontWeight="400" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:id="@id/id_multiview_menu" android:layout_width="wrap_content" android:layout_height="wrap_content">
+        <LinearLayout android:id="@id/id_multiview_shadow_layout" android:background="@drawable/background_multiview" android:visibility="visible" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_margin="@dimen/floating_menu_elevation" android:elevation="@dimen/floating_menu_elevation_more_option">
+            <LinearLayout android:id="@id/id_multiview_captured_blur_layout" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                <LinearLayout android:orientation="vertical" android:id="@id/id_multiview_background_layout" android:visibility="visible" style="@style/multiview_background_layout">
+                    <LinearLayout android:id="@id/is_multiview_background_title" android:layout_width="match_parent" android:layout_height="match_parent" style="@style/more_option_background_upper">
+                        <RelativeLayout android:id="@id/id_multiview_head_layout" style="@style/multiview_head_layout">
+                            <TextView android:gravity="center" android:id="@id/id_multiview_head_textview" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/floating_icon_tips_multiview" android:includeFontPadding="false" android:layout_centerInParent="true" android:textDirection="locale" android:layout_alignParentStart="true" style="@style/multiview_head_text" />
+                        </RelativeLayout>
+                    </LinearLayout>
+                    <LinearLayout android:orientation="vertical" android:id="@id/id_multiview_buttons_layout" style="@style/multiview_button_layout">
+                        <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+                            <LinearLayout android:id="@id/id_multiview_size_button_layout" style="@style/multiview_size_button">
+                                <ImageView android:id="@id/id_multiview_size_imageview" android:src="@drawable/ic_multiview_size" style="@style/multiview_button_icon" />
+                                <TextView android:id="@id/id_multiview_size_textview" android:text="@string/cdd_option_screensize" style="@style/multiview_button_text" />
+                            </LinearLayout>
+                            <LinearLayout android:id="@id/id_multiview_pip_button_layout" style="@style/multiview_pip_button">
+                                <ImageView android:id="@id/id_multiview_pip_imageview" android:src="@drawable/ic_multiview_layout" style="@style/multiview_button_icon" />
+                                <TextView android:id="@id/id_multiview_pip_textview" android:text="@string/cdd_option_pipscreen" style="@style/multiview_button_text" />
+                            </LinearLayout>
+                            <LinearLayout android:id="@id/id_multiview_select_button_layout" style="@style/multiview_select_button">
+                                <ImageView android:id="@id/id_multiview_select_imageview" android:src="@drawable/ic_multiview_select_screen" style="@style/multiview_button_icon" />
+                                <TextView android:id="@id/id_multiview_select_textview" android:text="@string/cdd_option_selectscreen" style="@style/multiview_button_text" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

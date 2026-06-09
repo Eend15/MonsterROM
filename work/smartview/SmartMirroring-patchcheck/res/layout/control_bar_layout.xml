@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <SeekBar android:id="@id/progress_seek_bar" android:paddingTop="@dimen/seek_bar_padding_top_bottom" android:paddingBottom="@dimen/seek_bar_padding_top_bottom" android:layout_width="wrap_content" android:layout_height="@dimen/seek_bar_height" android:progressBackgroundTint="@color/control_seek_bar_bg_tint" />
+</LinearLayout>

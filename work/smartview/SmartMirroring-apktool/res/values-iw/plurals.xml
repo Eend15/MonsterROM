@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="dlg_naming_limit">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">לא ניתן להזין יותר מ-%d תו.</item>
+        <item quantity="two">ניתן להזין לכל היותר %d תווים.</item>
+        <item quantity="few">N/A</item>
+        <item quantity="many">לא ניתן להזין יותר מ-%d תווים.</item>
+        <item quantity="other">לא ניתן להזין יותר מ-%d תווים.</item>
+    </plurals>
+    <plurals name="limit_shortcut_description">
+        <item quantity="zero">N/A</item>
+        <item quantity="one">לא ניתן להוסיף יותר מ-%d קיצור דרך של Smart View למסך הבית.</item>
+        <item quantity="two">לא ניתן להוסיף יותר מ-%d קיצורי דרך של Smart View למסך הבית.</item>
+        <item quantity="few">N/A</item>
+        <item quantity="many">לא ניתן להוסיף יותר מ-%d קיצורי דרך של Smart View למסך הבית.</item>
+        <item quantity="other">לא ניתן להוסיף יותר מ-%d קיצורי דרך של Smart View למסך הבית.</item>
+    </plurals>
+</resources>

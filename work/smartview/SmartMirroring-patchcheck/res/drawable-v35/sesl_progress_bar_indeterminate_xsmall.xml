@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector android:height="128.0dp" android:width="1136.0dp" android:viewportWidth="1136.0" android:viewportHeight="128.0" aapt:fps="60"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt">
+    <group android:name="s3" android:translateX="568.0" android:translateY="64.0" aapt:layer_name="Track">
+        <group android:name="s3pg1" aapt:layer_name="Rectangle 1">
+            <path android:name="s3pg1p10" android:fillColor="@color/basic_token_sys_tone_on_tone_high" android:pathData="M 568 0 C 568 5.523 568 -5.523 568 0 C 568 5.523 563.523 10 558 10 C 552.477 10 -552.477 10 -558 10 C -563.523 10 -568 5.523 -568 0 C -568 -5.523 -568 5.523 -568 0 C -568 -5.523 -563.523 -10 -558 -10 C -552.477 -10 552.477 -10 558 -10 C 563.523 -10 568 -5.523 568 0 Z" android:fillAlpha="1.0" aapt:layer_name="Rectangle Path 1" aapt:style_name="Fill 1" />
+        </group>
+    </group>
+    <group android:name="null_group" aapt:layer_name="Mask">
+        <clip-path android:name="trk_s1" android:pathData="M1136,64c0,5.523 0,-5.523 0,0c0,5.523 -4.477,10 -10,10c-5.523,0 -1110.477,0 -1116,0c-5.523,0 -10,-4.477 -10,-10c0,-5.523 0,5.523 0,0c0,-5.523 4.477,-10 10,-10c5.523,0 1110.477,0 1116,0c5.523,0 10,4.477 10,10z" />
+        <group android:name="c2" android:pivotX="568.0" android:pivotY="64.0" aapt:layer_name="Progress_bar_indterminate_no_track_xsmall">
+            <group android:name="c2s1" android:pivotX="-1136.0" android:translateY="64.0" aapt:layer_name="Bar_xsmall">
+                <group android:name="c2s1pg1" aapt:layer_name="Rectangle 1">
+                    <path android:name="c2s1pg1p10" android:fillColor="@drawable/$sesl_progress_bar_indeterminate_xsmall__0" android:pathData="M 1136 -10 C 1136 -10 1136 10 1136 10 C 1136 10 1136 10 1136 10 C 1136 10 -1136 10 -1136 10 C -1136 10 -1136 10 -1136 10 C -1136 10 -1136 -10 -1136 -10 C -1136 -10 -1136 -10 -1136 -10 C -1136 -10 1136 -10 1136 -10 C 1136 -10 1136 -10 1136 -10 Z" android:fillAlpha="1.0" aapt:layer_name="Rectangle Path 1" aapt:style_name="Gradient Fill 1" />
+                </group>
+            </group>
+        </group>
+    </group>
+</vector>

@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView android:textSize="@dimen/naming_title_text_size" android:textColor="@color/shortcut_naming_text_color" android:ellipsize="end" android:id="@id/naming_title" android:paddingTop="@dimen/naming_title_margin_horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:fontFamily="sec" android:paddingHorizontal="@dimen/naming_title_margin_horizontal" android:lineHeight="@dimen/naming_title_line_height" android:textFontWeight="600"
+  xmlns:android="http://schemas.android.com/apk/res/android" />

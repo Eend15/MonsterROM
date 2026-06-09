@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape android:shape="rectangle"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/shortcut_naming_background_icon" />
+    <corners android:radius="@dimen/shortcut_background_radius" />
+    <stroke android:width="1.0dp" android:color="@color/sliding_view_idle_icon_color" />
+</shape>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:baselineAligned="false" android:fillViewport="true"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:gravity="bottom" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="0.0dp" android:layout_weight="1.0">
+        <View android:id="@id/dim_layout" android:layout_width="match_parent" android:layout_height="match_parent" android:importantForAccessibility="no" />
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <View android:id="@id/dim_layout_left" android:layout_width="0.0dp" android:layout_height="match_parent" android:layout_weight="1.0" android:importantForAccessibility="no" />
+        <LinearLayout android:orientation="horizontal" android:id="@id/half_screen_layout" android:layout_height="@dimen/half_screen_layout_height" style="@style/CastingDialogStyle">
+            <LinearLayout android:orientation="vertical" android:id="@id/half_screen_layout_upper" android:background="@drawable/dialog_round_corner_upper" android:layout_width="match_parent" android:layout_height="@dimen/half_screen_layout_height">
+                <include android:layout_width="match_parent" android:layout_height="wrap_content" layout="@layout/half_screen_header_view" />
+                <LinearLayout android:paddingBottom="@dimen/half_screen_padding_bottom_port" android:layout_width="match_parent" android:layout_height="match_parent">
+                    <androidx.recyclerview.widget.RecyclerView android:id="@id/half_screen_listview" android:scrollbars="vertical" android:layout_width="match_parent" android:layout_height="match_parent" android:groupIndicator="@null" android:divider="@null" android:importantForAccessibility="no" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+        <View android:id="@id/dim_layout_right" android:layout_width="0.0dp" android:layout_height="match_parent" android:layout_weight="1.0" android:importantForAccessibility="no" />
+    </LinearLayout>
+</LinearLayout>

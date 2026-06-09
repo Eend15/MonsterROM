@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.samsung.android.smartmirroring.controller.views.BlackScreenView android:orientation="vertical" android:background="@android:color/black" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="vertical" android:id="@id/black_screen_view" android:background="@android:color/black" android:paddingTop="@dimen/black_screen_top_height" android:paddingBottom="@dimen/black_screen_bottom_height" android:layout_width="match_parent" android:layout_height="match_parent">
+        <LinearLayout android:id="@id/status_bar_custom" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/black_screen_notification_view_top_margin_land">
+            <include layout="@layout/black_screen_notification" />
+        </LinearLayout>
+        <LinearLayout android:layout_gravity="center" android:orientation="vertical" android:id="@id/clock_date" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/black_screen_top_height">
+            <include layout="@layout/black_screen_clock" />
+        </LinearLayout>
+        <include layout="@layout/black_screen_date" />
+        <View android:layout_width="match_parent" android:layout_height="0.0dp" android:layout_weight="1.0" />
+        <LinearLayout android:gravity="center|bottom" android:layout_gravity="bottom" android:orientation="horizontal" android:id="@id/black_screen_view_content_layout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/black_screen_layout_bottom_margin">
+            <ImageView android:id="@id/black_screen_title_image" android:layout_width="@dimen/black_screen_center_image_width_height" android:layout_height="@dimen/black_screen_center_image_width_height" android:src="@drawable/ic_smartview" android:tint="@color/black_screen_view_text_color" android:contentDescription="@null" />
+            <TextView android:textSize="@dimen/black_screen_title_text_size" android:textStyle="bold" android:textColor="@color/black_screen_view_text_color" android:id="@id/black_screen_title_text" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/black_screen_notification_item_divider" android:text="@string/smart_mirroring_title" android:fontFamily="sec" android:textFontWeight="@dimen/font_weight_medium" />
+        </LinearLayout>
+        <include layout="@layout/black_screen_battery" />
+        <TextView android:textSize="@dimen/black_screen_swipe_guide_text_size" android:textColor="@color/black_screen_view_text_color" android:gravity="center" android:id="@id/swipe_guide_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/black_screen_battery_icon_height" android:text="@string/black_screen_swipe_text" android:fontFamily="sec" android:textFontWeight="@dimen/font_weight_normal" />
+        <include layout="@layout/black_screen_media" />
+    </LinearLayout>
+</com.samsung.android.smartmirroring.controller.views.BlackScreenView>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:background="@drawable/tutorial_view_bg" android:padding="@dimen/app_cast_tutorial_movable_margin" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="horizontal" android:id="@id/tutorial_layout_ok" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <TextView android:textAppearance="@style/RobotoRegular" android:textSize="@dimen/app_cast_tutorial_text_size" android:textColor="@color/app_cast_tutorial_text_color" android:layout_gravity="fill" android:id="@id/tutorial_view_text" android:layout_width="@dimen/app_cast_tutorial_text_width" android:layout_height="wrap_content" android:text="@string/app_cast_tutorial" android:layout_marginStart="@dimen/app_cast_tutorial_text_margin_side" android:layout_marginEnd="@dimen/app_cast_tutorial_text_margin_end" />
+    </LinearLayout>
+    <ImageView android:id="@id/tutorial_view_rectangle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/app_cast_tutorial_rectangle" />
+    <LinearLayout android:id="@id/id_more_option_app_cast" style="@style/app_cast_tutorial_button">
+        <ImageView android:id="@id/id_more_option_app_cast_imageview" android:src="@drawable/ic_moreoption_appcast" style="@style/image_app_cast_icon_tutorial" />
+        <TextView android:id="@id/tutorial_view_app_cast_textview" android:text="@string/dlg_cast_ps_only" style="@style/text_app_cast_tutorial" />
+    </LinearLayout>
+    <Button android:textAppearance="@style/RobotoRegular" android:textSize="@dimen/app_cast_tutorial_text_size" android:id="@id/tutorial_ok_button" android:layout_width="@dimen/app_cast_tutorial_button_width" android:layout_height="wrap_content" android:layout_marginBottom="50.0dp" android:text="@string/dlg_ok" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true" />
+</RelativeLayout>

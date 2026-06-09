@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.samsung.android.smartmirroring.controller.views.BatteryView android:gravity="center" android:orientation="horizontal" android:id="@id/battery_layout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/black_screen_battery_view_top_margin"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.samsung.android.smartmirroring.controller.views.BatteryIconView android:gravity="center" android:id="@id/battery_percentage_icon" android:layout_width="@dimen/black_screen_battery_icon_width" android:layout_height="@dimen/black_screen_battery_icon_height" />
+    <TextView android:textSize="@dimen/black_screen_battery_text_size" android:textColor="@color/black_screen_view_text_color" android:gravity="center" android:id="@id/battery_percentage_text" android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" android:fontFamily="sec" android:layout_marginStart="@dimen/black_screen_divider_margin" android:textFontWeight="@dimen/font_weight_normal" />
+</com.samsung.android.smartmirroring.controller.views.BatteryView>

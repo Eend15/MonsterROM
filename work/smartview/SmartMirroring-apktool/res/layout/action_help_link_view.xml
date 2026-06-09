@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center" android:orientation="horizontal" android:background="?android:selectableItemBackground" android:paddingTop="@dimen/help_link_title_padding_top" android:paddingBottom="@dimen/help_link_title_padding_bottom" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="@dimen/help_link_title_padding_horizontal"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="@dimen/help_link_title_text" android:textColor="@color/help_link_title_color" android:ellipsize="end" android:gravity="center" android:layout_gravity="center_vertical" android:id="@id/help_link" android:background="@drawable/list_selected_ripple_effect" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/trouble_connecting_title" android:maxLines="2" android:fontFamily="sec" android:textFontWeight="400" />
+</LinearLayout>

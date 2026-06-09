@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:background="@color/theme_background_color" android:layout_width="match_parent" android:layout_height="match_parent" android:baselineAligned="false" android:fillViewport="true"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="match_parent">
+        <LinearLayout android:orientation="horizontal" android:id="@id/content_start" android:layout_width="0.0dp" android:layout_height="match_parent" android:layout_weight="0.0" />
+        <LinearLayout android:orientation="vertical" android:id="@id/content" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_weight="1.0">
+            <TextView android:textAppearance="?android:textAppearance" android:textSize="@dimen/list_view_header_description_size_port" android:textStyle="normal" android:textColor="@color/list_view_header_description_color" android:ellipsize="end" android:id="@id/phone_to_device_description" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/phone_to_device_description" android:maxLines="3" android:lineSpacingExtra="@dimen/casting_dialog_description_line_spacing_extra" android:fontFamily="sec" android:textDirection="locale" android:layout_marginHorizontal="@dimen/list_item_checkbox_margin_left" android:layout_marginVertical="@dimen/device_group_view_sub_text_margin" android:lineHeight="23.0sp" android:textFontWeight="400" />
+            <LinearLayout android:orientation="vertical" android:id="@id/phone_to_device_layout" android:background="@color/list_background_color" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <androidx.recyclerview.widget.RecyclerView android:id="@id/phone_to_device_listview" android:scrollbars="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:groupIndicator="@null" android:divider="@null" android:importantForAccessibility="yes" />
+            </LinearLayout>
+            <LinearLayout android:gravity="center" android:orientation="horizontal" android:id="@id/help_link_layout" android:background="?android:selectableItemBackground" android:visibility="invisible" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="@dimen/help_link_title_padding_horizontal" android:paddingVertical="@dimen/help_link_title_padding_vertical">
+                <TextView android:textSize="@dimen/help_link_title_text" android:textColor="@color/help_link_title_color" android:ellipsize="end" android:gravity="center" android:layout_gravity="center_vertical" android:id="@id/help_link" android:background="@drawable/list_selected_ripple_effect" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/trouble_connecting_title" android:maxLines="2" android:fontFamily="sec" android:textFontWeight="400" />
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:id="@id/content_end" android:layout_width="0.0dp" android:layout_height="match_parent" android:layout_weight="0.0" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.preference.PreferenceCategory>
+        <com.samsung.android.smartmirroring.wrapper.HelpImagePreference android:key="Help image" />
+    </androidx.preference.PreferenceCategory>
+    <androidx.preference.PreferenceCategory>
+        <com.samsung.android.smartmirroring.wrapper.HelpPreference android:icon="@drawable/user_manual" android:title="@string/essential_title" android:key="Essentials" />
+        <com.samsung.android.smartmirroring.wrapper.HelpPreference android:icon="@drawable/device_connection_error" android:title="@string/trouble_finding_your_tv_title" android:key="Trouble finding your TV?" />
+        <com.samsung.android.smartmirroring.wrapper.HelpPreference android:icon="@drawable/sync_error" android:title="@string/solving_connection_issues_tile" android:key="Solving connection issues" />
+    </androidx.preference.PreferenceCategory>
+    <androidx.preference.PreferenceCategory>
+        <com.samsung.android.smartmirroring.wrapper.HelpPreference android:icon="@drawable/samsungmembers" android:title="@string/contact_us_title" android:key="Contact us" />
+    </androidx.preference.PreferenceCategory>
+    <androidx.preference.PreferenceCategory android:key="bottom_area" />
+</androidx.preference.PreferenceScreen>

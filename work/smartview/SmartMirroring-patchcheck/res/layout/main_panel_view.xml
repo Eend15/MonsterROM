@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="@dimen/control_panel_exception_text_size" android:textColor="@color/control_panel_exception_text_color" android:id="@id/control_panel_exception_text" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="@dimen/control_panel_margin_bottom" android:fontFamily="@string/sec_roboto_regular_font_family" android:textAlignment="center" />
+    <RelativeLayout android:id="@id/control_panel_layout" android:background="@color/control_panel_alpha" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/control_btn_margin_top_bottom" android:layout_marginBottom="@dimen/control_btn_margin_top_bottom" android:layout_marginStart="@dimen/control_btn_power_full_view_margin" android:layout_alignParentStart="true">
+            <ImageButton android:id="@id/main_btn_power" android:src="@raw/video_control_btn_power" android:contentDescription="@null" style="@style/player_main_panel_button" />
+            <TextView android:id="@id/main_btn_power_tv" android:text="@string/control_panel_btn_text_tv_on" style="@style/player_main_panel_text" />
+        </LinearLayout>
+        <LinearLayout android:orientation="vertical" android:id="@id/main_layout_keypad" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/control_btn_margin_top_bottom" android:layout_marginBottom="@dimen/control_btn_margin_top_bottom" android:layout_marginStart="@dimen/control_btn_source_return_margin" android:layout_alignParentStart="true">
+            <ImageButton android:id="@id/main_btn_keypad" android:src="@raw/video_control_btn_keypad" android:contentDescription="@string/main_text_keypad" style="@style/player_main_panel_button" />
+            <TextView android:text="@string/main_text_keypad" style="@style/player_main_panel_text" />
+        </LinearLayout>
+        <LinearLayout android:orientation="vertical" android:id="@id/main_layout_source" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/control_btn_margin_top_bottom" android:layout_marginBottom="@dimen/control_btn_margin_top_bottom" android:layout_marginStart="@dimen/control_btn_source_margin" android:layout_alignParentStart="true">
+            <ImageButton android:id="@id/main_btn_source" android:src="@raw/video_control_btn_source" android:contentDescription="@string/control_panel_btn_text_source" style="@style/player_main_panel_button" />
+            <TextView android:layout_width="@dimen/control_btn_text_width" android:text="@string/control_panel_btn_text_source" style="@style/player_main_panel_text" />
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:id="@id/main_layout_channel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/control_btn_margin_top_bottom" android:layout_marginBottom="@dimen/control_btn_margin_top_bottom" android:layout_centerInParent="true">
+            <ImageButton android:id="@id/main_btn_channel_down" android:src="@raw/video_control_btn_channel_down" android:contentDescription="@string/text_channel_ch_down" style="@style/player_main_panel_button" />
+            <TextView android:textSize="@dimen/control_btn_ch_text_size" android:textColor="@color/control_panel_text_color" android:gravity="center_horizontal" android:layout_gravity="center_vertical" android:id="@id/main_tv_channel_ch" android:layout_width="@dimen/control_btn_ch_text_width" android:layout_height="wrap_content" android:text="@string/text_channel_ch" android:contentDescription="@string/text_channel_ch" android:fontFamily="sec-roboto-condensed" />
+            <ImageButton android:id="@id/main_btn_channel_up" android:src="@raw/video_control_btn_channel_up" android:contentDescription="@string/text_channel_ch_up" style="@style/player_main_panel_button" />
+        </LinearLayout>
+        <LinearLayout android:orientation="vertical" android:id="@id/btn_return_layout" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/control_btn_margin_top_bottom" android:layout_marginBottom="@dimen/control_btn_margin_top_bottom" android:layout_marginEnd="@dimen/control_btn_source_return_margin" android:layout_alignParentEnd="true">
+            <ImageButton android:id="@id/main_btn_return" android:src="@raw/video_control_btn_return" android:contentDescription="@string/control_panel_btn_text_return" style="@style/player_main_panel_button" />
+            <TextView android:text="@string/control_panel_btn_text_return" style="@style/player_main_panel_text" />
+        </LinearLayout>
+        <LinearLayout android:orientation="vertical" android:id="@id/btn_ratio_layout" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/control_btn_margin_top_bottom" android:layout_marginBottom="@dimen/control_btn_margin_top_bottom" android:layout_marginEnd="@dimen/control_btn_power_full_view_margin" android:layout_alignParentEnd="true">
+            <ImageButton android:id="@id/main_btn_full_view" android:src="@raw/video_view_btn_smart_fitting_01" android:contentDescription="@string/control_panel_btn_text_ratio" style="@style/player_main_panel_button" />
+            <TextView android:text="@string/control_panel_btn_text_ratio" style="@style/player_main_panel_text" />
+        </LinearLayout>
+    </RelativeLayout>
+</LinearLayout>
