@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:id="@id/second_screen_icon_view_circle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:contentDescription="@string/smart_mirroring_title"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <ImageView android:gravity="center" android:id="@id/second_screen_icon_view" android:padding="@dimen/second_screen_icon_padding" android:layout_width="@dimen/second_screen_icon_size" android:layout_height="@dimen/second_screen_icon_size" android:src="@drawable/ic_second_screen_floating" android:layout_centerInParent="true" android:contentDescription="@null" android:elevation="@dimen/icon_view_elevation_value" />
-</RelativeLayout>

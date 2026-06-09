@@ -1,16 +1,8 @@
-service vendor.prophide /system/bin/prophide.sh
-    class late_start
+service prophide /system/bin/prophide.sh
     user root
-    group root system readproc
-    oneshot
+    group root
     disabled
-    seclabel u:r:init:s0
+    oneshot
 
-on property:sys.boot_completed=1
-    start vendor.prophide
-
-on property:vendor.boot_completed=1
-    start vendor.prophide
-
-on property:init.svc.bootanim=stopped
-    start vendor.prophide
+on property:service.bootanim.exit=1
+    start prophide

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<conditions>
-    <condition category="connected_devices" icon="@drawable/ic_routines_second_screen" label="@string/second_screen_title" tag="second_screen_condition_tag">
-        <configuration targetUi="\@template/TOGGLE" />
-    </condition>
-    <condition category="connected_devices" icon="@drawable/ic_routines_smart_view" label="@string/smart_mirroring_title" tag="smart_view_condition_tag">
-        <configuration targetUi="\@template/TOGGLE" />
-    </condition>
-</conditions>

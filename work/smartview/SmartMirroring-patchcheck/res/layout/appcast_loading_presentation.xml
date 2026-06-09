@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:gravity="center" android:background="@color/appcast_presentation_background_color" android:layout_width="match_parent" android:layout_height="match_parent"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <androidx.appcompat.widget.SeslProgressBar android:theme="@style/appcast_presentation_progressbar_theme" android:id="@id/progress_bar" android:layout_width="90.0dp" android:layout_height="90.0dp" android:indeterminate="true" style="?android:progressBarStyle" />
-</LinearLayout>

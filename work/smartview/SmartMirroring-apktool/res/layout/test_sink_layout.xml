@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout android:id="@id/surfaceViewFrame" android:tag="layout/test_sink_layout_0" android:background="@drawable/hidden_texture_view_bg" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/app_cast_control_bar_margin" android:layoutDirection="ltr"
-  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
-    <SurfaceView android:id="@id/surfaceView" android:layout_width="wrap_content" android:layout_height="wrap_content" />
-</FrameLayout>

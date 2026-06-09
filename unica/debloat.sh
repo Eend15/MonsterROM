@@ -280,12 +280,6 @@ system/hidden/SmartTutor
 
 SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_COMMON_CONFIG_SMARTTUTOR_PACKAGES_PATH" --delete
 
-# Software update
-SYSTEM_DEBLOAT+="
-system/etc/permissions/privapp-permissions-com.wssyncmldm.xml
-system/priv-app/FotaAgent
-"
-
 # SVC Agent
 SYSTEM_DEBLOAT+="
 system/etc/permissions/privapp-permissions-com.samsung.android.svcagent.xml

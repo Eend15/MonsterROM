@@ -166,29 +166,31 @@ index 17739fae0..c59858ab9 100644
      new-instance p0, Ljava/lang/SecurityException;
  
      const-string/jumbo p1, "Requires STATUS_BAR_SERVICE permission"
-@@ -26724,6 +26747,25 @@
+@@ -26736,6 +26736,27 @@
  
      invoke-virtual {p0}, Landroid/view/IWindowManager$Stub;->registerScreenRecordingCallback_enforcePermission()V
  
-+    iget-object v2, p0, Lcom/android/server/wm/WindowManagerService;->mContext:Landroid/content/Context;
++    iget-object v0, p0, Lcom/android/server/wm/WindowManagerService;->mContext:Landroid/content/Context;
 +
-+    invoke-virtual {v2}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
 +
-+    move-result-object v2
++    move-result-object v0
 +
-+    const-string v3, "unica_ss_detection"
++    const-string v1, "unica_ss_detection"
 +
-+    const/4 v1, 0x0
++    const/4 v2, 0x0
 +
-+    invoke-static {v2, v3, v1}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
++    invoke-static {v0, v1, v2}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
 +
-+    move-result v2
++    move-result v0
 +
-+    if-eqz v2, :unica_ss_detection_enabled
++    if-eqz v0, :cond_unica_ss_detection
 +
-+    return v1
++    const/4 v0, 0x0
 +
-+    :unica_ss_detection_enabled
++    return v0
++
++    :cond_unica_ss_detection
      iget-object p0, p0, Lcom/android/server/wm/WindowManagerService;->mScreenRecordingCallbackController:Lcom/android/server/wm/ScreenRecordingCallbackController;
  
      iget-object v0, p0, Lcom/android/server/wm/ScreenRecordingCallbackController;->mWms:Lcom/android/server/wm/WindowManagerService;

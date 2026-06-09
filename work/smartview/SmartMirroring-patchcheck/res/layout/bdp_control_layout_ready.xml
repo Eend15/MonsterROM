@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:background="@color/control_panel_alpha" android:layout_width="match_parent" android:layout_height="match_parent"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <ImageButton android:id="@id/bdp_ready_btn_play" android:background="@drawable/player_btn_ripple_style" android:layout_width="@dimen/bdp_control_play_pause_image_size" android:layout_height="@dimen/bdp_control_play_pause_image_size" android:layout_marginTop="@dimen/bdp_control_ready_margin_top_bottom" android:layout_marginBottom="@dimen/bdp_control_ready_margin_top_bottom" android:src="@raw/video_control_btn_play" android:layout_centerInParent="true" />
-    <LinearLayout android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="@dimen/bdp_control_ready_margin_top_bottom" android:layout_marginBottom="@dimen/bdp_control_ready_margin_top_bottom" android:layout_marginEnd="@dimen/bdp_control_ready_return_margin_right" android:layout_alignParentEnd="true">
-        <ImageButton android:layout_gravity="center_horizontal" android:id="@id/bdp_ready_btn_return" android:background="@drawable/player_btn_ripple_style" android:layout_width="@dimen/bdp_control_ready_return_image_size" android:layout_height="@dimen/bdp_control_ready_return_image_size" android:src="@raw/video_control_btn_return" />
-        <TextView android:textSize="9.0dp" android:textColor="@android:color/white" android:gravity="center_horizontal" android:layout_width="@dimen/bdp_control_ready_return_text_width" android:layout_height="wrap_content" android:text="@string/tv_return" android:fontFamily="sec-roboto-condensed" />
-    </LinearLayout>
-</RelativeLayout>

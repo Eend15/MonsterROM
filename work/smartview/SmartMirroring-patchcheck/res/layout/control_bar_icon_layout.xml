@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <ImageView android:layout_gravity="center_vertical" android:id="@id/seek_bar_icon" android:layout_width="@dimen/seek_bar_image_size" android:layout_height="@dimen/seek_bar_image_size" />
-    <TextView android:textSize="50.0dp" android:textColor="@android:color/white" android:gravity="center_vertical" android:layout_gravity="center_vertical" android:id="@id/seek_bar_text" android:layout_width="@dimen/seek_bar_text_width" android:layout_height="wrap_content" android:fontFamily="sans-serif-thin" android:layout_marginStart="@dimen/seek_bar_text_margin_left" />
-</LinearLayout>

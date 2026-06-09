@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:id="@id/app_bar_layout" android:background="@color/theme_background_color" android:layout_width="match_parent" android:layout_height="wrap_content" app:expanded="false" app:seslUseCustomHeight="true"
-  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
-    <LinearLayout android:id="@id/collapsing_toolbar" android:background="@color/theme_background_color" android:layout_width="match_parent" android:layout_height="wrap_content">
-        <androidx.appcompat.widget.Toolbar android:layout_gravity="top" android:id="@id/toolbar" android:background="@color/theme_background_color" android:layout_width="match_parent" android:layout_height="wrap_content" />
-    </LinearLayout>
-</LinearLayout>

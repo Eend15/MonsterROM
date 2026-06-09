@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<shape android:shape="rectangle"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <stroke android:width="@dimen/black_screen_help_button_ok_button_width" android:color="@color/black_screen_help_ok_button_color" />
-    <corners android:radius="@dimen/black_screen_help_power_key_rectangle_radius" />
-</shape>

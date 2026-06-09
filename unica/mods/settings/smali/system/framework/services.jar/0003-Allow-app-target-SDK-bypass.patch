@@ -1,21 +1,20 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From 4463d74624598458ec43f2892eeca8b96a9177eb Mon Sep 17 00:00:00 2001
 From: utkustnr <utkuustuner@proton.me>
 Date: Fri, 24 Oct 2025 15:11:39 +0200
 Subject: [PATCH] Allow app target SDK bypass
 
-Adapted for One UI 8.5 services.jar.
 ---
- smali_classes2/com/android/server/pm/InstallPackageHelper.smali | 17 ++++++++++++++++-
- 1 file changed, 16 insertions(+), 1 deletion(-)
+ .../server/pm/InstallPackageHelper.smali      | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
 diff --git a/smali_classes2/com/android/server/pm/InstallPackageHelper.smali b/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
+index d8893e3df..b8f5f4e2f 100644
 --- a/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
 +++ b/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
-@@ -15618,7 +15618,26 @@
+@@ -15613,6 +15613,20 @@
      goto :goto_11
  
      :cond_16
--    move v0, v8
 +    iget-object v0, v1, Lcom/android/server/pm/InstallPackageHelper;->mContext:Landroid/content/Context;
 +
 +    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
@@ -28,16 +27,10 @@ diff --git a/smali_classes2/com/android/server/pm/InstallPackageHelper.smali b/s
 +
 +    move-result v0
 +
-+    if-eqz v0, :unica_sdkbypass_off
++    if-nez v0, :goto_11
 +
-+    const/4 v0, 0x1
-+
-+    goto :goto_11
-+
-+    :unica_sdkbypass_off
-+    move v0, v8
+     move v0, v8
  
      :goto_11
-     if-nez v0, :cond_17
 -- 
 2.51.1

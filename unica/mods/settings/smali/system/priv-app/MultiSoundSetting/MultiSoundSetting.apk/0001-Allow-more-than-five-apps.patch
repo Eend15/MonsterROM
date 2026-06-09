@@ -1,0 +1,42 @@
+From 4ec501ee800e91ea20ba2bdcdc127df176d872be Mon Sep 17 00:00:00 2001
+From: Salvo Giangreco <giangrecosalvo9@gmail.com>
+Date: Sun, 26 Oct 2025 18:38:46 +0100
+Subject: [PATCH] Allow more than five apps
+
+---
+ .../fragment/SelectMultipleAppsFragment.smali | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/smali_classes2/com/samsung/android/setting/multisound/view/fragment/SelectMultipleAppsFragment.smali b/smali_classes2/com/samsung/android/setting/multisound/view/fragment/SelectMultipleAppsFragment.smali
+index fab3e55..48212c7 100644
+--- a/smali_classes2/com/samsung/android/setting/multisound/view/fragment/SelectMultipleAppsFragment.smali
++++ b/smali_classes2/com/samsung/android/setting/multisound/view/fragment/SelectMultipleAppsFragment.smali
+@@ -12,7 +12,7 @@
+ 
+ 
+ # static fields
+-.field private static final MAX_SELECTION:I = 0x5
++.field private static final MAX_SELECTION:I = 0xf
+ 
+ 
+ # instance fields
+@@ -1590,7 +1590,7 @@
+ 
+     move-result v1
+ 
+-    const/4 v2, 0x5
++    const/16 v2, 0xf
+ 
+     if-lt v1, v2, :cond_5
+ 
+@@ -1878,7 +1878,7 @@
+ 
+     move-result p1
+ 
+-    const/4 p2, 0x5
++    const/16 p2, 0xf
+ 
+     if-lt p1, p2, :cond_2
+ 
+-- 
+2.51.1

@@ -1,40 +1,32 @@
 SKIPUNZIP=1
 
-if [ ! "$(GET_PROP "system" "ro.monsterrom.version")" ]; then
-    SET_PROP "system" "ro.monsterrom.version" "$ROM_VERSION"
+if ! $ROM_IS_OFFICIAL; then
+    LOG "\033[0;33m! Build is not official. Skipping\033[0m"
+    return 0
 fi
-if [ ! "$(GET_PROP "system" "ro.monsterrom.timestamp")" ]; then
-    SET_PROP "system" "ro.monsterrom.timestamp" "$ROM_BUILD_TIMESTAMP"
-fi
-if [ ! "$(GET_PROP "system" "ro.monsterrom.device")" ]; then
-    SET_PROP "system" "ro.monsterrom.device" "$TARGET_CODENAME"
-fi
+
 if [ ! "$(GET_PROP "system" "ro.unica.version")" ]; then
-    SET_PROP "system" "ro.unica.version" "$(GET_PROP "system" "ro.monsterrom.version")"
+    SET_PROP "system" "ro.unica.version" "$ROM_VERSION"
 fi
 if [ ! "$(GET_PROP "system" "ro.unica.timestamp")" ]; then
-    SET_PROP "system" "ro.unica.timestamp" "$(GET_PROP "system" "ro.monsterrom.timestamp")"
+    SET_PROP "system" "ro.unica.timestamp" "$ROM_BUILD_TIMESTAMP"
 fi
 if [ ! "$(GET_PROP "system" "ro.unica.device")" ]; then
-    SET_PROP "system" "ro.unica.device" "$(GET_PROP "system" "ro.monsterrom.device")"
+    SET_PROP "system" "ro.unica.device" "$TARGET_CODENAME"
 fi
 
 ADD_TO_WORK_DIR "$MODPATH" "system" "." 0 0 755 "u:object_r:system_file:s0"
 
-LOG "- Keeping stock /system/system/etc/security/otacerts.zip"
+LOG "- Patching /system/system/etc/security/otacerts.zip"
+EVAL "rm \"$WORK_DIR/system/system/etc/security/otacerts.zip\""
+EVAL "cd \"$SRC_DIR\"; zip -q \"$WORK_DIR/system/system/etc/security/otacerts.zip\" \"./security/unica_ota.x509.pem\""
 
 DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 
 # Disable stock OTA references
-CHOIDUJOUR_SECSETTINGS_DIR="$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk"
-CHOIDUJOUR_SOFTWARE_UPDATE_UTILS_PATH="$(find "$CHOIDUJOUR_SECSETTINGS_DIR" -type f -path "*/com/samsung/android/settings/softwareupdate/SoftwareUpdateUtils.smali" | sort | head -n 1)"
-if [ "$CHOIDUJOUR_SOFTWARE_UPDATE_UTILS_PATH" ]; then
-    SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-        "${CHOIDUJOUR_SOFTWARE_UPDATE_UTILS_PATH#$CHOIDUJOUR_SECSETTINGS_DIR/}" "return" \
-        "isOTAUpgradeAllowed(Landroid/content/Context;)Z" "false"
-else
-    ABORT "SoftwareUpdateUtils.smali not found in SecSettings"
-fi
+SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+    "smali_classes3/com/samsung/android/settings/softwareupdate/SoftwareUpdateUtils.smali" "return" \
+    "isOTAUpgradeAllowed(Landroid/content/Context;)Z" "false"
 
 # Dynamically patch SecSettings
 # - Add missing/non-xml files in place
@@ -64,5 +56,4 @@ while IFS= read -r f; do
     fi
 done < <(find "$MODPATH/SecSettings.apk" -type f)
 
-unset CERT_NAME PATCH_INST CONTENT CHOIDUJOUR_SECSETTINGS_DIR \
-    CHOIDUJOUR_SOFTWARE_UPDATE_UTILS_PATH
+unset CERT_NAME PATCH_INST CONTENT

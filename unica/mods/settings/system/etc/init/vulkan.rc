@@ -1,14 +1,2 @@
-on property:persist.sys.unica.vulkan_renderer=0
-    setprop debug.hwui.renderer skiagl
-    setprop debug.renderengine.backend skiagl
-
-on property:persist.sys.unica.vulkan_renderer=1
+on zygote-start && property:persist.sys.unica.vulkan=true
     setprop debug.hwui.renderer skiavk
-    setprop debug.renderengine.backend skiavk
-
-on property:persist.sys.unica.vulkan_renderer=2
-    setprop debug.hwui.renderer skiavkthreaded
-    setprop debug.renderengine.backend skiavkthreaded
-
-on boot
-    setprop persist.sys.unica.vulkan_renderer ${persist.sys.unica.vulkan_renderer:-0}

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu android:background="@color/list_background_color"
-  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:icon="@drawable/tw_ic_ab_app_info_mtrl" android:id="@id/action_app_info" android:title="@string/app_info" app:iconTint="@color/app_info_icon_color" app:showAsAction="always" />
-</menu>

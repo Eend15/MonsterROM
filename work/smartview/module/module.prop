@@ -1,6 +1,0 @@
-id=monsterrom-smartview-fullmode-p3s
-name=MonsterROM p3s Smart View Fullscreen Test
-author=Codex
-version=1.0
-versionCode=1
-description=Forces Samsung Smart View to full-screen WFD mode and disables failing p3s HDCP negotiation for LG OLED mirror testing.

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="sesl_list_divider_inset">16.0dp</dimen>
-    <dimen name="sesl_list_image_end_padding">16.0dp</dimen>
-    <dimen name="sesl_list_item_padding_end">8.0dp</dimen>
-    <dimen name="sesl_list_item_padding_horizontal">18.0dp</dimen>
-</resources>

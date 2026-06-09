@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="match_parent"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <androidx.appcompat.widget.SeslProgressBar android:id="@id/landscape_progress_bar" android:layout_width="@dimen/casting_full_screen_progress_size" android:layout_height="@dimen/casting_full_screen_progress_size" android:indeterminate="true" style="?android:progressBarStyleSmall" />
-</LinearLayout>

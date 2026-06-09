@@ -1,14 +1,14 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From 07df021f2666afcaffd9e882560626581ac6d7f5 Mon Sep 17 00:00:00 2001
 From: Salvo Giangreco <giangrecosalvo9@gmail.com>
 Date: Fri, 24 Oct 2025 14:21:42 +0200
 Subject: [PATCH] Allow disabling secure windows
 
-Adapted for One UI 8.5 services.jar.
 ---
- .../WindowManagerService$SettingsObserver.smali | 47 +++++++----------
- 1 file changed, 18 insertions(+), 29 deletions(-)
+ ...indowManagerService$SettingsObserver.smali | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
 
 diff --git a/smali_classes2/com/android/server/wm/WindowManagerService$SettingsObserver.smali b/smali_classes2/com/android/server/wm/WindowManagerService$SettingsObserver.smali
+index 5a7ae767c..e894586fe 100644
 --- a/smali_classes2/com/android/server/wm/WindowManagerService$SettingsObserver.smali
 +++ b/smali_classes2/com/android/server/wm/WindowManagerService$SettingsObserver.smali
 @@ -95,9 +95,9 @@
@@ -23,99 +23,26 @@ diff --git a/smali_classes2/com/android/server/wm/WindowManagerService$SettingsO
  
      move-result-object v8
  
-@@ -1398,20 +1398,6 @@
- .method public final updateDisableSecureWindows()V
-     .locals 3
+@@ -1405,7 +1405,7 @@
  
--    const-string/jumbo v0, "ro.debuggable"
--
--    const/4 v1, 0x0
--
--    invoke-static {v0, v1}, Landroid/os/SystemProperties;->getBoolean(Ljava/lang/String;Z)Z
--
--    move-result v0
--
--    if-nez v0, :cond_0
--
+     if-nez v0, :cond_0
+ 
 -    goto :goto_0
--
--    :cond_0
--    :try_start_0
-     iget-object v0, p0, Lcom/android/server/wm/WindowManagerService$SettingsObserver;->this$0:Lcom/android/server/wm/WindowManagerService;
++    goto :cond_0
  
-     iget-object v0, v0, Lcom/android/server/wm/WindowManagerService;->mContext:Landroid/content/Context;
-@@ -1421,30 +1407,29 @@
+     :cond_0
+     :try_start_0
+@@ -1418,9 +1418,9 @@
  
      move-result-object v0
  
 -    const-string/jumbo v2, "disable_secure_windows"
-+    const/4 v1, 0x0
++    const-string/jumbo v2, "unica_secure_ss"
  
 -    invoke-static {v0, v2, v1}, Landroid/provider/Settings$Secure;->getIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;I)I
-+    const-string/jumbo v2, "unica_secure_ss"
-+
 +    invoke-static {v0, v2, v1}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
  
      move-result v0
--    :try_end_0
--    .catch Landroid/provider/Settings$SettingNotFoundException; {:try_start_0 .. :try_end_0} :catch_0
- 
--    if-eqz v0, :cond_1
-+    if-eqz v0, :cond_0
- 
-     const/4 v1, 0x1
- 
--    :catch_0
--    :cond_1
-+    :cond_0
-     iget-object v0, p0, Lcom/android/server/wm/WindowManagerService$SettingsObserver;->this$0:Lcom/android/server/wm/WindowManagerService;
- 
-     iget-boolean v0, v0, Lcom/android/server/wm/WindowManagerService;->mDisableSecureWindows:Z
- 
--    if-ne v0, v1, :cond_2
-+    if-ne v0, v1, :cond_1
- 
-     :goto_0
-     return-void
- 
--    :cond_2
-+    :cond_1
-     iget-object v0, p0, Lcom/android/server/wm/WindowManagerService$SettingsObserver;->this$0:Lcom/android/server/wm/WindowManagerService;
- 
-     iget-object v0, v0, Lcom/android/server/wm/WindowManagerService;->mGlobalLock:Lcom/android/server/wm/WindowManagerGlobalLock;
-@@ -1452,7 +1437,7 @@
- 
-     monitor-enter v0
- 
--    :try_start_1
-+    :try_start_0
-     iget-object v2, p0, Lcom/android/server/wm/WindowManagerService$SettingsObserver;->this$0:Lcom/android/server/wm/WindowManagerService;
- 
-     iput-boolean v1, v2, Lcom/android/server/wm/WindowManagerService;->mDisableSecureWindows:Z
-@@ -1464,8 +1449,8 @@
-     invoke-virtual {p0}, Lcom/android/server/wm/RootWindowContainer;->refreshSecureSurfaceState()V
- 
-     monitor-exit v0
--    :try_end_1
--    .catchall {:try_start_1 .. :try_end_1} :catchall_0
-+    :try_end_0
-+    .catchall {:try_start_0 .. :try_end_0} :catchall_0
- 
-     invoke-static {}, Lcom/android/server/wm/WindowManagerService;->resetPriorityAfterLockedSection()V
- 
-@@ -1475,10 +1460,10 @@
-     :catchall_0
-     move-exception p0
- 
--    :try_start_2
-+    :try_start_1
-     monitor-exit v0
--    :try_end_2
--    .catchall {:try_start_2 .. :try_end_2} :catchall_0
-+    :try_end_1
-+    .catchall {:try_start_1 .. :try_end_1} :catchall_0
- 
-     invoke-static {}, Lcom/android/server/wm/WindowManagerService;->resetPriorityAfterLockedSection()V
- 
+     :try_end_0
 -- 
 2.51.1

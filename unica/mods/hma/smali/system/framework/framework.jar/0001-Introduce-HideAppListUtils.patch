@@ -173,7 +173,7 @@ new file mode 100644
 index 00000000..c8b84436
 --- /dev/null
 +++ b/smali_classes6/io/mesalabs/unica/HideAppListUtils.smali
-@@ -0,0 +1,413 @@
+@@ -0,0 +1,411 @@
 +.class public final Lio/mesalabs/unica/HideAppListUtils;
 +.super Ljava/lang/Object;
 +.source "HideAppListUtils.java"
@@ -453,7 +453,7 @@ index 00000000..c8b84436
 +.end method
 +
 +.method public static blacklist shouldHideAppList(Landroid/content/ContentResolver;Ljava/lang/String;)Z
-+    .locals 4
++    .locals 3
 +
 +    const/4 v0, 0x0
 +
@@ -472,15 +472,13 @@ index 00000000..c8b84436
 +    :cond_0
 +    const-string v1, "unica_hma"
 +
-+    const/4 v2, 0x0
++    const/4 v2, 0x1
 +
 +    invoke-static {p0, v1, v2}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
 +
 +    move-result v1
 +
-+    const/4 v3, 0x1
-+
-+    if-eq v1, v3, :cond_1
++    if-eq v1, v2, :cond_1
 +
 +    return v0
 +
@@ -589,3 +587,4 @@ index 00000000..c8b84436
 +.end method
 -- 
 2.51.0
+

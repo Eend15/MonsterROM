@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<menu
-  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:icon="@drawable/help_info" android:id="@id/help_button" android:title="@string/dlg_help" app:iconTint="@color/color_image_item_more_option" app:showAsAction="always" />
-    <item android:id="@id/settings" android:title="@string/dlg_settings" android:showAsAction="never" />
-</menu>

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true" android:paddingHorizontal="@dimen/cdm_dialog_padding_horizontal" android:paddingVertical="@dimen/cdm_main_description_margin_Bottom"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
-        <TextView android:textSize="@dimen/cdm_main_description_text_size" android:textColor="@color/dialog_body_text_color" android:layout_gravity="center" android:id="@id/turn_on_wifi_notification_text" android:layout_width="match_parent" android:layout_height="wrap_content" android:includeFontPadding="false" android:fontFamily="sec" android:textFontWeight="400" />
-    </LinearLayout>
-</LinearLayout>

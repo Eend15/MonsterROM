@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<com.samsung.android.smartmirroring.controller.views.IconView android:id="@id/icon_view_frame" android:tag="layout/icon_view_layout_0" android:layout_width="wrap_content" android:layout_height="wrap_content"
-  xmlns:android="http://schemas.android.com/apk/res/android" />

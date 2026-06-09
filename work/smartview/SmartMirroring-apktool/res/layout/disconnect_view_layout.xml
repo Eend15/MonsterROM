@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout android:orientation="vertical" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content"
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <LinearLayout android:layout_gravity="center|top" android:orientation="vertical" android:id="@id/disconnect_view_active_circle" android:background="@drawable/hide_view_active_bg" android:visibility="gone" android:layout_width="@dimen/hide_view_circle_size" android:layout_height="@dimen/hide_view_circle_size" />
-    <LinearLayout android:gravity="center" android:layout_gravity="center|top" android:orientation="vertical" android:background="@drawable/hide_view_ready_bg" android:layout_width="wrap_content" android:layout_height="wrap_content">
-        <ImageView android:id="@id/disconnect_view_icon" android:layout_width="@dimen/hide_view_icon_size" android:layout_height="@dimen/hide_view_icon_size" android:layout_marginBottom="@dimen/hide_view_icon_margin_bottom" android:src="@drawable/ic_floating_sidekick_remove" android:tint="@color/hide_view_icon_tint_color" />
-        <TextView android:textSize="@dimen/hide_view_text_size" android:textColor="@color/hide_view_text_color" android:gravity="center" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/sliding_view_menu_disconnect" />
-    </LinearLayout>
-</FrameLayout>

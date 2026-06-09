@@ -1,49 +1,49 @@
 /application>/i
-        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/monsterrom_reborn_settings_title" android:name="com.android.settings.Settings$MonsterROMRebornSettingsActivity">
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/unica_settings_title" android:name="com.android.settings.Settings$UnicaSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-            <meta-data android:name="com.android.settings.FRAGMENT_CLASS" android:value="io.mesalabs.monsterromreborn.settings.MonsterROMRebornSettingsFragment"/>
-            <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY" android:value="@string/menu_key_monsterrom_reborn_top_settings"/>
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS" android:value="io.mesalabs.unica.settings.UnicaSettingsFragment"/>
+            <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY" android:value="@string/menu_key_unica_top_settings"/>
         </activity>
-        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/monsterrom_reborn_extra_settings_title" android:name="com.android.settings.Settings$MonsterROMRebornExtraSettingsActivity" android:parentActivityName="com.android.settings.Settings$MonsterROMRebornSettingsActivity">
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/unica_extra_settings_title" android:name="com.android.settings.Settings$UnicaExtraSettingsActivity" android:parentActivityName="com.android.settings.Settings$UnicaSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-            <meta-data android:name="com.android.settings.FRAGMENT_CLASS" android:value="io.mesalabs.monsterromreborn.settings.extra.ExtraSettingsFragment"/>
-            <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY" android:value="@string/menu_key_monsterrom_reborn_top_settings"/>
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS" android:value="io.mesalabs.unica.settings.extra.ExtraSettingsFragment"/>
+            <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY" android:value="@string/menu_key_unica_top_settings"/>
         </activity>
-        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/monsterrom_reborn_hma_title" android:name="com.android.settings.Settings$MonsterROMRebornHMASettingsActivity" android:parentActivityName="com.android.settings.Settings$MonsterROMRebornSpoofSettingsActivity">
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/unica_hma_title" android:name="com.android.settings.Settings$UnicaHMASettingsActivity" android:parentActivityName="com.android.settings.Settings$UnicaSpoofSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-            <meta-data android:name="com.android.settings.FRAGMENT_CLASS" android:value="io.mesalabs.monsterromreborn.settings.hma.HideMyApplistFragment"/>
-            <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY" android:value="@string/menu_key_monsterrom_reborn_top_settings"/>
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS" android:value="io.mesalabs.unica.settings.hma.HideMyApplistFragment"/>
+            <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY" android:value="@string/menu_key_unica_top_settings"/>
         </activity>
-        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/monsterrom_reborn_hide_dev_title" android:name="com.android.settings.Settings$MonsterROMRebornHideDevSettingsActivity" android:parentActivityName="com.android.settings.Settings$MonsterROMRebornSpoofSettingsActivity">
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/unica_hide_dev_title" android:name="com.android.settings.Settings$UnicaHideDevSettingsActivity" android:parentActivityName="com.android.settings.Settings$UnicaSpoofSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-            <meta-data android:name="com.android.settings.FRAGMENT_CLASS" android:value="io.mesalabs.monsterromreborn.settings.spoof.HideDeveloperStatusFragment"/>
-            <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY" android:value="@string/menu_key_monsterrom_reborn_top_settings"/>
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS" android:value="io.mesalabs.unica.settings.spoof.HideDeveloperStatusFragment"/>
+            <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY" android:value="@string/menu_key_unica_top_settings"/>
         </activity>
-        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/monsterrom_reborn_spoof_settings_title" android:name="com.android.settings.Settings$MonsterROMRebornSpoofSettingsActivity" android:parentActivityName="com.android.settings.Settings$MonsterROMRebornSettingsActivity">
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/unica_spoof_settings_title" android:name="com.android.settings.Settings$UnicaSpoofSettingsActivity" android:parentActivityName="com.android.settings.Settings$UnicaSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-            <meta-data android:name="com.android.settings.FRAGMENT_CLASS" android:value="io.mesalabs.monsterromreborn.settings.spoof.SpoofSettingsFragment"/>
-            <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY" android:value="@string/menu_key_monsterrom_reborn_top_settings"/>
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS" android:value="io.mesalabs.unica.settings.spoof.SpoofSettingsFragment"/>
+            <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY" android:value="@string/menu_key_unica_top_settings"/>
         </activity>
-        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/monsterrom_reborn_ui_settings_title" android:name="com.android.settings.Settings$MonsterROMRebornUISettingsActivity" android:parentActivityName="com.android.settings.Settings$MonsterROMRebornSettingsActivity">
+        <activity android:configChanges="keyboardHidden|orientation|screenSize" android:exported="true" android:label="@string/unica_ui_settings_title" android:name="com.android.settings.Settings$UnicaUISettingsActivity" android:parentActivityName="com.android.settings.Settings$UnicaSettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-            <meta-data android:name="com.android.settings.FRAGMENT_CLASS" android:value="io.mesalabs.monsterromreborn.settings.ui.UISettingsFragment"/>
-            <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY" android:value="@string/menu_key_monsterrom_reborn_top_settings"/>
+            <meta-data android:name="com.android.settings.FRAGMENT_CLASS" android:value="io.mesalabs.unica.settings.ui.UISettingsFragment"/>
+            <meta-data android:name="com.android.settings.HIGHLIGHT_MENU_KEY" android:value="@string/menu_key_unica_top_settings"/>
         </activity>
