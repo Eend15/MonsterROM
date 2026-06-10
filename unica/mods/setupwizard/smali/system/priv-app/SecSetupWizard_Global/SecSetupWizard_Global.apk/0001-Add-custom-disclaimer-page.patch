@@ -1,0 +1,91 @@
+From 2629c43904977036d4bd7b45626b37748e1f3076 Mon Sep 17 00:00:00 2001
+From: Salvo Giangreco <giangrecosalvo9@gmail.com>
+Date: Sat, 1 Nov 2025 13:49:38 +0100
+Subject: [PATCH] Add custom disclaimer page
+
+UN1CA: this patch is not complete! Please check unica/mods/setupwizard/customize.sh for more info.
+---
+ res/values/public.xml                         |  2 ++
+ smali/I2/f.smali                              |  2 +-
+ .../UI/DisclaimerActivity.smali               | 26 +++++++++++++++++++
+ 3 files changed, 29 insertions(+), 1 deletion(-)
+
+diff --git a/res/values/public.xml b/res/values/public.xml
+index 91c69bf..35768ad 100644
+--- a/res/values/public.xml
++++ b/res/values/public.xml
+@@ -6151,6 +6151,7 @@
+     <public type="drawable" name="tw_home" id="0x7f0802c2" />
+     <public type="drawable" name="up_down_transition" id="0x7f0802c5" />
+     <public type="drawable" name="use_old_phone_illustration" id="0x7f0802c6" />
++    <public type="drawable" name="suw_ic_unica" id="0x7f0802c7" />
+     <public type="fraction" name="disabled_button_alpha" id="0x7f090000" />
+     <public type="fraction" name="setup_compat_footer_button_disabled_alpha" id="0x7f090001" />
+     <public type="id" name="ALT" id="0x7f0a0000" />
+@@ -8178,6 +8179,7 @@
+     <public type="string" name="wizard_script_user_uri" id="0x7f1202bc" />
+     <public type="string" name="yes_agree_baidu" id="0x7f1202bd" />
+     <public type="string" name="your_choice" id="0x7f1202be" />
++    <public type="string" name="disclaimer_unica_description" id="0x7f1202bf" />
+     <public type="style" name="AlertDialog.AppCompat" id="0x7f130000" />
+     <public type="style" name="AlertDialog.AppCompat.Light" id="0x7f130001" />
+     <public type="style" name="Animation.AppCompat.Dialog" id="0x7f130002" />
+diff --git a/smali/I2/f.smali b/smali/I2/f.smali
+index b67cd85..c9e7c84 100644
+--- a/smali/I2/f.smali
++++ b/smali/I2/f.smali
+@@ -729,7 +729,7 @@
+     goto/16 :goto_a
+ 
+     :cond_19
+-    const-string v13, "disclaimer"
++    const-string v13, "this_string_does_not_exist"
+ 
+     invoke-virtual {v13, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+ 
+diff --git a/smali/com/sec/android/app/SecSetupWizard/UI/DisclaimerActivity.smali b/smali/com/sec/android/app/SecSetupWizard/UI/DisclaimerActivity.smali
+index 2683e52..9643476 100644
+--- a/smali/com/sec/android/app/SecSetupWizard/UI/DisclaimerActivity.smali
++++ b/smali/com/sec/android/app/SecSetupWizard/UI/DisclaimerActivity.smali
+@@ -78,6 +78,22 @@
+ 
+     invoke-virtual {p0, p1}, LP2/b;->setContentView(I)V
+ 
++    invoke-virtual {p0}, Lg/h;->getResources()Landroid/content/res/Resources;
++
++    move-result-object p1
++
++    const v1, 0x7f0802c7
++
++    invoke-virtual {p0}, Landroid/content/Context;->getTheme()Landroid/content/res/Resources$Theme;
++
++    move-result-object v2
++
++    invoke-virtual {p1, v1, v2}, Landroid/content/res/Resources;->getDrawable(ILandroid/content/res/Resources$Theme;)Landroid/graphics/drawable/Drawable;
++
++    move-result-object p1
++
++    invoke-virtual {p0, p1}, LP2/b;->y(Landroid/graphics/drawable/Drawable;)V
++
+     const p1, 0x7f120279
+ 
+     invoke-virtual {p0, p1}, LP2/b;->z(I)V
+@@ -99,6 +115,16 @@
+ 
+     check-cast p1, Landroid/widget/TextView;
+ 
++    const v0, 0x7f1202bf
++
++    invoke-virtual {p0, v0}, Landroid/content/Context;->getString(I)Ljava/lang/String;
++
++    move-result-object p0
++
++    invoke-virtual {p1, p0}, Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;)V
++
++    return-void
++
+     const-string v1, "ThomBrowne"
+ 
+     invoke-static {v1}, LI2/p;->l(Ljava/lang/String;)Z
+-- 
+2.51.1

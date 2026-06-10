@@ -1,0 +1,4 @@
+id=packageinstaller_targetsdk
+name=Package Installer target SDK bypass
+author=Codex
+description=Allow GooglePackageInstaller to preview low target SDK APKs when UN1CA target SDK bypass is enabled.

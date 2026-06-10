@@ -5,7 +5,8 @@ Subject: [PATCH] Allow app target SDK bypass
 
 ---
  .../server/pm/InstallPackageHelper.smali      | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+ .../server/pm/PackageInstallerService.smali   | 25 +++++++++++++++++++++++++
+ 2 files changed, 39 insertions(+)
 
 diff --git a/smali_classes2/com/android/server/pm/InstallPackageHelper.smali b/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
 index d8893e3df..b8f5f4e2f 100644
@@ -32,5 +33,39 @@ index d8893e3df..b8f5f4e2f 100644
      move v0, v8
  
      :goto_11
+diff --git a/smali_classes2/com/android/server/pm/PackageInstallerService.smali b/smali_classes2/com/android/server/pm/PackageInstallerService.smali
+index 2729dcd8..e5c36f0a 100644
+--- a/smali_classes2/com/android/server/pm/PackageInstallerService.smali
++++ b/smali_classes2/com/android/server/pm/PackageInstallerService.smali
+@@ -1919,3 +1919,28 @@
+     iput v0, p1, Landroid/content/pm/PackageInstaller$SessionParams;->installFlags:I
+-
++    iget-object v0, p0, Lcom/android/server/pm/PackageInstallerService;->mContext:Landroid/content/Context;
++
++    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v0
++
++    const-string v1, "unica_allow_sdkbypass"
++
++    const/4 v2, 0x0
++
++    invoke-static {v0, v1, v2}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
++
++    move-result v0
++
++    if-eqz v0, :cond_unica_target_sdk_bypass
++
++    iget v0, p1, Landroid/content/pm/PackageInstaller$SessionParams;->installFlags:I
++
++    const/high16 v1, 0x1000000
++
++    or-int/2addr v0, v1
++
++    iput v0, p1, Landroid/content/pm/PackageInstaller$SessionParams;->installFlags:I
++
++    :cond_unica_target_sdk_bypass
++
+     invoke-static {}, Landroid/os/Binder;->getCallingUid()I
 -- 
 2.51.1

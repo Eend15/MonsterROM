@@ -1,0 +1,69 @@
+From b948e50bdb64e5a4ab50c3ee89a0ea55071a43a6 Mon Sep 17 00:00:00 2001
+From: Salvo Giangreco <giangrecosalvo9@gmail.com>
+Date: Fri, 3 Oct 2025 16:22:12 +0200
+Subject: [PATCH] Bypass ICD verification
+
+UN1CA: unica/mods/deknox needs to be applied for this patch to work!
+---
+ smali/com/android/server/knox/dar/DarManagerService.smali             | 2 ++
+ .../android/security/keystore/AttestParameterSpec$Builder.smali       | 2 +-
+ .../com/samsung/android/security/keystore/AttestationUtils.smali      | 2 ++
+ smali_classes2/com/samsung/android/ssdid/SemSsdidManagerService.smali | 4 +++-
+ 4 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/smali/com/android/server/knox/dar/DarManagerService.smali b/smali/com/android/server/knox/dar/DarManagerService.smali
+index af1233b..c038e25 100644
+--- a/smali/com/android/server/knox/dar/DarManagerService.smali
++++ b/smali/com/android/server/knox/dar/DarManagerService.smali
+@@ -2043,6 +2043,8 @@
+ 
+     iput-object v0, v10, Lcom/samsung/android/security/keystore/AttestParameterSpec;->mChallenge:[B
+ 
++    const/4 v4, 0x0
++
+     iput-boolean v4, v10, Lcom/samsung/android/security/keystore/AttestParameterSpec;->mVerifiableIntegrity:Z
+ 
+     iput-boolean v3, v10, Lcom/samsung/android/security/keystore/AttestParameterSpec;->mSAKUidRequired:Z
+diff --git a/smali_classes2/com/samsung/android/security/keystore/AttestParameterSpec$Builder.smali b/smali_classes2/com/samsung/android/security/keystore/AttestParameterSpec$Builder.smali
+index e090940..f87a4db 100644
+--- a/smali_classes2/com/samsung/android/security/keystore/AttestParameterSpec$Builder.smali
++++ b/smali_classes2/com/samsung/android/security/keystore/AttestParameterSpec$Builder.smali
+@@ -91,7 +91,7 @@
+ 
+     new-instance v0, Lcom/samsung/android/security/keystore/AttestParameterSpec;
+ 
+-    iget-boolean v1, p0, Lcom/samsung/android/security/keystore/AttestParameterSpec$Builder;->mVerifiableIntegrity:Z
++    const/4 v1, 0x0
+ 
+     iget-object v2, p0, Lcom/samsung/android/security/keystore/AttestParameterSpec$Builder;->mSpec:Landroid/security/keystore/KeyGenParameterSpec;
+ 
+diff --git a/smali_classes2/com/samsung/android/security/keystore/AttestationUtils.smali b/smali_classes2/com/samsung/android/security/keystore/AttestationUtils.smali
+index cdee74c..96d6422 100644
+--- a/smali_classes2/com/samsung/android/security/keystore/AttestationUtils.smali
++++ b/smali_classes2/com/samsung/android/security/keystore/AttestationUtils.smali
+@@ -362,6 +362,8 @@
+ 
+     iget-boolean v0, p1, Lcom/samsung/android/security/keystore/AttestParameterSpec;->mVerifiableIntegrity:Z
+ 
++    const/4 v0, 0x0
++
+     const-string v2, "AttestationUtils"
+ 
+     if-eqz v0, :cond_9
+diff --git a/smali_classes2/com/samsung/android/ssdid/SemSsdidManagerService.smali b/smali_classes2/com/samsung/android/ssdid/SemSsdidManagerService.smali
+index dddbd4c..68fea14 100644
+--- a/smali_classes2/com/samsung/android/ssdid/SemSsdidManagerService.smali
++++ b/smali_classes2/com/samsung/android/ssdid/SemSsdidManagerService.smali
+@@ -201,7 +201,9 @@
+ 
+     iput-object v0, v12, Lcom/samsung/android/security/keystore/AttestParameterSpec;->mChallenge:[B
+ 
+-    iput-boolean v8, v12, Lcom/samsung/android/security/keystore/AttestParameterSpec;->mVerifiableIntegrity:Z
++    const/4 v14, 0x0
++
++    iput-boolean v14, v12, Lcom/samsung/android/security/keystore/AttestParameterSpec;->mVerifiableIntegrity:Z
+ 
+     iput-boolean v13, v12, Lcom/samsung/android/security/keystore/AttestParameterSpec;->mSAKUidRequired:Z
+ 
+-- 
+2.51.2

@@ -1,0 +1,135 @@
+From eac4067cc5e440da3d98df64a6d2fa04527641ed Mon Sep 17 00:00:00 2001
+From: Salvo Giangreco <giangrecosalvo9@gmail.com>
+Date: Sun, 2 Nov 2025 23:54:16 +0100
+Subject: [PATCH] Adjust metadata for 60fps video files
+
+---
+ res/raw/resources_info.json | 60 ++++++++++++++++++-------------------
+ 1 file changed, 30 insertions(+), 30 deletions(-)
+
+diff --git a/res/raw/resources_info.json b/res/raw/resources_info.json
+index 1ca08c3..7b39641 100644
+--- a/res/raw/resources_info.json
++++ b/res/raw/resources_info.json
+@@ -14,14 +14,14 @@
+         "service_class_name" : "com.samsung.android.wallpaper.live.infinity.InfinityWallpaper",
+         "service_settings" : {
+           "filename": "video_001.mp4",
+-          "thumbnail_system_frame_no" : 270,
+-          "thumbnail_lock_frame_no" : 270,
+-          "thumbnail_frame_no" : 270,
+-          "transition_frame_info": "AOD LOCK 0 269 1500 0.17 0.17 0.1 1\nAOD HOME 0 719 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 270 719 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 720 1169 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 1170 1619 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 270 519 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 720 969 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 1170 1419 3000 0.17 0.17 0.1 1"
++          "thumbnail_system_frame_no" : 180,
++          "thumbnail_lock_frame_no" : 180,
++          "thumbnail_frame_no" : 180,
++          "transition_frame_info": "AOD LOCK 0 179 1500 0.17 0.17 0.1 1\nAOD HOME 0 479 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 180 479 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 480 779 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 780 1079 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 180 346 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 480 646 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 780 946 3000 0.17 0.17 0.1 1"
+         }
+       },
+       "filename": "video_001.mp4",
+-      "frame_no": 270,
++      "frame_no": 180,
+       "desc_str_id": "str_id_black",
+       "cmf_info": [
+         "zk"
+@@ -40,14 +40,14 @@
+         "service_class_name" : "com.samsung.android.wallpaper.live.infinity.InfinityWallpaper",
+         "service_settings" : {
+           "filename": "video_002.mp4",
+-          "thumbnail_system_frame_no" : 270,
+-          "thumbnail_lock_frame_no" : 270,
+-          "thumbnail_frame_no" : 270,
+-          "transition_frame_info": "AOD LOCK 0 269 1500 0.17 0.17 0.1 1\nAOD HOME 0 719 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 270 719 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 720 1169 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 1170 1619 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 270 519 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 720 969 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 1170 1419 3000 0.17 0.17 0.1 1"
++          "thumbnail_system_frame_no" : 180,
++          "thumbnail_lock_frame_no" : 180,
++          "thumbnail_frame_no" : 180,
++          "transition_frame_info": "AOD LOCK 0 179 1500 0.17 0.17 0.1 1\nAOD HOME 0 479 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 180 479 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 480 779 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 780 1079 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 180 346 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 480 646 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 780 946 3000 0.17 0.17 0.1 1"
+         }
+       },
+       "filename": "video_002.mp4",
+-      "frame_no": 270,
++      "frame_no": 180,
+       "desc_str_id": "str_id_light_blue",
+       "cmf_info": [
+         "lb"
+@@ -66,14 +66,14 @@
+         "service_class_name" : "com.samsung.android.wallpaper.live.infinity.InfinityWallpaper",
+         "service_settings" : {
+           "filename": "video_003.mp4",
+-          "thumbnail_system_frame_no" : 270,
+-          "thumbnail_lock_frame_no" : 270,
+-          "thumbnail_frame_no" : 270,
+-          "transition_frame_info": "AOD LOCK 0 269 1500 0.17 0.17 0.1 1\nAOD HOME 0 719 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 270 719 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 720 1169 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 1170 1619 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 270 519 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 720 969 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 1170 1419 3000 0.17 0.17 0.1 1"
++          "thumbnail_system_frame_no" : 180,
++          "thumbnail_lock_frame_no" : 180,
++          "thumbnail_frame_no" : 180,
++          "transition_frame_info": "AOD LOCK 0 179 1500 0.17 0.17 0.1 1\nAOD HOME 0 479 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 180 479 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 480 779 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 780 1079 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 180 346 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 480 646 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 780 946 3000 0.17 0.17 0.1 1"
+         }
+       },
+       "filename": "video_003.mp4",
+-      "frame_no": 270,
++      "frame_no": 180,
+       "desc_str_id": "str_id_violet",
+       "cmf_info": [
+         "zv"
+@@ -92,14 +92,14 @@
+         "service_class_name" : "com.samsung.android.wallpaper.live.infinity.InfinityWallpaper",
+         "service_settings" : {
+           "filename": "video_004.mp4",
+-          "thumbnail_system_frame_no" : 270,
+-          "thumbnail_lock_frame_no" : 270,
+-          "thumbnail_frame_no" : 270,
+-          "transition_frame_info": "AOD LOCK 0 269 1500 0.17 0.17 0.1 1\nAOD HOME 0 719 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 270 719 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 720 1169 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 1170 1619 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 270 519 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 720 969 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 1170 1419 3000 0.17 0.17 0.1 1"
++          "thumbnail_system_frame_no" : 180,
++          "thumbnail_lock_frame_no" : 180,
++          "thumbnail_frame_no" : 180,
++          "transition_frame_info": "AOD LOCK 0 179 1500 0.17 0.17 0.1 1\nAOD HOME 0 479 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 180 479 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 480 779 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 780 1079 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 180 346 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 480 646 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 780 946 3000 0.17 0.17 0.1 1"
+         }
+       },
+       "filename": "video_004.mp4",
+-      "frame_no": 270,
++      "frame_no": 180,
+       "desc_str_id": "str_id_white",
+       "cmf_info": [
+         "zw"
+@@ -118,14 +118,14 @@
+         "service_class_name" : "com.samsung.android.wallpaper.live.infinity.InfinityWallpaper",
+         "service_settings" : {
+           "filename": "video_005.mp4",
+-          "thumbnail_system_frame_no" : 270,
+-          "thumbnail_lock_frame_no" : 270,
+-          "thumbnail_frame_no" : 270,
+-          "transition_frame_info": "AOD LOCK 0 269 1500 0.17 0.17 0.1 1\nAOD HOME 0 719 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 270 719 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 720 1169 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 1170 1619 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 270 519 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 720 969 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 1170 1419 3000 0.17 0.17 0.1 1"
++          "thumbnail_system_frame_no" : 180,
++          "thumbnail_lock_frame_no" : 180,
++          "thumbnail_frame_no" : 180,
++          "transition_frame_info": "AOD LOCK 0 179 1500 0.17 0.17 0.1 1\nAOD HOME 0 479 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 180 479 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 480 779 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 780 1079 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 180 346 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 480 646 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 780 946 3000 0.17 0.17 0.1 1"
+         }
+       },
+       "filename": "video_005.mp4",
+-      "frame_no": 270,
++      "frame_no": 180,
+       "desc_str_id": "str_id_gold",
+       "cmf_info": [
+         "zd"
+@@ -144,14 +144,14 @@
+         "service_class_name" : "com.samsung.android.wallpaper.live.infinity.InfinityWallpaper",
+         "service_settings" : {
+           "filename": "video_006.mp4",
+-          "thumbnail_system_frame_no" : 270,
+-          "thumbnail_lock_frame_no" : 270,
+-          "thumbnail_frame_no" : 270,
+-          "transition_frame_info": "AOD LOCK 0 269 1500 0.17 0.17 0.1 1\nAOD HOME 0 719 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 270 719 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 720 1169 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 1170 1619 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 270 519 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 720 969 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 1170 1419 3000 0.17 0.17 0.1 1"
++          "thumbnail_system_frame_no" : 180,
++          "thumbnail_lock_frame_no" : 180,
++          "thumbnail_frame_no" : 180,
++          "transition_frame_info": "AOD LOCK 0 179 1500 0.17 0.17 0.1 1\nAOD HOME 0 479 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 180 479 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 480 779 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 780 1079 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 180 346 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 480 646 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 780 946 3000 0.17 0.17 0.1 1"
+         }
+       },
+       "filename": "video_006.mp4",
+-      "frame_no": 270,
++      "frame_no": 180,
+       "desc_str_id": "str_id_silver",
+       "cmf_info": [
+         "zs"
+-- 
+2.51.1

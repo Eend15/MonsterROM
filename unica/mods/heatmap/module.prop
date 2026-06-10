@@ -1,0 +1,4 @@
+id=heatmap
+name=Heatmap compatibility
+author=Codex
+description=Disables Samsung heatmap helper when the target firmware does not provide matching support.

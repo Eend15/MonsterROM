@@ -1,0 +1,24 @@
+From 25d79df9f21fd60e372189aa16526b4f079be436 Mon Sep 17 00:00:00 2001
+From: Salvo Giangreco <giangrecosalvo9@gmail.com>
+Date: Fri, 30 May 2025 00:31:50 +0200
+Subject: [PATCH] Adjust motion animator for 60fps video files
+
+---
+ smali/com/samsung/android/wallpaper/live/infinity/c.smali | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/smali/com/samsung/android/wallpaper/live/infinity/c.smali b/smali/com/samsung/android/wallpaper/live/infinity/c.smali
+index d4832a7..f8fd88d 100644
+--- a/smali/com/samsung/android/wallpaper/live/infinity/c.smali
++++ b/smali/com/samsung/android/wallpaper/live/infinity/c.smali
+@@ -47,7 +47,7 @@
+ .method static constructor <clinit>()V
+     .locals 1
+ 
+-    const-string v0, "AOD LOCK 0 269 1500 0.17 0.17 0.1 1\nAOD HOME 0 719 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 270 719 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 720 1169 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 1170 1619 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 270 519 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 720 969 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 1170 1419 3000 0.17 0.17 0.1 1"
++    const-string v0, "AOD LOCK 0 179 1500 0.17 0.17 0.1 1\nAOD HOME 0 479 3000 0.33 0 0.1 1\nLOCK HOME_LEFT 180 479 3000 0.17 0.17 0.1 1\nLOCK HOME_UP 480 779 3000 0.17 0.17 0.1 1\nLOCK HOME_RIGHT 780 1079 3000 0.17 0.17 0.1 1\nLOCK TOUCH_LEFT 180 346 3000 0.17 0.17 0.1 1\nLOCK TOUCH_UP 480 646 3000 0.17 0.17 0.1 1\nLOCK TOUCH_RIGHT 780 946 3000 0.17 0.17 0.1 1"
+ 
+     sput-object v0, Lcom/samsung/android/wallpaper/live/infinity/c;->q:Ljava/lang/String;
+ 
+-- 
+2.51.1

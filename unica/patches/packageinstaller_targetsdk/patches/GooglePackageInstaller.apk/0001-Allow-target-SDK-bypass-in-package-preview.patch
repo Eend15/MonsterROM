@@ -1,0 +1,58 @@
+diff --git a/smali/com/android/packageinstaller/PackageInstallerActivity.smali b/smali/com/android/packageinstaller/PackageInstallerActivity.smali
+index 0000000..0000000 100644
+--- a/smali/com/android/packageinstaller/PackageInstallerActivity.smali
++++ b/smali/com/android/packageinstaller/PackageInstallerActivity.smali
+@@ -1137,3 +1137,23 @@
+     const/16 v4, 0x1000
+ 
++    invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v7
++
++    const-string v8, "unica_allow_sdkbypass"
++
++    const/4 v10, 0x0
++
++    invoke-static {v7, v8, v10}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
++
++    move-result v7
++
++    if-eqz v7, :cond_unica_target_sdk_preview_legacy
++
++    const/high16 v7, 0x1000000
++
++    or-int/2addr v4, v7
++
++    :cond_unica_target_sdk_preview_legacy
++
+     invoke-virtual {v3, v1, v4}, Landroid/content/pm/PackageManager;->getPackageArchiveInfo(Ljava/lang/String;I)Landroid/content/pm/PackageInfo;
+diff --git a/smali/com/android/packageinstaller/v2/model/InstallRepository.smali b/smali/com/android/packageinstaller/v2/model/InstallRepository.smali
+index 0000000..0000000 100644
+--- a/smali/com/android/packageinstaller/v2/model/InstallRepository.smali
++++ b/smali/com/android/packageinstaller/v2/model/InstallRepository.smali
+@@ -1024,3 +1024,25 @@
+     const/16 v3, 0x1000
+ 
++    iget-object v4, v1, Lcom/android/packageinstaller/v2/model/InstallRepository;->context:Landroid/content/Context;
++
++    invoke-virtual {v4}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v4
++
++    const-string v9, "unica_allow_sdkbypass"
++
++    const/4 v11, 0x0
++
++    invoke-static {v4, v9, v11}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
++
++    move-result v4
++
++    if-eqz v4, :cond_unica_target_sdk_preview_v2
++
++    const/high16 v4, 0x1000000
++
++    or-int/2addr v3, v4
++
++    :cond_unica_target_sdk_preview_v2
++
+     invoke-virtual {v0, v10, v3}, Landroid/content/pm/PackageManager;->getPackageArchiveInfo(Ljava/lang/String;I)Landroid/content/pm/PackageInfo;

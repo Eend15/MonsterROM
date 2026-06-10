@@ -1,0 +1,22 @@
+commit c7f4a9d0b32ef18c4b6e91a78fd23b59ac4e7d12
+Author: Android-Artisan <romartisan2025@gmail.com>
+Date:   Thu, 26 Feb 2026 13:06:54 +0100
+Subject: [PATCH] Add fake device image to SecSettings.apk
+
+diff --git a/smali_classes5/com/samsung/android/settings/deviceinfo/aboutphone/DeviceImageManager$1.smali b/smali_classes5/com/samsung/android/settings/deviceinfo/aboutphone/DeviceImageManager$1.smali
+index 4fcfcf8e..9b05bbba 100644
+--- a/smali_classes5/com/samsung/android/settings/deviceinfo/aboutphone/DeviceImageManager$1.smali
++++ b/smali_classes5/com/samsung/android/settings/deviceinfo/aboutphone/DeviceImageManager$1.smali
+@@ -323,11 +323,7 @@
+ 
+     if-eqz v2, :cond_3
+ 
+-    const-string/jumbo v0, "ril.product_code"
+-
+-    invoke-static {v0}, Landroid/os/SystemProperties;->get(Ljava/lang/String;)Ljava/lang/String;
+-
+-    move-result-object v0
++    const-string/jumbo v0, "SM-S948BZDGEUX"
+ 
+     const-string/jumbo v2, "requestPki - model_code = "
+ 
