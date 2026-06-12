@@ -135,6 +135,7 @@ if $BUILD_ROM; then
     if [ -d "$APKTOOL_DIR" ]; then
         LOG_STEP_IN true "Building APKs/JARs"
 
+        APKTOOL_MAX_JOBS="${UNICA_APKTOOL_MAX_JOBS:-0}"
         while IFS= read -r f; do
             f="${f/$APKTOOL_DIR\//}"
             PARTITION="$(cut -d "/" -f 1 -s <<< "$f")"
@@ -142,6 +143,12 @@ if $BUILD_ROM; then
                 "$SRC_DIR/scripts/apktool.sh" b "system" "$f" &
             else
                 "$SRC_DIR/scripts/apktool.sh" b "$PARTITION" "$(cut -d "/" -f 2- -s <<< "$f")" &
+            fi
+
+            if [ "$APKTOOL_MAX_JOBS" -gt 0 ]; then
+                while [ "$(jobs -pr | wc -l)" -ge "$APKTOOL_MAX_JOBS" ]; do
+                    wait -n || exit 1
+                done
             fi
         done < <(find "$APKTOOL_DIR" -type d \( -name "*.apk" -o -name "*.jar" \))
 

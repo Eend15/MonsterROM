@@ -1,0 +1,4 @@
+id=floppy_kernel
+name=Floppy kernel
+author=Codex
+description=Install the provided Floppy boot and vendor_boot images for p3s.

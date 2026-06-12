@@ -1,21 +1,20 @@
-From 4463d74624598458ec43f2892eeca8b96a9177eb Mon Sep 17 00:00:00 2001
-From: utkustnr <utkuustuner@proton.me>
-Date: Fri, 24 Oct 2025 15:11:39 +0200
+From 164b9eaceac106fb3897b3d6ed3f16bd3af13708 Mon Sep 17 00:00:00 2001
+From: ditternation <ditternation@outlook.com>
+Date: Sat, 28 Mar 2026 10:56:32 +0100
 Subject: [PATCH] Allow app target SDK bypass
 
 ---
- .../server/pm/InstallPackageHelper.smali      | 14 ++++++++++++++
- .../server/pm/PackageInstallerService.smali   | 25 +++++++++++++++++++++++++
- 2 files changed, 39 insertions(+)
+ .../server/pm/InstallPackageHelper.smali      | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
 
 diff --git a/smali_classes2/com/android/server/pm/InstallPackageHelper.smali b/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
-index d8893e3df..b8f5f4e2f 100644
+index 455221a..b2f0db1 100644
 --- a/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
 +++ b/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
-@@ -15613,6 +15613,20 @@
-     goto :goto_11
+@@ -15627,6 +15627,23 @@
+     :cond_17
+     if-nez v0, :cond_19
  
-     :cond_16
 +    iget-object v0, v1, Lcom/android/server/pm/InstallPackageHelper;->mContext:Landroid/content/Context;
 +
 +    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
@@ -28,44 +27,13 @@ index d8893e3df..b8f5f4e2f 100644
 +
 +    move-result v0
 +
-+    if-nez v0, :goto_11
++    if-eqz v0, :cond_unica_skip
++    goto :cond_19
 +
-     move v0, v8
++    :cond_unica_skip
++
+     invoke-interface {v3}, Lcom/android/internal/pm/parsing/pkg/ParsedPackage;->getTargetSdkVersion()I
  
-     :goto_11
-diff --git a/smali_classes2/com/android/server/pm/PackageInstallerService.smali b/smali_classes2/com/android/server/pm/PackageInstallerService.smali
-index 2729dcd8..e5c36f0a 100644
---- a/smali_classes2/com/android/server/pm/PackageInstallerService.smali
-+++ b/smali_classes2/com/android/server/pm/PackageInstallerService.smali
-@@ -1919,3 +1919,28 @@
-     iput v0, p1, Landroid/content/pm/PackageInstaller$SessionParams;->installFlags:I
--
-+    iget-object v0, p0, Lcom/android/server/pm/PackageInstallerService;->mContext:Landroid/content/Context;
-+
-+    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
-+
-+    move-result-object v0
-+
-+    const-string v1, "unica_allow_sdkbypass"
-+
-+    const/4 v2, 0x0
-+
-+    invoke-static {v0, v1, v2}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
-+
-+    move-result v0
-+
-+    if-eqz v0, :cond_unica_target_sdk_bypass
-+
-+    iget v0, p1, Landroid/content/pm/PackageInstaller$SessionParams;->installFlags:I
-+
-+    const/high16 v1, 0x1000000
-+
-+    or-int/2addr v0, v1
-+
-+    iput v0, p1, Landroid/content/pm/PackageInstaller$SessionParams;->installFlags:I
-+
-+    :cond_unica_target_sdk_bypass
-+
-     invoke-static {}, Landroid/os/Binder;->getCallingUid()I
+     move-result v0
 -- 
-2.51.1
+2.34.1

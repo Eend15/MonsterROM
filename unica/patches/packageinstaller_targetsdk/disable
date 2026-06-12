@@ -1,0 +1,1 @@
+Disabled because rebuilding GooglePackageInstaller.apk with the current smali toolchain creates an invalid classes.dex on One UI 8.5. The target-SDK bypass is handled in services.jar.
