@@ -170,7 +170,17 @@ fi
 
 if $ANDROID_TOOLS; then
     ANDROID_TOOLS_CMDS=(
+        "git submodule update --init --recursive"
         "git submodule foreach --recursive \"git am --abort || true\""
+        "git -C \"vendor/adb\" fetch origin && git -C \"vendor/adb\" checkout \"1e9f19dbd9cdd9edf9a2e10ed38af801e6ce490d\""
+        "git -C \"vendor/boringssl\" fetch origin && git -C \"vendor/boringssl\" checkout \"f5f8174a471d61722dc75ed9dd25698f9cafe4e4\""
+        "git -C \"vendor/core\" fetch origin && git -C \"vendor/core\" checkout \"071390460fcdfa4a3a16ea2ddde9868c7e19777c\""
+        "git -C \"vendor/e2fsprogs\" fetch origin && git -C \"vendor/e2fsprogs\" checkout \"1ee999c4cb8d541c981279e92cf4c6703fd97edd\""
+        "git -C \"vendor/extras\" fetch origin && git -C \"vendor/extras\" checkout \"e593a91d452887bd24470c0ce8cb08019cecf511\""
+        "git -C \"vendor/f2fs-tools\" fetch origin && git -C \"vendor/f2fs-tools\" checkout \"6ae5a62b558e84889442063604ae82b165d37d77\""
+        "git -C \"vendor/libbase\" fetch origin && git -C \"vendor/libbase\" checkout \"b8231eef8894efe1880d432a64c6fe99533d5022\""
+        "git -C \"vendor/libziparchive\" fetch origin && git -C \"vendor/libziparchive\" checkout \"d09a2c3813eba546dd8e69135a3f545be0470541\""
+        "git -C \"vendor/logging\" fetch origin && git -C \"vendor/logging\" checkout \"51099df928151dfff672806555745910384241e2\""
         "cmake -B \"build\" $(GET_CMAKE_FLAGS) -DANDROID_TOOLS_USE_BUNDLED_FMT=ON -DANDROID_TOOLS_USE_BUNDLED_LIBUSB=ON"
         "make -C \"build\" -j\"$(nproc)\""
         "find \"build/vendor\" -maxdepth 1 -type f -exec test -x {} \; -exec cp -a {} \"$TOOLS_DIR/bin\" \;"
@@ -203,6 +213,9 @@ if $APKTOOL; then
 fi
 if $EROFS_UTILS; then
     EROFS_UTILS_CMDS=(
+        "git submodule update --init --recursive"
+        "git -C \"src/selinux\" reset --hard"
+        "git -C \"src/selinux\" apply \"$SRC_DIR/external/patches/erofs-utils/0001-libselinux-guard-non-linux-includes.patch\""
         "cmake -S \"build/cmake\" -B \"out\" $(GET_CMAKE_FLAGS) -DRUN_ON_WSL=\"$(IS_WSL)\" -DENABLE_FULL_LTO=\"ON\" -DMAX_BLOCK_SIZE=\"4096\""
         "make -C \"out\" -j\"$(nproc)\""
         "find \"out/erofs-tools\" -maxdepth 1 -type f -exec test -x {} \; -exec cp -a {} \"$TOOLS_DIR/bin\" \;"
