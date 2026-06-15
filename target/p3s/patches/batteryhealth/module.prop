@@ -1,0 +1,4 @@
+id=batteryhealth
+name=Battery Health Stats
+author=Fede2782, Codex
+description=Shows Samsung battery health stats on p3s using the device-reported BSOH values.

@@ -2,6 +2,7 @@
 
 TAG="monsterrom_display_fix"
 SMARTVIEW_STATE="/data/local/tmp/monsterrom-smartview-display.state"
+AOD_DEFAULT_MARKER="/data/local/tmp/monsterrom-aod-defaults.seeded"
 
 put_setting() {
     settings put "$1" "$2" "$3" >/dev/null 2>&1 || true
@@ -16,6 +17,17 @@ setting_missing() {
     [ -z "$VALUE" ] || [ "$VALUE" = "null" ]
 }
 
+seed_aod_defaults() {
+    [ -f "$AOD_DEFAULT_MARKER" ] && return 0
+
+    put_setting system aod_mode 1
+    put_setting secure doze_always_on 1
+    put_setting system aod_show_lockscreen_wallpaper 0
+    put_setting secure doze_always_on_wallpaper_enabled 0
+
+    touch "$AOD_DEFAULT_MARKER" 2>/dev/null || true
+}
+
 seed_defaults() {
     put_setting system screen_resolution 2
     put_setting global display_size_forced 1440,3200
@@ -24,6 +36,7 @@ seed_defaults() {
     put_setting system refresh_rate_mode 1
     put_setting system peak_refresh_rate 120.0
     put_setting system min_refresh_rate 0.0
+    seed_aod_defaults
 }
 
 wait_for_boot() {

@@ -6,6 +6,9 @@
 # Enable AOD live clock
 SEC_FLOATING_FEATURE_FRAMEWORK_CONFIG_AOD_ITEM=activeclock=7,aodversion=7,clocktransition,coverboldfont
 
+# Keep stock Always On Display by default; fullscreen AOD is opt-in via Magisk/KSU module.
+SEC_FLOATING_FEATURE_LCD_CONFIG_AOD_FULLSCREEN=0
+
 # Rainbow LED Cover level
 SEC_FLOATING_FEATURE_FRAMEWORK_CONFIG_NFC_LED_COVER_LEVEL=100
 
