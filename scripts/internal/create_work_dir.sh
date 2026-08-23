@@ -108,6 +108,44 @@ COPY_SOURCE_FIRMWARE()
     fi
 }
 
+# Some firmware extraction tools lose SELinux xattrs on small auxiliary
+# partitions and leave a file_context entry with only its path. EROFS refuses
+# those entries, so recover labels from the source firmware when available and
+# use a vendor-file fallback for any path that is still unknown.
+NORMALIZE_FILE_CONTEXT()
+{
+    local FILE="$1"
+    local SOURCE_FILE="$2"
+    local TMP_FILE="${FILE}.normalized"
+
+    if ! grep -qE '^[[:space:]]*[^[:space:]]+[[:space:]]*$' "$FILE"; then
+        return 0
+    fi
+
+    LOGW "Normalizing incomplete file_context entries in ${FILE//$WORK_DIR\//}"
+
+    if [ -f "$SOURCE_FILE" ]; then
+        awk '
+            FNR == NR {
+                if (NF >= 2) labels[$1] = $0
+                next
+            }
+            NF >= 2 { print; next }
+            NF == 1 {
+                if ($1 in labels) print labels[$1]
+                else print $1 " u:object_r:vendor_file:s0"
+            }
+        ' "$SOURCE_FILE" "$FILE" > "$TMP_FILE"
+    else
+        awk '
+            NF >= 2 { print; next }
+            NF == 1 { print $1 " u:object_r:vendor_file:s0" }
+        ' "$FILE" > "$TMP_FILE"
+    fi
+
+    mv -f "$TMP_FILE" "$FILE" || return 1
+}
+
 COPY_TARGET_FIRMWARE()
 {
     local TARGET_FOLDERS="odm odm_dlkm system_dlkm vendor vendor_dlkm"
@@ -117,6 +155,7 @@ COPY_TARGET_FIRMWARE()
             EVAL "rsync -a --mkpath --delete \"$FW_DIR/$TARGET_FIRMWARE_PATH/$f\" \"$WORK_DIR\"" || exit 1
             EVAL "cp -a \"$FW_DIR/$TARGET_FIRMWARE_PATH/file_context-$f\" \"$WORK_DIR/configs/file_context-$f\"" || exit 1
             EVAL "cp -a \"$FW_DIR/$TARGET_FIRMWARE_PATH/fs_config-$f\" \"$WORK_DIR/configs/fs_config-$f\"" || exit 1
+            NORMALIZE_FILE_CONTEXT "$WORK_DIR/configs/file_context-$f" "$FW_DIR/$SOURCE_FIRMWARE_PATH/file_context-$f" || exit 1
             if [[ "$f" == "vendor" ]]; then
                 LOG_STEP_IN
                 SET_PROP "vendor" "ro.config.ringtone" "$(GET_PROP "$FW_DIR/$SOURCE_FIRMWARE_PATH/vendor/build.prop" "ro.config.ringtone")"
