@@ -9,7 +9,9 @@ fi
 
 # 2025 Audio Pack
 LOG_STEP_IN "- Adding 2025 Audio Pack"
-DELETE_FROM_WORK_DIR "system" "system/hidden/INTERNAL_SDCARD/Music/Samsung/Over_the_Horizon.mp3"
+if [ -f "$WORK_DIR/system/system/hidden/INTERNAL_SDCARD/Music/Samsung/Over_the_Horizon.mp3" ]; then
+    DELETE_FROM_WORK_DIR "system" "system/hidden/INTERNAL_SDCARD/Music/Samsung/Over_the_Horizon.mp3"
+fi
 ADD_TO_WORK_DIR "pa2qxxx" "system" \
     "system/hidden/INTERNAL_SDCARD/Music/Samsung/Over_the_Horizon.m4a" 0 0 644 "u:object_r:system_file:s0"
 DELETE_FROM_WORK_DIR "system" "system/media/audio/notifications"
@@ -55,12 +57,12 @@ else
         "$MODPATH/ead_mdnie/services.jar/0001-Add-Adaptive-color-tone-feature.patch"
 fi
 if $TARGET_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
-    if [ "$TARGET_PLATFORM_SDK_VERSION" -ge "36" ]; then
+    if [ -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/smali_classes2/com/android/settings/DisplaySettings\$4.smali" ] && \
+            [ -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/smali_classes4/com/samsung/android/settings/display/SecAdaptiveDisplaySettings.smali" ]; then
         APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
             "$MODPATH/ead_resolution/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
     else
-        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-            "$MODPATH/ead_resolution_legacy/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
+        LOG "- Skipping legacy Adaptive color tone UI patch; QPR2 uses a different SecSettings layout"
     fi
 else
     APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \

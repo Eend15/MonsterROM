@@ -89,37 +89,51 @@ DECODE_APK_IN_APEX()
 EXTRACT_PAYLOAD()
 {
     LOG_STEP_IN "- Unpacking apex_payload.img"
-
-    if ! sudo -n -v &> /dev/null; then
-        LOG "\033[0;33m! Asking user for sudo password\033[0m"
-        if ! sudo -v 2> /dev/null; then
-            ABORT "Root permissions are required to unpack APEX image"
-        fi
-    fi
-
     LOG_STEP_OUT
 
     mkdir -p "$TMP_DIR/unknown/apex_payload"
     mkdir -p "$TMP_DIR/tmp_out"
-    EVAL "sudo mount -o ro \"$TMP_DIR/unknown/apex_payload.img\" \"$TMP_DIR/tmp_out\""
-    EVAL "sudo cp -a -T \"$TMP_DIR/tmp_out\" \"$TMP_DIR/unknown/apex_payload\""
-    sudo chown -hR "$(whoami):$(whoami)" "$TMP_DIR/unknown/apex_payload"
+
+    local METADATA_ROOT
+    local PAYLOAD_MOUNTED=false
+    if sudo -n mount -o ro "$TMP_DIR/unknown/apex_payload.img" "$TMP_DIR/tmp_out" 2> /dev/null; then
+        PAYLOAD_MOUNTED=true
+        METADATA_ROOT="$TMP_DIR/tmp_out"
+        EVAL "sudo cp -a -T \"$TMP_DIR/tmp_out\" \"$TMP_DIR/unknown/apex_payload\""
+        sudo chown -hR "$(whoami):$(whoami)" "$TMP_DIR/unknown/apex_payload"
+    else
+        if ! command -v debugfs &> /dev/null; then
+            ABORT "debugfs is required to unpack APEX images without loop-mount support"
+        fi
+
+        # WSL1 cannot mount loop images, but debugfs preserves the ext4 modes,
+        # ownership and symlinks needed to rebuild the Bluetooth APEX.
+        METADATA_ROOT="$TMP_DIR/unknown/apex_payload"
+        EVAL "debugfs -R 'rdump / \"$METADATA_ROOT\"' \"$TMP_DIR/unknown/apex_payload.img\""
+    fi
+
     if [ -d "$TMP_DIR/unknown/apex_payload/lost+found" ]; then
         rm -rf "$TMP_DIR/unknown/apex_payload/lost+found"
     fi
 
     LOG "- Generating fs_config/file_context for apex_payload.img"
 
-    EVAL "sudo find \"$TMP_DIR/tmp_out\" | sudo xargs -I \"{}\" -P \"$(nproc)\" stat -c \"%n %u %g %a capabilities=0x0\" \"{}\" > \"$TMP_DIR/unknown/fs_config-apex_payload\""
-    EVAL "sudo find \"$TMP_DIR/tmp_out\" | sudo xargs -I \"{}\" -P \"$(nproc)\" sh -c 'echo \"\$1 \$(getfattr -n security.selinux --only-values -h --absolute-names \"\$1\")\"' \"sh\" \"{}\" > \"$TMP_DIR/unknown/file_context-apex_payload\""
+    EVAL "find \"$METADATA_ROOT\" | xargs -I \"{}\" -P \"$(nproc)\" stat -c \"%n %u %g %a capabilities=0x0\" \"{}\" > \"$TMP_DIR/unknown/fs_config-apex_payload\""
+    if $PAYLOAD_MOUNTED; then
+        EVAL "sudo find \"$METADATA_ROOT\" | sudo xargs -I \"{}\" -P \"$(nproc)\" sh -c 'echo \"\$1 \$(getfattr -n security.selinux --only-values -h --absolute-names \"\$1\")\"' \"sh\" \"{}\" > \"$TMP_DIR/unknown/file_context-apex_payload\""
+    else
+        EVAL "find \"$METADATA_ROOT\" -printf '%p u:object_r:system_file:s0\\n' > \"$TMP_DIR/unknown/file_context-apex_payload\""
+    fi
     sort -o "$TMP_DIR/unknown/file_context-apex_payload" "$TMP_DIR/unknown/file_context-apex_payload"
     sort -o "$TMP_DIR/unknown/fs_config-apex_payload" "$TMP_DIR/unknown/fs_config-apex_payload"
-    sed -i -e "s|$TMP_DIR/tmp_out |/ |g" -e "s|$TMP_DIR/tmp_out||g" "$TMP_DIR/unknown/file_context-apex_payload"
+    sed -i -e "s|$METADATA_ROOT |/ |g" -e "s|$METADATA_ROOT||g" "$TMP_DIR/unknown/file_context-apex_payload"
     sed -i -e "s|\.|\\\.|g" -e "s|\+|\\\+|g" -e "s|\[|\\\[|g" \
         -e "s|\]|\\\]|g" -e "s|\*|\\\*|g" "$TMP_DIR/unknown/file_context-apex_payload"
-    sed -i -e "s|$TMP_DIR/tmp_out | |g" -e "s|$TMP_DIR/tmp_out/||g" "$TMP_DIR/unknown/fs_config-apex_payload"
+    sed -i -e "s|$METADATA_ROOT | |g" -e "s|$METADATA_ROOT/||g" "$TMP_DIR/unknown/fs_config-apex_payload"
 
-    EVAL "sudo umount \"$TMP_DIR/tmp_out\""
+    if $PAYLOAD_MOUNTED; then
+        EVAL "sudo umount \"$TMP_DIR/tmp_out\""
+    fi
     rm -rf "$TMP_DIR/tmp_out" "$TMP_DIR/unknown/apex_payload.img"
 }
 
@@ -233,17 +247,17 @@ fi
 # SEC_PRODUCT_FEATURE_BLUETOOTH_SUPPORT_XLNA_CONTROL
 if $SOURCE_BLUETOOTH_SUPPORT_XLNA_CONTROL; then
     if ! $TARGET_BLUETOOTH_SUPPORT_XLNA_CONTROL; then
-        DECODE_APK_IN_APEX "$TMP_DIR/unknown/apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        LOG "- Applying \"Disable SUPPORT_XLNA_CONTROL support\" to apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        APPLY_PATCH "system" "system/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk" \
+        DECODE_APK_IN_APEX "$BLUETOOTH_APK_PATH"
+        LOG "- Applying \"Disable SUPPORT_XLNA_CONTROL support\" to apex_payload/$BLUETOOTH_APK_REL_PATH"
+        APPLY_PATCH "system" "system/$BLUETOOTH_APK_REL_PATH" \
             "$MODPATH/xlna/Bluetooth.apk/0001-Disable-SUPPORT_XLNA_CONTROL-support.patch" \
             > /dev/null
     fi
 else
     if $TARGET_BLUETOOTH_SUPPORT_XLNA_CONTROL; then
-        DECODE_APK_IN_APEX "$TMP_DIR/unknown/apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        LOG "- Applying \"Enable SUPPORT_XLNA_CONTROL support\" to apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        APPLY_PATCH "system" "system/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk" \
+        DECODE_APK_IN_APEX "$BLUETOOTH_APK_PATH"
+        LOG "- Applying \"Enable SUPPORT_XLNA_CONTROL support\" to apex_payload/$BLUETOOTH_APK_REL_PATH"
+        APPLY_PATCH "system" "system/$BLUETOOTH_APK_REL_PATH" \
             "$MODPATH/xlna/Bluetooth.apk/0001-Enable-SUPPORT_XLNA_CONTROL-support.patch" \
             > /dev/null
     fi
@@ -256,7 +270,7 @@ LOG "- Patching \"8876743948050037\" to \"887674392a000014\" in apex_payload/lib
 HEX_PATCH "$TMP_DIR/unknown/apex_payload/lib64/libbluetooth_jni.so" \
     "8876743948050037" "887674392a000014" > /dev/null
 
-BUILD_APK_IN_APEX "$TMP_DIR/unknown/apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
+BUILD_APK_IN_APEX "$BLUETOOTH_APK_PATH"
 BUILD_APK_IN_APEX "$TMP_DIR/unknown/apex_payload/javalib/framework-bluetooth.jar"
 BUILD_PAYLOAD
 SIGN_PAYLOAD

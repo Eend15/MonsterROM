@@ -1,0 +1,4 @@
+id=camera_compat
+name=p3s S23 FE Camera Compatibility
+author=MonsterROM
+description=Aligns the S23 FE camera client with the p3s Exynos 2100 camera HAL.

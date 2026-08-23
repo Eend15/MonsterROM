@@ -1,9 +1,14 @@
 # Nuke WSM
-DELETE_FROM_WORK_DIR "system" "system/etc/public.libraries-wsm.samsung.txt"
-DELETE_FROM_WORK_DIR "system" "system/lib/libhal.wsm.samsung.so"
-DELETE_FROM_WORK_DIR "system" "system/lib/vendor.samsung.hardware.security.wsm.service-V1-ndk.so"
-DELETE_FROM_WORK_DIR "system" "system/lib64/libhal.wsm.samsung.so"
-DELETE_FROM_WORK_DIR "system" "system/lib64/vendor.samsung.hardware.security.wsm.service-V1-ndk.so"
+for WSM_FILE in \
+    system/etc/public.libraries-wsm.samsung.txt \
+    system/lib/libhal.wsm.samsung.so \
+    system/lib/vendor.samsung.hardware.security.wsm.service-V1-ndk.so \
+    system/lib64/libhal.wsm.samsung.so \
+    system/lib64/vendor.samsung.hardware.security.wsm.service-V1-ndk.so; do
+    if [ -f "$WORK_DIR/system/$WSM_FILE" ]; then
+        DELETE_FROM_WORK_DIR "system" "$WSM_FILE"
+    fi
+done
 
 # Add KnoxPatchHooks
 APPLY_PATCH "system" "system/framework/framework.jar" \
@@ -27,8 +32,13 @@ APPLY_PATCH "system" "system/framework/knoxsdk.jar" \
 SMALI_PATCH "system" "system/framework/samsungkeystoreutils.jar" \
     "smali/com/samsung/android/security/keystore/AttestParameterSpec.smali" "return" \
     'isVerifiableIntegrity()Z' 'true'
-APPLY_PATCH "system" "system/framework/services.jar" \
-    "$MODPATH/services.jar/0001-Bypass-ICD-verification.patch"
+if grep -q 'mVerifiableIntegrity' \
+        "$APKTOOL_DIR/system/framework/services.jar/smali_classes2/com/samsung/android/security/keystore/AttestParameterSpec.smali"; then
+    APPLY_PATCH "system" "system/framework/services.jar" \
+        "$MODPATH/services.jar/0001-Bypass-ICD-verification.patch"
+else
+    LOG "- Keeping native QPR2 ICD handling"
+fi
 
 # Disable SAK in DarManagerService
 SMALI_PATCH "system" "system/framework/services.jar" \

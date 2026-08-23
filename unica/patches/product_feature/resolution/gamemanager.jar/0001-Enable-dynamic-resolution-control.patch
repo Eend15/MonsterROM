@@ -4,14 +4,14 @@ Date: Mon, 6 Oct 2025 21:21:15 +0200
 Subject: [PATCH] Enable dynamic resolution control
 
 ---
- .../android/game/GameManagerService$DisplayListener.smali     | 4 +---
+ .../samsung/android/game/display/GameDisplayListener.smali    | 4 +---
  1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/smali/com/samsung/android/game/GameManagerService$DisplayListener.smali b/smali/com/samsung/android/game/GameManagerService$DisplayListener.smali
+diff --git a/smali/com/samsung/android/game/display/GameDisplayListener.smali b/smali/com/samsung/android/game/display/GameDisplayListener.smali
 index 4cb4380..5d041b4 100644
---- a/smali/com/samsung/android/game/GameManagerService$DisplayListener.smali
-+++ b/smali/com/samsung/android/game/GameManagerService$DisplayListener.smali
-@@ -59,9 +59,7 @@
+--- a/smali/com/samsung/android/game/display/GameDisplayListener.smali
++++ b/smali/com/samsung/android/game/display/GameDisplayListener.smali
+@@ -45,9 +45,7 @@
  
      const-string v0, "WQHD,FHD,HD"
  
@@ -24,4 +24,3 @@ index 4cb4380..5d041b4 100644
  
 -- 
 2.51.0
-

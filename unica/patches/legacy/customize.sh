@@ -232,8 +232,10 @@ else
     PATCHED=true
     DELETE_FROM_WORK_DIR "system" "system/bin/heatmap"
     DELETE_FROM_WORK_DIR "system" "system/etc/init/init.sec-heatmap.rc"
-    DELETE_FROM_WORK_DIR "system" "system/lib64/libectcore.so"
-    DELETE_FROM_WORK_DIR "system" "system/lib64/libparam_A55_250328.so"
+    [ ! -e "$WORK_DIR/system/system/lib64/libectcore.so" ] || \
+        DELETE_FROM_WORK_DIR "system" "system/lib64/libectcore.so"
+    [ ! -e "$WORK_DIR/system/system/lib64/libparam_A55_250328.so" ] || \
+        DELETE_FROM_WORK_DIR "system" "system/lib64/libparam_A55_250328.so"
 fi
 
 # Support camera light sensor

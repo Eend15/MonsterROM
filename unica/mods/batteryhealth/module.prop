@@ -1,0 +1,4 @@
+id=batteryhealth
+name=Exynos 2100 Battery Health Stats
+author=Fede2782, MonsterROM
+description=Shows Samsung battery health stats using device-reported BSOH values.

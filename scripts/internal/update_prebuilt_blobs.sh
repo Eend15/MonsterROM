@@ -8,6 +8,7 @@ source "$SRC_DIR/scripts/utils/firmware_utils.sh" || exit 1
 DEVICE=""
 MODEL=""
 CSC=""
+CURRENT_FIRMWARE=""
 IMEI=""
 LATEST_FIRMWARE=""
 
@@ -16,6 +17,7 @@ UPDATE_BLOBS()
     local BLOBS
     local PREBUILTS_DIR="$SRC_DIR/prebuilts/samsung/$DEVICE"
     local FILE_PATH
+    local CHUNK_PATH
 
     if [ -d "$PREBUILTS_DIR/system" ]; then
         BLOBS+="$(find "$PREBUILTS_DIR/system" ! -type d)"
@@ -39,8 +41,8 @@ UPDATE_BLOBS()
     BLOBS="$(LC_ALL=C sort <<< "$BLOBS")"
 
     for i in $BLOBS; do
-        if [[ "$i" == *.[0-9][0-9] ]]; then
-            [[ "$i" == *".00" ]] || continue
+        if [[ "$i" =~ \.([0-9]+)$ ]]; then
+            [[ "${BASH_REMATCH[1]}" == "00" ]] || continue
             i="${i%.*}"
         fi
         FILE_PATH="$PREBUILTS_DIR/${i//system\/system\//system/}"
@@ -52,9 +54,17 @@ UPDATE_BLOBS()
 
         LOG "- Updating prebuilts/samsung/$DEVICE/$i"
 
+        # A blob can cross the 50 MiB split threshold between firmware builds.
+        # Remove the unsplit file and all numeric split siblings first.
+        rm -f -- "$FILE_PATH" || exit 1
+        for CHUNK_PATH in "$FILE_PATH".*; do
+            [ -e "$CHUNK_PATH" ] || [ -L "$CHUNK_PATH" ] || continue
+            [[ "${CHUNK_PATH##*.}" =~ ^[0-9]+$ ]] || continue
+            rm -f -- "$CHUNK_PATH" || exit 1
+        done
+
         if [ ! -L "$FW_DIR/${MODEL}_${CSC}/$i" ] && \
                 [ "$(wc -c "$FW_DIR/${MODEL}_${CSC}/$i" | cut -d " " -f 1)" -gt "52428800" ]; then
-            EVAL "rm \"$FILE_PATH.\"*" || exit 1
             EVAL "split -d -b 52428800 \"$FW_DIR/${MODEL}_${CSC}/$i\" \"$FILE_PATH.\"" || exit 1
         else
             EVAL "cp -a \"$FW_DIR/${MODEL}_${CSC}/$i\" \"$FILE_PATH\"" || exit 1
@@ -86,13 +96,17 @@ if [ ! "$LATEST_FIRMWARE" ]; then
 fi
 
 LOG_STEP_IN true "Starting update_prebuilt_blobs for prebuilts/samsung/$DEVICE"
-LOG "- Current firmware: $(cat "$SRC_DIR/prebuilts/samsung/$DEVICE/.current" 2> /dev/null)"
-LOG "- Latest available firmware: $LATEST_FIRMWARE"
+    CURRENT_FIRMWARE="$(cat "$SRC_DIR/prebuilts/samsung/$DEVICE/.current" 2> /dev/null)"
+    LOG "- Current firmware: $CURRENT_FIRMWARE"
+    LOG "- Latest available firmware: $LATEST_FIRMWARE"
 
-if [[ "$LATEST_FIRMWARE" == "$(cat "$SRC_DIR/prebuilts/samsung/$DEVICE/.current" 2> /dev/null)" ]]; then
+if [[ "$LATEST_FIRMWARE" == "$CURRENT_FIRMWARE" ]]; then
     LOG_STEP_IN
     LOG "\033[0;33m! Nothing to do\033[0m"
     exit 0
+elif [ "$CURRENT_FIRMWARE" ] && COMPARE_SEC_BUILD_VERSION "$CURRENT_FIRMWARE" "$LATEST_FIRMWARE"; then
+    LOGE "Refusing to replace equal/newer prebuilts with an older or ambiguous Samsung feed build"
+    exit 1
 fi
 
 LOG_STEP_OUT

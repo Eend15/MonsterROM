@@ -22,8 +22,10 @@ BUILD_APKS()
     local RUNS="0"
     local CODE="0"
 
-    MAX_JOBS="$(nproc)"
-    [ "$MAX_JOBS" -gt "8" ] && MAX_JOBS="8"
+    # Large Samsung framework archives can each consume around 1.5 GiB while
+    # apktool/aapt2 are active. Keep the ROM build deterministic on WSL hosts
+    # instead of spawning enough JVMs to exhaust memory.
+    MAX_JOBS="1"
 
     if [ -d "$APKTOOL_DIR" ]; then
         LOG_STEP_IN true "Building APKs/JARs"

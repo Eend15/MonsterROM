@@ -1,0 +1,4 @@
+id=codec2
+name=Exynos 2100 Codec2 seccomp fix
+author=devcore94
+description=Allows Codec2 to use MREMAP_MAYMOVE on the S23 FE QPR2 base.

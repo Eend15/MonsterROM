@@ -90,7 +90,7 @@ SMALI_PATCH()
         return 1
     elif [[ "$OPERATION" == "remove" ]]; then
         local USED
-        USED="$(find "$FILE_PATH" ! -path "*$SMALI" -type f -exec grep -r -n -- "$(cut -d "." -f "1" <<< "${SMALI#*/}");" {} \+ || true)"
+        USED="$(grep -R -n --exclude="$(basename "$SMALI")" -- "$(cut -d "." -f "1" <<< "${SMALI#*/}");" "$FILE_PATH" || true)"
         USED="$(cut -d ":" -f 1-2 <<< "$USED")"
 
         if [ "$USED" ]; then
