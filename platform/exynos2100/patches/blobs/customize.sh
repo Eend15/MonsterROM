@@ -51,6 +51,13 @@ ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib/android.hardware.graphics.extensio
 ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib/libhdcp_client_aidl.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib/libhdcp2.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib/libremotedisplay_wfd.so" 0 0 644 "u:object_r:system_lib_file:s0"
+# Match AudioSource allocation size to the source framework
+HEX_PATCH "$WORK_DIR/system/system/lib/libremotedisplay_wfd.so" \
+    "4ff480734cf030ec00274ff49070099749f032e992490646" \
+    "4ff480734cf030ec00274ff49470099749f032e992490646"
+HEX_PATCH "$WORK_DIR/system/system/lib/libremotedisplay_wfd.so" \
+    "48ef08a849f046e9ffe730464ff4907148f0c0ef4df03eef09a802f0" \
+    "48ef08a849f046e9ffe730464ff4947148f0c0ef4df03eef09a802f0"
 ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib/libremotedisplayservice.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib/librepeater.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib/libsecuibc.so" 0 0 644 "u:object_r:system_lib_file:s0"

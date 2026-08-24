@@ -4,6 +4,41 @@ TARGET_FIRMWARE_PATH="$(cut -d "/" -f 1 -s <<< "$TARGET_FIRMWARE")_$(cut -d "/" 
 DELETE_FROM_WORK_DIR "system" "system/saiv"
 ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/saiv" 0 0 755 "u:object_r:system_file:s0"
 
+if [[ "$TARGET_CODENAME" == "t2s" ]] && \
+        [ ! -d "$WORK_DIR/system/system/saiv/localtm" ] && \
+        [ -d "$FW_DIR/$SOURCE_FIRMWARE_PATH/system/system/saiv/localtm" ]; then
+    # Pair the target LocalTM runtime with source tuning data and target sensor aliases.
+    ADD_TO_WORK_DIR "$SOURCE_FIRMWARE" "system" \
+        "system/saiv/localtm" 0 0 755 "u:object_r:system_file:s0"
+    if ! grep -q "1_2_0_S5K2LD" "$WORK_DIR/system/system/saiv/localtm/pcc_tunefile_map.txt"; then
+        {
+            echo
+            echo "1_0_0_S5K2LD   pcc_wide_night.dat"
+            echo "1_2_0_S5K2LD   pcc_wide_night.dat"
+            echo "31_0_0_S5K2LD  pcc_wide_night.dat"
+            echo "31_2_0_S5K2LD  pcc_wide_night.dat"
+            echo "21_0_0_S5K2LD  pcc_wide_night.dat"
+            echo "21_2_0_S5K2LD  pcc_wide_night.dat"
+            echo "39_0_0_S5K2LD  pcc_wide_night.dat"
+            echo "39_2_0_S5K2LD  pcc_wide_night.dat"
+            echo
+            echo "1_0_2_S5KGW2   pcc_tele_night.dat"
+            echo "1_2_2_S5KGW2   pcc_tele_night.dat"
+            echo "31_0_2_S5KGW2  pcc_tele_night.dat"
+            echo "31_2_2_S5KGW2  pcc_tele_night.dat"
+            echo "21_0_2_S5KGW2  pcc_tele_night.dat"
+            echo "21_2_2_S5KGW2  pcc_tele_night.dat"
+            echo
+            echo "1_0_4_IMX563   pcc_uw_night.dat"
+            echo "1_2_4_IMX563   pcc_uw_night.dat"
+            echo "31_0_4_IMX563  pcc_uw_night.dat"
+            echo "31_2_4_IMX563  pcc_uw_night.dat"
+            echo "21_0_4_IMX563  pcc_uw_night.dat"
+            echo "21_2_4_IMX563  pcc_uw_night.dat"
+        } >> "$WORK_DIR/system/system/saiv/localtm/pcc_tunefile_map.txt"
+    fi
+fi
+
 # SEC_PRODUCT_FEATURE_VISION_CONFIG_FACE_RECOGNITION_SOLUTION
 SOURCE_VISION_CONFIG_FACE_RECOGNITION_SOLUTION="$(GET_FLOATING_FEATURE_CONFIG "$FW_DIR/$SOURCE_FIRMWARE_PATH/system/system/etc/floating_feature.xml" "SEC_FLOATING_FEATURE_GALLERY_CONFIG_FACE_CLUSTER_VERSION")"
 TARGET_VISION_CONFIG_FACE_RECOGNITION_SOLUTION="$(GET_FLOATING_FEATURE_CONFIG "$FW_DIR/$TARGET_FIRMWARE_PATH/system/system/etc/floating_feature.xml" "SEC_FLOATING_FEATURE_GALLERY_CONFIG_FACE_CLUSTER_VERSION")"
@@ -38,6 +73,12 @@ fi
 # SEC_PRODUCT_FEATURE_GALLERY_CONFIG_IMAGE_TAGGER_VERSION
 SOURCE_GALLERY_CONFIG_IMAGE_TAGGER_VERSION="$(GET_FLOATING_FEATURE_CONFIG "$FW_DIR/$SOURCE_FIRMWARE_PATH/system/system/etc/floating_feature.xml" "SEC_FLOATING_FEATURE_GALLERY_CONFIG_IMAGE_TAGGER_VERSION")"
 TARGET_GALLERY_CONFIG_IMAGE_TAGGER_VERSION="$(GET_FLOATING_FEATURE_CONFIG "$FW_DIR/$TARGET_FIRMWARE_PATH/system/system/etc/floating_feature.xml" "SEC_FLOATING_FEATURE_GALLERY_CONFIG_IMAGE_TAGGER_VERSION")"
+AIC_MODEL_FIRMWARE="$SOURCE_FIRMWARE"
+if [ -f "$FW_DIR/$TARGET_FIRMWARE_PATH/vendor/bin/hw/vendor.samsung_slsi.hardware.eden_runtime@1.0-service" ] && \
+        [ ! -f "$FW_DIR/$SOURCE_FIRMWARE_PATH/vendor/bin/hw/vendor.samsung_slsi.hardware.eden_runtime@1.0-service" ]; then
+    # Keep EDEN models paired with the target vendor runtime.
+    AIC_MODEL_FIRMWARE="$TARGET_FIRMWARE"
+fi
 if [[ "$(GET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_GALLERY_CONFIG_IMAGE_TAGGER_VERSION")" == "$SOURCE_GALLERY_CONFIG_IMAGE_TAGGER_VERSION" ]]; then
     if [[ "$TARGET_GALLERY_CONFIG_IMAGE_TAGGER_VERSION" != "$SOURCE_GALLERY_CONFIG_IMAGE_TAGGER_VERSION" ]] || \
             [ "$TARGET_PLATFORM_SDK_VERSION" -lt "$SOURCE_PLATFORM_SDK_VERSION" ]; then
@@ -50,7 +91,7 @@ if [[ "$(GET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_GALLERY_CONFIG_IMAGE_
         if [ -d "$WORK_DIR/system/system/saiv/image_understanding/db/aic_g_o_detector" ]; then
             DELETE_FROM_WORK_DIR "system" "system/saiv/image_understanding/db/aic_g_o_detector"
         fi
-        ADD_TO_WORK_DIR "$SOURCE_FIRMWARE" "system" \
+        ADD_TO_WORK_DIR "$AIC_MODEL_FIRMWARE" "system" \
             "system/saiv/image_understanding/db/aic_g_o_detector" 0 0 755 "u:object_r:system_file:s0"
         if [ -d "$WORK_DIR/vendor/saiv/image_understanding/db/aig_classifier" ]; then
             DELETE_FROM_WORK_DIR "vendor" "saiv/image_understanding/db/aig_classifier"
@@ -70,17 +111,17 @@ if [[ "$(GET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_GALLERY_CONFIG_IMAGE_
         if [ -d "$WORK_DIR/vendor/etc/saiv/image_understanding/db/aic_classifier" ]; then
             DELETE_FROM_WORK_DIR "vendor" "etc/saiv/image_understanding/db/aic_classifier"
         fi
-        ADD_TO_WORK_DIR "$SOURCE_FIRMWARE" "vendor" \
+        ADD_TO_WORK_DIR "$AIC_MODEL_FIRMWARE" "vendor" \
             "etc/saiv/image_understanding/db/aic_classifier" 0 0 755 "u:object_r:vendor_configs_file:s0"
         if [ -d "$WORK_DIR/vendor/etc/saiv/image_understanding/db/aic_detector" ]; then
             DELETE_FROM_WORK_DIR "vendor" "etc/saiv/image_understanding/db/aic_detector"
         fi
-        ADD_TO_WORK_DIR "$SOURCE_FIRMWARE" "vendor" \
+        ADD_TO_WORK_DIR "$AIC_MODEL_FIRMWARE" "vendor" \
             "etc/saiv/image_understanding/db/aic_detector" 0 0 755 "u:object_r:vendor_configs_file:s0"
         if [ -d "$WORK_DIR/vendor/etc/saiv/image_understanding/db/aic_g_o_detector" ]; then
             DELETE_FROM_WORK_DIR "vendor" "etc/saiv/image_understanding/db/aic_g_o_detector"
         fi
-        ADD_TO_WORK_DIR "$SOURCE_FIRMWARE" "vendor" \
+        ADD_TO_WORK_DIR "$AIC_MODEL_FIRMWARE" "vendor" \
             "etc/saiv/image_understanding/db/aic_g_o_detector" 0 0 755 "u:object_r:vendor_configs_file:s0"
     fi
 fi
@@ -243,6 +284,7 @@ if [ -f "$WORK_DIR/system/system/lib64/libSmartScan.camera.samsung.so" ]; then
 fi
 
 unset SOURCE_FIRMWARE_PATH TARGET_FIRMWARE_PATH \
+    AIC_MODEL_FIRMWARE \
     SOURCE_VISION_CONFIG_FACE_RECOGNITION_SOLUTION TARGET_VISION_CONFIG_FACE_RECOGNITION_SOLUTION \
     SOURCE_GALLERY_CONFIG_IMAGE_TAGGER_VERSION TARGET_GALLERY_CONFIG_IMAGE_TAGGER_VERSION \
     SOURCE_GALLERY_CONFIG_PET_CLUSTER_VERSION TARGET_GALLERY_CONFIG_PET_CLUSTER_VERSION \

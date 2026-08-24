@@ -1,0 +1,4 @@
+id=camera
+name=Camera patches
+author=Devcore94
+description=Fixes target camera runtime compatibility.
