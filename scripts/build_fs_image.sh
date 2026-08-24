@@ -123,6 +123,79 @@ BUILD_IMAGE_MKFS()
             ;;
     esac
 
+    # Some imported Samsung blobs do not retain SELinux xattrs.  Their
+    # generated file_context entry then contains only a path, which mkfs.erofs
+    # rejects. Preserve valid labels and assign a partition-safe fallback to
+    # incomplete entries before invoking the filesystem builder.
+    if grep -qE '^[[:space:]]*[^[:space:]]+[[:space:]]*$' "$FILE_CONTEXT_FILE"; then
+        local DEFAULT_LABEL
+        local NORMALIZED_FILE="$FILE_CONTEXT_FILE.normalized"
+        case "$PARTITION" in
+            vendor|vendor_dlkm|odm|odm_dlkm) DEFAULT_LABEL="u:object_r:vendor_file:s0" ;;
+            *) DEFAULT_LABEL="u:object_r:system_file:s0" ;;
+        esac
+
+        LOGW "Normalizing incomplete file_context entries for $PARTITION"
+        awk -v label="$DEFAULT_LABEL" '
+            /^[[:space:]]*#/ { print; next }
+            NF >= 2 { print; next }
+            NF == 1 { print $1 " " label }
+        ' "$FILE_CONTEXT_FILE" > "$NORMALIZED_FILE" || exit 1
+        mv -f "$NORMALIZED_FILE" "$FILE_CONTEXT_FILE" || exit 1
+    fi
+
+    # The system image is built with "/" as its mount point while Samsung's
+    # canned fs_config prefixes every entry with "system/". mkfs.erofs looks
+    # up every packed path verbatim, so rebuild the configuration from the
+    # actual image tree instead of guessing: strip the prefix from donor
+    # attributes and add safe defaults for any newly added path.
+    if [[ "$MOUNT_POINT" == "/" ]] && grep -qE '^system(/|[[:space:]])' "$FS_CONFIG_FILE"; then
+        local NORMALIZED_FS_CONFIG="$FS_CONFIG_FILE.normalized"
+        local TREE_LIST="$FS_CONFIG_FILE.tree"
+        LOGW "Normalizing system fs_config paths for the image root"
+
+        (
+            cd "$INPUT_DIR" &&
+            find . -mindepth 1 -printf '%y\t%m\t%P\n'
+        ) | LC_ALL=C sort -k3 > "$TREE_LIST" || exit 1
+
+        awk '
+            NR == FNR {
+                if (NF < 2) next
+                path = $1
+                if (path == "/") { root_line = $0; next }
+                if (path ~ /^system\/./) { key = path; sub(/^system\//, "", key) }
+                else key = path
+                if (!(key in attrs)) {
+                    attrs[key] = $2
+                    for (i = 3; i <= NF; i++) attrs[key] = attrs[key] " " $i
+                }
+                next
+            }
+            {
+                type = $1
+                perms = $2 + 0
+                path = $3
+                if (path in attrs) {
+                    lines[++count] = path " " attrs[path]
+                } else {
+                    fallbacks++
+                    if (type == "d") lines[++count] = path " 0 0 0755"
+                    else if (type != "f" || perms % 2 || int(perms / 10) % 10 % 2 || int(perms / 100) % 2) lines[++count] = path " 0 0 0755"
+                    else lines[++count] = path " 0 0 0644"
+                }
+            }
+            END {
+                if (root_line != "") print root_line
+                for (i = 1; i <= count; i++) print lines[i]
+                printf "Normalized system fs_config: %d of %d entries use tree defaults\n", fallbacks + 0, count + 0 > "/dev/stderr"
+            }
+        ' "$FS_CONFIG_FILE" "$TREE_LIST" > "$NORMALIZED_FS_CONFIG" || exit 1
+
+        mv -f "$NORMALIZED_FS_CONFIG" "$FS_CONFIG_FILE" || exit 1
+        rm -f "$TREE_LIST"
+    fi
+
     EVAL "$BUILD_CMD" || exit 1
 
     if $MANUAL_SPARSE; then
