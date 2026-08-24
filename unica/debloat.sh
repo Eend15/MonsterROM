@@ -190,6 +190,7 @@ system/etc/permissions/privapp-permissions-com.sec.android.diagmonagent.xml
 system/etc/permissions/privapp-permissions-com.sec.android.soagent.xml
 system/priv-app/DeviceQualityAgent36
 system/priv-app/DiagMonAgent95
+system/priv-app/DiagMonAgent97
 system/priv-app/SOAgent76
 "
 
@@ -208,11 +209,6 @@ system/priv-app/AvatarEmojiSticker
 # Samsung Calendar
 SYSTEM_DEBLOAT+="
 system/app/SamsungCalendar
-"
-
-# Samsung Clock
-SYSTEM_DEBLOAT+="
-system/app/ClockPackage
 "
 
 # Samsung Free

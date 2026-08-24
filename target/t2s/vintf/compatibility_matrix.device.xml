@@ -6,7 +6,6 @@
         vendor/samsung/interfaces/security/hdcp/wifidisplay/aidl/framework_compatibility_matrix.xml
         vendor/samsung/interfaces/sysinput/aidl/framework_compatibility_matrix.xml
         vendor/samsung/interfaces/security/widevine/keyprov/aidl/framework_compatibility_matrix.xml
-        vendor/samsung/interfaces/tlc/ddar/1.0/vendor.samsung.hardware.tlc.ddar@1.0-matrix.xml
         vendor/samsung/interfaces/wifi/aidl/framework_compatibility_matrix.xml
         vendor/samsung/interfaces/wifi/nan/aidl/framework_compatibility_matrix.xml
         vendor/samsung/interfaces/hyper/aidl/framework_compatibility_matrix.xml
@@ -22,7 +21,6 @@
         vendor/samsung/interfaces/audio/aidl/framework_compatibility_matrix.xml
         vendor/samsung/system/security/drk/drk_hidl_framework_compatibility_matrix.xml
         vendor/samsung/system/security/drk/drk_aidl_framework_compatibility_matrix.xml
-        vendor/samsung/interfaces/tlc/ucm/2.0/framework_compatibility_matrix.xml
         vendor/samsung/interfaces/authfw/1.0/vendor.samsung.hardware.authfw@1.0-matrix.xml
         vendor/samsung/interfaces/authfw/aidl/vendor.samsung.hardware.authfw-matrix.xml
         vendor/samsung/interfaces/biometrics/face/3.0/face_compatibility_matrix.xml
@@ -483,14 +481,6 @@
         </interface>
     </hal>
     <hal format="hidl">
-        <name>vendor.samsung.hardware.tlc.ddar</name>
-        <version>1.0</version>
-        <interface>
-            <name>ISehDdar</name>
-            <instance>default</instance>
-        </interface>
-    </hal>
-    <hal format="hidl">
         <name>vendor.samsung.hardware.tlc.hdm</name>
         <version>1.1</version>
         <interface>
@@ -527,14 +517,6 @@
         <version>1.0</version>
         <interface>
             <name>ISehTlcPayment</name>
-            <instance>default</instance>
-        </interface>
-    </hal>
-    <hal format="hidl">
-        <name>vendor.samsung.hardware.tlc.ucm</name>
-        <version>2.0</version>
-        <interface>
-            <name>ISehUcm</name>
             <instance>default</instance>
         </interface>
     </hal>

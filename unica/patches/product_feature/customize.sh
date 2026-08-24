@@ -853,8 +853,10 @@ if $SOURCE_WLAN_SUPPORT_80211AX; then
             fi
         else
             if ! $TARGET_WLAN_SUPPORT_80211AX_6GHZ; then
-                # TODO handle this condition
-                LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_80211AX_6GHZ" "TARGET_WLAN_SUPPORT_80211AX_6GHZ"
+                SMALI_PATCH "system" "system/framework/semwifi-service.jar" \
+                    "smali/com/samsung/android/server/wifi/SemFrameworkFacade.smali" "return" \
+                    "isSupported6Ghz()Z" \
+                    "false"
             fi
         fi
     else
@@ -1055,8 +1057,17 @@ if ! $SOURCE_WLAN_SUPPORT_MOBILEAP_DUALAP; then
     fi
 else
     if ! $TARGET_WLAN_SUPPORT_MOBILEAP_DUALAP; then
-        # TODO handle this condition
-        LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_MOBILEAP_DUALAP" "TARGET_WLAN_SUPPORT_MOBILEAP_DUALAP"
+        DELETE_FROM_WORK_DIR "product" "overlay/SoftapOverlayDualAp"
+
+        SMALI_PATCH "system" "system/framework/semwifi-service.jar" \
+            "smali/com/samsung/android/server/wifi/ap/SemSoftApConfiguration.smali" "replaceall" \
+            "SPF_DualAp=true" \
+            "SPF_DualAp=false"
+        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "smali/com/android/settings/Utils.smali" "replace" \
+            "<clinit>()V" \
+            "sput-boolean v2, Lcom/android/settings/Utils;->SPF_SupportMobileApDualAp:Z" \
+            "sput-boolean v1, Lcom/android/settings/Utils;->SPF_SupportMobileApDualAp:Z"
     fi
 fi
 
@@ -1076,8 +1087,27 @@ if ! $SOURCE_WLAN_SUPPORT_MOBILEAP_OWE; then
     fi
 else
     if ! $TARGET_WLAN_SUPPORT_MOBILEAP_OWE; then
-        # TODO handle this condition
-        LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_MOBILEAP_OWE" "TARGET_WLAN_SUPPORT_MOBILEAP_OWE"
+        DELETE_FROM_WORK_DIR "product" "overlay/SoftapOverlayOWE"
+
+        SMALI_PATCH "system" "system/framework/semwifi-service.jar" \
+            "smali/com/samsung/android/server/wifi/ap/SemSoftApConfiguration.smali" "replaceall" \
+            "SPF_OWE=true" \
+            "SPF_OWE=false"
+        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "smali_classes2/com/samsung/android/settings/wifi/mobileap/configure/WifiApConfigureSecurityDropDownController.smali" "replace" \
+            "setSecurityTypeEntryArrays(Z)V" \
+            "const v0, 0x7f0301e9" \
+            "const v0, 0x7f0301ea"
+        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "smali_classes2/com/samsung/android/settings/wifi/mobileap/configure/WifiApConfigureSecurityDropDownController.smali" "replace" \
+            "setSecurityTypeEntryArrays(Z)V" \
+            "const v0, 0x7f0301f5" \
+            "const v0, 0x7f0301fd"
+        SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "smali_classes2/com/samsung/android/settings/wifi/mobileap/configure/WifiApConfigureSecurityDropDownController.smali" "replace" \
+            "setSecurityTypeEntryArrays(Z)V" \
+            "const v0, 0x7f0301f4" \
+            "const v0, 0x7f0301f7"
     fi
 fi
 

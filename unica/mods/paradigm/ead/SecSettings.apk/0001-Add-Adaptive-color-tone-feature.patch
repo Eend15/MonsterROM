@@ -811,9 +811,9 @@ index d42d0f5..52eff4d 100644
 +
 +    move-result-object v1
 +
-+    iget-object v2, p0, Lcom/samsung/android/settings/display/SecAdaptiveDisplaySettings;->mEadObserver:Lcom/samsung/android/settings/display/SecAdaptiveDisplaySettings$3;
++    iget-object v3, p0, Lcom/samsung/android/settings/display/SecAdaptiveDisplaySettings;->mEadObserver:Lcom/samsung/android/settings/display/SecAdaptiveDisplaySettings$3;
 +
-+    invoke-virtual {v0, v1, v3, v2}, Landroid/content/ContentResolver;->registerContentObserver(Landroid/net/Uri;ZLandroid/database/ContentObserver;)V
++    invoke-virtual {v0, v1, v2, v3}, Landroid/content/ContentResolver;->registerContentObserver(Landroid/net/Uri;ZLandroid/database/ContentObserver;)V
 +
      iget-boolean v0, p0, Lcom/samsung/android/settings/display/SecAdaptiveDisplaySettings;->mIsSupportAdvancedWhiteBalance:Z
  
@@ -835,11 +835,13 @@ diff --git a/smali_classes5/com/samsung/android/settings/eternal/provider/items/
 index ab62c2a..04076a2 100644
 --- a/smali_classes5/com/samsung/android/settings/eternal/provider/items/DisplayItem.smali
 +++ b/smali_classes5/com/samsung/android/settings/eternal/provider/items/DisplayItem.smali
-@@ -1661,6 +1661,30 @@
+@@ -1661,6 +1661,32 @@
      :pswitch_10
      sget-object v0, Lcom/samsung/android/settings/Rune;->COMMON_CONFIG_PACKAGE_NAME_SMART_MANAGER:Ljava/lang/String;
  
 +    const-string v0, "ead_enabled"
++
++    const/4 v3, 0x0
 +
 +    invoke-static {v6, v0, v3}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
 +
@@ -886,4 +888,3 @@ index ab62c2a..04076a2 100644
  
 -- 
 2.53.0
-

@@ -12,11 +12,14 @@ PATCH_FSTAB()
         if sed -E -i \
             -e "/^[^[:space:]]+[[:space:]]+\/(${PARTITIONS_LIST// /|})[[:space:]]+/ s/^([^[:space:]]+[[:space:]]+[^[:space:]]+)[[:space:]]+[^[:space:]]+[[:space:]]+/\1\t$TARGET_OS_FILE_SYSTEM_TYPE\t/" \
             -e "/^[^[:space:]]+[[:space:]]+\/(${PARTITIONS_LIST// /|})[[:space:]]+/ s/^([^[:space:]]+[[:space:]]+[^[:space:]]+[[:space:]]+[^[:space:]]+)[[:space:]]+[^[:space:]]+[[:space:]]+/\1\tro\t/" \
+            -e "/^[[:space:]]*#/! s/[[:space:]]default[[:space:]]+(voldmanaged=)/\tdefaults\t\1/g" \
+            -e "/^[[:space:]]*#/! s/,fscompress//g" \
+            -e "/^[[:space:]]*#/! s/fscompress,//g" \
             "$f"; then
             LOG "- Patching $(sed -e "s|$WORK_DIR||g" -e "s|$TMP_DIR/out/ramdisk_extracted|$BOOT_FILE|g" <<< "$f")"
         fi
         EVAL "uniq \"$f\" \"$TMP_DIR/tmp\" && mv -f \"$TMP_DIR/tmp\" \"$f\""
-    done < <(find "$1" -type f -name "fstab.*")
+    done < <(find "$1" -type f \( -name "fstab.*" -o -name "recovery.fstab" \))
 }
 # ]
 

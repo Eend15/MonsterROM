@@ -102,8 +102,28 @@ GET_LATEST_FIRMWARE()
     _CHECK_NON_EMPTY_PARAM "MODEL" "$1" || return 1
     _CHECK_NON_EMPTY_PARAM "CSC" "$2" || return 1
 
-    curl -s --retry 3 -m 3 "https://fota-cloud-dn.ospserver.net/firmware/$2/$1/version.xml" \
-        | perl -nE 'say $1 if /<latest[^>]*>(.*?)<\/latest>/'
+    local URL="https://fota-cloud-dn.ospserver.net/firmware/$2/$1/version.xml"
+    local XML
+    local LATEST
+
+    for attempt in 1 2 3 4 5 6 7 8 9 10; do
+        XML="$(curl -fsSL --retry 5 --retry-delay 3 --retry-connrefused \
+                --retry-all-errors --connect-timeout 15 --max-time 60 \
+                -H "User-Agent: Kies2.0_FUS" "$URL")"
+        LATEST="$(perl -nE 'say $1 if /<latest[^>]*>(.*?)<\/latest>/' <<< "$XML" | head -n 1)"
+
+        if [ "$LATEST" ]; then
+            echo "$LATEST"
+            return 0
+        fi
+
+        if [ "$attempt" -lt 10 ]; then
+            echo "GET_LATEST_FIRMWARE: retrying $1/$2 after failed attempt $attempt" >&2
+            sleep "$((attempt * 10))"
+        fi
+    done
+
+    return 1
 }
 
 # PARSE_FIRMWARE_STRING <string>

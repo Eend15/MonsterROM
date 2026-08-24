@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Devcore94 <devcore94@users.noreply.github.com>
+Date: Sun, 23 Aug 2026 16:25:00 +0200
+Subject: [PATCH] unica: mods: deknox: nuke Knox UCM
+
+---
+ smali/com/android/server/SystemServer.smali | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/smali/com/android/server/SystemServer.smali b/smali/com/android/server/SystemServer.smali
+--- a/smali/com/android/server/SystemServer.smali
++++ b/smali/com/android/server/SystemServer.smali
+@@ -6202,6 +6202,8 @@
+ 
+     if-nez v0, :cond_3
+ 
++    goto :cond_3
++
+     :try_start_b
+     const-string/jumbo v0, "UCM Policy Service"
+ 

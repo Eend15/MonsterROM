@@ -74,9 +74,15 @@ if [ "${#MISSING[@]}" -ne 0 ]; then
 fi
 unset DEPENDENCIES MISSING
 
-if ! "$SRC_DIR/external/make.sh" --check-tools; then
+MAKE_TOOL_ARGS=()
+if [[ "${UNICA_FIRMWARE_TOOLS_ONLY:-}" == "true" ]]; then
+    MAKE_TOOL_ARGS+=("--firmware-tools")
+fi
+
+if ! "$SRC_DIR/external/make.sh" --check-tools "${MAKE_TOOL_ARGS[@]}"; then
     LOG_STEP_IN true "Building required tools..."
-    "$SRC_DIR/external/make.sh" || return 1
+    "$SRC_DIR/external/make.sh" "${MAKE_TOOL_ARGS[@]}" || return 1
     LOG_STEP_OUT
 fi
+unset MAKE_TOOL_ARGS
 # ]

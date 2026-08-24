@@ -16,15 +16,26 @@ BUILD()
 
     cd "$DIR" || return 1
     for CMD in "${CMDS[@]}"; do
-        local OUT
-        OUT="$(eval "$CMD" 2>&1)"
-        # shellcheck disable=SC2181,SC2291
-        if [ $? -ne 0 ]; then
+        local STATUS
+        if [ -n "$GITHUB_ACTIONS" ]; then
+            echo "::group::$NAME: $CMD"
+            eval "$CMD"
+            STATUS="$?"
+            echo "::endgroup::"
+        else
+            local OUT
+            OUT="$(eval "$CMD" 2>&1)"
+            STATUS="$?"
+        fi
+
+        if [ "$STATUS" -ne 0 ]; then
             echo -e    '\033[1;31m'"BUILD FAILED!"'\033[0m\n' >&2
             echo -e    '\033[0;31m'"$CMD"'\033[0m\n' >&2
-            echo -n -e '\033[0;33m' >&2
-            echo -n    "$OUT" >&2
-            echo -e    '\033[0m' >&2
+            if [ -z "$GITHUB_ACTIONS" ]; then
+                echo -n -e '\033[0;33m' >&2
+                echo -n    "$OUT" >&2
+                echo -e    '\033[0m' >&2
+            fi
             exit 1
         fi
     done
@@ -114,6 +125,21 @@ TOOLS_DIR="$OUT_DIR/tools"
 
 mkdir -p "$TOOLS_DIR/bin"
 
+CHECK_ONLY=false
+FIRMWARE_TOOLS_ONLY=false
+while [ "$#" != 0 ]; do
+    if [[ "$1" == "--check-tools" ]]; then
+        CHECK_ONLY=true
+    elif [[ "$1" == "--firmware-tools" ]]; then
+        FIRMWARE_TOOLS_ONLY=true
+    else
+        echo "Usage: $(basename "$0" | sed 's/build_dependencies.sh/build_dependencies/') [--check-tools] [--firmware-tools]" >&2
+        echo "This script only accepts --check-tools and --firmware-tools." >&2
+        exit 1
+    fi
+    shift
+done
+
 ANDROID_TOOLS=true
 APKTOOL=true
 EROFS_UTILS=true
@@ -151,7 +177,13 @@ SIGNAPK_EXEC=(
 )
 CHECK_TOOLS "${SIGNAPK_EXEC[@]}" && SIGNAPK=false
 
-if [[ "$1" == "--check-tools" ]]; then
+if $FIRMWARE_TOOLS_ONLY; then
+    APKTOOL=false
+    IMG2SDAT=false
+    SIGNAPK=false
+fi
+
+if $CHECK_ONLY; then
     if ! $ANDROID_TOOLS && \
             ! $APKTOOL && \
             ! $EROFS_UTILS && \
@@ -162,10 +194,6 @@ if [[ "$1" == "--check-tools" ]]; then
     else
         exit 1
     fi
-elif [ "$1" ]; then
-    echo "Usage: $(basename "$0" | sed 's/build_dependencies.sh/build_dependencies/')" >&2
-    echo "This script does not accept any arguments." >&2
-    exit 1
 fi
 
 if $ANDROID_TOOLS; then

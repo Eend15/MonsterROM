@@ -73,8 +73,13 @@ DELETE_FROM_WORK_DIR "system" "system/lib64/vendor.samsung.hardware.security.hdc
 DELETE_FROM_WORK_DIR "system" "system/lib64/wfd_log.so"
 LOG_STEP_OUT
 
-ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib/libhwui.so" 0 0 644 "u:object_r:system_lib_file:s0"
-ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib64/libhwui.so" 0 0 644 "u:object_r:system_lib_file:s0"
+if [[ -f "$WORK_DIR/system/system/lib/android.hardware.graphics.common-V6-ndk.so" && \
+        -f "$WORK_DIR/system/system/lib64/android.hardware.graphics.common-V6-ndk.so" ]]; then
+    ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib/libhwui.so" 0 0 644 "u:object_r:system_lib_file:s0"
+    ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib64/libhwui.so" 0 0 644 "u:object_r:system_lib_file:s0"
+else
+    LOG "\033[0;33m! Keeping source HWUI: r9sxxx HWUI requires graphics.common V6\033[0m"
+fi
 
 LOG_STEP_IN "- Adding HIDL face biometrics libs"
 ADD_TO_WORK_DIR "r9sxxx" "system" "system/lib/android.hardware.biometrics.face@1.0.so" 0 0 644 "u:object_r:system_lib_file:s0"

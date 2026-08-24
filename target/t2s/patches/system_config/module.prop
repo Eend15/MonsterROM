@@ -1,0 +1,4 @@
+id=system_config
+name=System configuration
+author=Devcore94
+description=Fixes source-system configuration files for the target device.

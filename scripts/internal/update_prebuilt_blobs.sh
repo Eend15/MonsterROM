@@ -12,6 +12,34 @@ CURRENT_FIRMWARE=""
 IMEI=""
 LATEST_FIRMWARE=""
 
+REMOVE_PREBUILT_FILE()
+{
+    local FILE_PATH="$1"
+    local CHUNK_PATH
+
+    rm -f -- "$FILE_PATH" || return 1
+    for CHUNK_PATH in "$FILE_PATH".*; do
+        [ -e "$CHUNK_PATH" ] || [ -L "$CHUNK_PATH" ] || continue
+        [[ "${CHUNK_PATH##*.}" =~ ^[0-9]+$ ]] || continue
+        rm -f -- "$CHUNK_PATH" || return 1
+    done
+}
+
+PREBUILTS_NEED_REPAIR()
+{
+    local PREBUILTS_DIR="$SRC_DIR/prebuilts/samsung/$DEVICE"
+    local FILE_PATH
+
+    while IFS= read -r FILE_PATH; do
+        if [ ! -e "$FILE_PATH" ]; then
+            LOGW "Repair needed: broken symlink ${FILE_PATH//$SRC_DIR\/}"
+            return 0
+        fi
+    done < <(find "$PREBUILTS_DIR" -type l)
+
+    return 1
+}
+
 UPDATE_BLOBS()
 {
     local BLOBS
@@ -38,7 +66,35 @@ UPDATE_BLOBS()
         BLOBS+="$(find "$PREBUILTS_DIR/system_ext" ! -type d)"
         BLOBS="${BLOBS//$PREBUILTS_DIR\//}"
     fi
-    BLOBS="$(LC_ALL=C sort <<< "$BLOBS")"
+    BLOBS="$(LC_ALL=C sort -u <<< "$BLOBS")"
+
+    # If a tracked prebuilt is a symlink and Samsung renamed its target in a
+    # newer firmware, the target file may not be part of the previously tracked
+    # blob list. Include same-directory symlink targets so updates do not leave
+    # dangling links behind.
+    local EXPANDED_BLOBS="$BLOBS"
+    local LINK_TARGET
+    local LINK_BLOB
+    local NORMALIZED_BLOB
+    while IFS= read -r i; do
+        [ "$i" ] || continue
+        NORMALIZED_BLOB="$i"
+        if [[ "$NORMALIZED_BLOB" =~ \.([0-9]+)$ ]]; then
+            [[ "${BASH_REMATCH[1]}" == "00" ]] || continue
+            NORMALIZED_BLOB="${NORMALIZED_BLOB%.*}"
+        fi
+
+        if [ -L "$FW_DIR/${MODEL}_${CSC}/$NORMALIZED_BLOB" ]; then
+            LINK_TARGET="$(readlink "$FW_DIR/${MODEL}_${CSC}/$NORMALIZED_BLOB")"
+            if [ "$LINK_TARGET" ] && [[ "$LINK_TARGET" != /* ]] && [[ "$LINK_TARGET" != *".."* ]]; then
+                LINK_BLOB="$(dirname "$NORMALIZED_BLOB")/$LINK_TARGET"
+                if [ -e "$FW_DIR/${MODEL}_${CSC}/$LINK_BLOB" ] || [ -L "$FW_DIR/${MODEL}_${CSC}/$LINK_BLOB" ]; then
+                    EXPANDED_BLOBS+=$'\n'"$LINK_BLOB"
+                fi
+            fi
+        fi
+    done <<< "$BLOBS"
+    BLOBS="$(LC_ALL=C sort -u <<< "$EXPANDED_BLOBS")"
 
     for i in $BLOBS; do
         if [[ "$i" =~ \.([0-9]+)$ ]]; then
@@ -48,20 +104,17 @@ UPDATE_BLOBS()
         FILE_PATH="$PREBUILTS_DIR/${i//system\/system\//system/}"
 
         if [ ! -f "$FW_DIR/${MODEL}_${CSC}/$i" ]; then
-            LOGE "File not found: ${FW_DIR//$SRC_DIR\//}/${MODEL}_${CSC}/$i"
-            exit 1
+            LOGW "Removing stale blob missing from latest firmware: prebuilts/samsung/$DEVICE/$i"
+            REMOVE_PREBUILT_FILE "$FILE_PATH" || exit 1
+            continue
         fi
 
         LOG "- Updating prebuilts/samsung/$DEVICE/$i"
 
         # A blob can cross the 50 MiB split threshold between firmware builds.
-        # Remove the unsplit file and all numeric split siblings first.
-        rm -f -- "$FILE_PATH" || exit 1
-        for CHUNK_PATH in "$FILE_PATH".*; do
-            [ -e "$CHUNK_PATH" ] || [ -L "$CHUNK_PATH" ] || continue
-            [[ "${CHUNK_PATH##*.}" =~ ^[0-9]+$ ]] || continue
-            rm -f -- "$CHUNK_PATH" || exit 1
-        done
+        # Remove the unsplit file and every sibling with an all-numeric suffix;
+        # GNU split expands beyond two digits after chunk .89.
+        REMOVE_PREBUILT_FILE "$FILE_PATH" || exit 1
 
         if [ ! -L "$FW_DIR/${MODEL}_${CSC}/$i" ] && \
                 [ "$(wc -c "$FW_DIR/${MODEL}_${CSC}/$i" | cut -d " " -f 1)" -gt "52428800" ]; then
@@ -73,6 +126,7 @@ UPDATE_BLOBS()
 
     EVAL "cp -a \"$FW_DIR/${MODEL}_${CSC}/.extracted\" \"$PREBUILTS_DIR/.current\"" || exit 1
 }
+
 # ]
 
 if [[ "$#" != "2" ]]; then
@@ -96,14 +150,18 @@ if [ ! "$LATEST_FIRMWARE" ]; then
 fi
 
 LOG_STEP_IN true "Starting update_prebuilt_blobs for prebuilts/samsung/$DEVICE"
-    CURRENT_FIRMWARE="$(cat "$SRC_DIR/prebuilts/samsung/$DEVICE/.current" 2> /dev/null)"
-    LOG "- Current firmware: $CURRENT_FIRMWARE"
-    LOG "- Latest available firmware: $LATEST_FIRMWARE"
+CURRENT_FIRMWARE="$(cat "$SRC_DIR/prebuilts/samsung/$DEVICE/.current" 2> /dev/null)"
+LOG "- Current firmware: $CURRENT_FIRMWARE"
+LOG "- Latest available firmware: $LATEST_FIRMWARE"
 
 if [[ "$LATEST_FIRMWARE" == "$CURRENT_FIRMWARE" ]]; then
-    LOG_STEP_IN
-    LOG "\033[0;33m! Nothing to do\033[0m"
-    exit 0
+    if ! PREBUILTS_NEED_REPAIR; then
+        LOG_STEP_IN
+        LOG "\033[0;33m! Nothing to do\033[0m"
+        exit 0
+    fi
+
+    LOGW "Current firmware is already latest, but prebuilts need repair"
 elif [ "$CURRENT_FIRMWARE" ] && COMPARE_SEC_BUILD_VERSION "$CURRENT_FIRMWARE" "$LATEST_FIRMWARE"; then
     LOGE "Refusing to replace equal/newer prebuilts with an older or ambiguous Samsung feed build"
     exit 1

@@ -1,0 +1,33 @@
+From 7a4d28141318701716257276d00913e5b44ba8fd Mon Sep 17 00:00:00 2001
+From: Devcore94 <devcore94@users.noreply.github.com>
+Date: Mon, 24 Aug 2026 10:19:41 +0200
+Subject: [PATCH] camera: accept One UI 8.5 platform version
+
+The target-device SamsungCamera only knows One UI version codes through
+80000. Normalize the One UI 8.5 code to that existing enum before the
+strict version lookup so the camera settings can initialize.
+
+---
+ smali_classes3/w1/j.smali | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/smali_classes3/w1/j.smali b/smali_classes3/w1/j.smali
+index 0d49db3..b30824f 100644
+--- a/smali_classes3/w1/j.smali
++++ b/smali_classes3/w1/j.smali
+@@ -487,6 +487,13 @@
+ .method public static a(I)Lw1/j;
+     .locals 5
+ 
++    const v0, 0x13a74
++
++    if-ne p0, v0, :unica_oneui_version_ok
++
++    const p0, 0x13880
++
++    :unica_oneui_version_ok
+     invoke-static {}, Lw1/j;->values()[Lw1/j;
+ 
+     move-result-object v0
+-- 
+2.53.0

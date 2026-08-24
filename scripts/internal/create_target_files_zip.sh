@@ -159,6 +159,6 @@ GENERATE_BUILD_INFO
 
 LOG "- Creating zip"
 rm -f "$OUTPUT_FILE"
-EVAL "cd \"$TMP_DIR\" && 7z a -tzip -mx=3 -mmt=$(nproc) -mtc=off -mtm=off \"$OUTPUT_FILE\" -r *" || exit 1
+EVAL "cd \"$TMP_DIR\" && zip -q -r -3 -X \"$OUTPUT_FILE\" *" || exit 1
 
 exit 0
