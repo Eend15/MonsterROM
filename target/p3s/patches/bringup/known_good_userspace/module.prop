@@ -1,0 +1,4 @@
+id=p3s_known_good_userspace
+name=p3s Android 16 QPR2 userspace compatibility
+author=MonsterROM
+description=Installs the Exynos 2100 native bridge files proven by the booting p3s baseline.

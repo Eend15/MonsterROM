@@ -1,0 +1,4 @@
+id=floppy_kernel
+name=Floppy permissive kernel and boot logger
+author=FlopKernel-Series, MonsterROM
+description=Uses the p3s S23FE-compatible permissive Floppy kernel, logger, and first-stage fstab for bring-up testing.

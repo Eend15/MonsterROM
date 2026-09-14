@@ -1,18 +1,33 @@
 DECODE_APK "system" "system/priv-app/SecSetupWizard_Global/SecSetupWizard_Global.apk"
 
 LOG "- Enabling navigation bar type settings step"
-SMALI_PATCH "system" "system/priv-app/SecSetupWizard_Global/SecSetupWizard_Global.apk" \
-    "smali/S2/f.smali" "replace" \
-    "d(Landroid/content/Context;Z)Ljava/util/ArrayList;" \
-    "navigationbar_setting" \
-    "this_string_does_not_exist" \
-    > /dev/null
-SMALI_PATCH "system" "system/priv-app/SecSetupWizard_Global/SecSetupWizard_Global.apk" \
-    "smali/com/sec/android/app/SecSetupWizard/SecSetupWizardActivity.smali" "replace" \
-    "f(Ljava/lang/String;)Z" \
-    "navigationbar_setting" \
-    "this_string_does_not_exist" \
-    > /dev/null
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -ge "36" ]; then
+    SMALI_PATCH "system" "system/priv-app/SecSetupWizard_Global/SecSetupWizard_Global.apk" \
+        "smali/I2/f.smali" "replace" \
+        "d(Landroid/content/Context;Z)Ljava/util/ArrayList;" \
+        "navigationbar_setting" \
+        "this_string_does_not_exist" \
+        > /dev/null
+    SMALI_PATCH "system" "system/priv-app/SecSetupWizard_Global/SecSetupWizard_Global.apk" \
+        "smali/com/sec/android/app/SecSetupWizard/SecSetupWizardActivity.smali" "replace" \
+        "e(Ljava/lang/String;)Z" \
+        "navigationbar_setting" \
+        "this_string_does_not_exist" \
+        > /dev/null
+else
+    SMALI_PATCH "system" "system/priv-app/SecSetupWizard_Global/SecSetupWizard_Global.apk" \
+        "smali/S2/f.smali" "replace" \
+        "d(Landroid/content/Context;Z)Ljava/util/ArrayList;" \
+        "navigationbar_setting" \
+        "this_string_does_not_exist" \
+        > /dev/null
+    SMALI_PATCH "system" "system/priv-app/SecSetupWizard_Global/SecSetupWizard_Global.apk" \
+        "smali/com/sec/android/app/SecSetupWizard/SecSetupWizardActivity.smali" "replace" \
+        "f(Ljava/lang/String;)Z" \
+        "navigationbar_setting" \
+        "this_string_does_not_exist" \
+        > /dev/null
+fi
 
 LOG "- Disabling Recommended apps step"
 EVAL "sed -i \"/omcagent/d\" \"$APKTOOL_DIR/system/priv-app/SecSetupWizard_Global/SecSetupWizard_Global.apk/res/values/arrays.xml\""
@@ -24,6 +39,15 @@ EVAL "sed -i \"/omcagent/d\" \"$APKTOOL_DIR/system/priv-app/SecSetupWizard_Globa
 #   - Exception made for files under *res/values* where the "resources" tag gets nuked
 while IFS= read -r f; do
     f="${f//$MODPATH\/SecSetupWizard_Global.apk\//}"
+
+    DEST_FILE="$APKTOOL_DIR/system/priv-app/SecSetupWizard_Global/SecSetupWizard_Global.apk/$f"
+    if [ -f "$DEST_FILE" ] && [[ "$f" == *"res/values"* ]]; then
+        MARKER="$(grep -oE 'name="[^"]+"' "$MODPATH/SecSetupWizard_Global.apk/$f" | head -n 1 || true)"
+        if [ "$MARKER" ] && grep -Fq -- "$MARKER" "$DEST_FILE"; then
+            continue
+        fi
+        unset MARKER
+    fi
 
     if [ ! -f "$APKTOOL_DIR/system/priv-app/SecSetupWizard_Global/SecSetupWizard_Global.apk/$f" ] || \
             [[ "$f" != *".xml" ]]; then
@@ -46,3 +70,11 @@ while IFS= read -r f; do
 done < <(find "$MODPATH/SecSetupWizard_Global.apk" -type f)
 
 unset PATCH_INST CONTENT
+
+# The legacy custom disclaimer patch replaces obfuscated QPR1 code and fixed
+# resource IDs. One UI 8.5 moved both, so applying it risks crashing setup.
+# Keep Samsung's stock disclaimer on QPR2; the navigation and UN1CA resources
+# above remain supported.
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -ge "36" ]; then
+    SKIP_SMALI_PATCHES=true
+fi

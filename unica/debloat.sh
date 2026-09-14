@@ -145,13 +145,17 @@ system/etc/permissions/privapp-permissions-com.sec.android.cover.ledcover.xml
 system/priv-app/LedCoverService
 "
 
-# Link to Windows
-# Replace full apk with stub apk to save space
+# Multi Control
 SYSTEM_DEBLOAT+="
-system/priv-app/YourPhone_P1_5
+system/priv-app/MultiControl
+system/app/MultiControl
 "
 
-ADD_TO_WORK_DIR "gta9pxxx" "system" "system/priv-app/YourPhone_Stub/YourPhone_Stub.apk" 0 0 644 "u:object_r:system_file:s0"
+# Link to Windows
+SYSTEM_DEBLOAT+="
+system/priv-app/YourPhone_P1_5
+system/priv-app/YourPhone_Stub
+"
 
 # Live Transcribe
 SYSTEM_DEBLOAT+="
@@ -335,4 +339,11 @@ system/etc/sysconfig/feature-a11y-preload-voacc.xml
 # YouTube
 PRODUCT_DEBLOAT+="
 app/YouTube
+app/YouTubeMusic
+"
+
+# Google Photos
+PRODUCT_DEBLOAT+="
+app/Photos
+overlay/GmsConfigOverlayPhotos.apk
 "

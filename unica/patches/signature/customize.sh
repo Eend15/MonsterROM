@@ -1,3 +1,8 @@
+if grep -q "mCustomPlatformSignatures" "$APKTOOL_DIR/system/framework/services.jar/smali_classes2/com/android/server/pm/InstallPackageHelper.smali" 2>/dev/null; then
+    LOG "- Module \"signature\" already applied to /system/framework/services.jar"
+    return 0
+fi
+
 CERT_PREFIX="aosp"
 $ROM_IS_OFFICIAL && CERT_PREFIX="unica"
 

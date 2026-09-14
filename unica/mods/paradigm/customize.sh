@@ -46,33 +46,49 @@ LOG_STEP_OUT
 
 # Adaptive colour tone
 LOG_STEP_IN "- Adding Adaptive colour tone feature"
-ADD_TO_WORK_DIR "pa2qxxx" "system" \
-    "system/etc/permissions/privapp-permissions-com.samsung.android.sead.xml" 0 0 644 "u:object_r:system_file:s0"
-ADD_TO_WORK_DIR "pa2qxxx" "system" \
-    "system/priv-app/EnvironmentAdaptiveDisplay/EnvironmentAdaptiveDisplay.apk" 0 0 644 "u:object_r:system_file:s0"
-if $TARGET_LCD_SUPPORT_MDNIE_HW; then
-    APPLY_PATCH "system" "system/framework/services.jar" \
-        "$MODPATH/ead/services.jar/0001-Add-Adaptive-color-tone-feature.patch"
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -ge "36" ]; then
+    # The One UI 8.5 display services were rewritten and the pre-QPR2 EAD
+    # transplant no longer has a compatible service ABI. Shipping only its
+    # donor APK leaves a privileged app that repeatedly crashes, so omit this
+    # optional feature atomically on QPR2.
+    LOGW "Adaptive colour tone donor is not ABI-compatible with Android 16 QPR2; skipping feature"
+    DELETE_FROM_WORK_DIR "system" "system/etc/permissions/privapp-permissions-com.samsung.android.sead.xml"
+    DELETE_FROM_WORK_DIR "system" "system/priv-app/EnvironmentAdaptiveDisplay"
+    # A previous interrupted run may have registered/decoded the donor APK.
+    # Remove that stale decode so the module finalizer does not try to rebuild
+    # an APK that was deliberately removed from the work directory.
+    rm -rf "$APKTOOL_DIR/system/priv-app/EnvironmentAdaptiveDisplay/EnvironmentAdaptiveDisplay.apk"
+    # The module's only automatic smali patch targets that omitted donor APK.
+    SKIP_SMALI_PATCHES=true
 else
-    APPLY_PATCH "system" "system/framework/services.jar" \
-        "$MODPATH/ead_mdnie/services.jar/0001-Add-Adaptive-color-tone-feature.patch"
-fi
-if $TARGET_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
-    if [ "$TARGET_PLATFORM_SDK_VERSION" -ge "36" ]; then
-        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-            "$MODPATH/ead_resolution/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
+    ADD_TO_WORK_DIR "pa2qxxx" "system" \
+        "system/etc/permissions/privapp-permissions-com.samsung.android.sead.xml" 0 0 644 "u:object_r:system_file:s0"
+    ADD_TO_WORK_DIR "pa2qxxx" "system" \
+        "system/priv-app/EnvironmentAdaptiveDisplay/EnvironmentAdaptiveDisplay.apk" 0 0 644 "u:object_r:system_file:s0"
+    if $TARGET_LCD_SUPPORT_MDNIE_HW; then
+        APPLY_PATCH "system" "system/framework/services.jar" \
+            "$MODPATH/ead/services.jar/0001-Add-Adaptive-color-tone-feature.patch"
+    else
+        APPLY_PATCH "system" "system/framework/services.jar" \
+            "$MODPATH/ead_mdnie/services.jar/0001-Add-Adaptive-color-tone-feature.patch"
+    fi
+    if $TARGET_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
+        if [ "$TARGET_PLATFORM_SDK_VERSION" -ge "36" ]; then
+            APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+                "$MODPATH/ead_resolution/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
+        else
+            APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+                "$MODPATH/ead_resolution_legacy/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
+        fi
     else
         APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-            "$MODPATH/ead_resolution_legacy/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
+            "$MODPATH/ead/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
     fi
-else
-    APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-        "$MODPATH/ead/SecSettings.apk/0001-Add-Adaptive-color-tone-feature.patch"
+    APPLY_PATCH "system" "system/priv-app/SettingsProvider/SettingsProvider.apk" \
+        "$MODPATH/ead/SettingsProvider.apk/0001-Add-Adaptive-color-tone-feature.patch"
+    APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+        "$MODPATH/ead/SystemUI.apk/0001-Add-Adaptive-color-tone-toggle.patch"
 fi
-APPLY_PATCH "system" "system/priv-app/SettingsProvider/SettingsProvider.apk" \
-    "$MODPATH/ead/SettingsProvider.apk/0001-Add-Adaptive-color-tone-feature.patch"
-APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
-    "$MODPATH/ead/SystemUI.apk/0001-Add-Adaptive-color-tone-toggle.patch"
 LOG_STEP_OUT
 
 # Set AI Version to 20253 (latest)
@@ -86,7 +102,7 @@ ADD_TO_WORK_DIR "a56xnaxx" "system" "system/etc/mediacontextanalyzer/human-pet-d
 ADD_TO_WORK_DIR "a56xnaxx" "system" "system/etc/mediacontextanalyzer/human-pet-pose_SR-V200.tflite" 0 0 644 "u:object_r:system_file:s0"
 ADD_TO_WORK_DIR "a56xnaxx" "system" "system/etc/mediacontextanalyzer/Keyword.tflite" 0 0 644 "u:object_r:system_file:s0"
 ADD_TO_WORK_DIR "a56xnaxx" "system" "system/etc/mediacontextanalyzer/keyword-classification_SR-V031.tflite" 0 0 644 "u:object_r:system_file:s0"
-EVAL "ln -s \"human-pet-pose_SR-V200.tflite\" \"$WORK_DIR/system/system/etc/mediacontextanalyzer/Pose.tflite\""
+EVAL "ln -sfn \"human-pet-pose_SR-V200.tflite\" \"$WORK_DIR/system/system/etc/mediacontextanalyzer/Pose.tflite\""
 SET_METADATA "system" "system/etc/mediacontextanalyzer/Pose.tflite" 0 0 644 "u:object_r:system_file:s0"
 ADD_TO_WORK_DIR "a56xnaxx" "system" "system/lib64/libcontextanalyzer_jni.media.samsung.so" 0 0 644 "u:object_r:system_lib_file:s0"
 ADD_TO_WORK_DIR "a56xnaxx" "system" "system/lib64/libmediacontextanalyzer.so" 0 0 644 "u:object_r:system_lib_file:s0"

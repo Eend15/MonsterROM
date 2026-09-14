@@ -1,0 +1,4 @@
+id=rescueparty_guard
+name=Bring-up RescueParty guard
+author=UN1CA
+description=Prevents RescueParty from hiding the first real userspace crash during p3s bring-up.

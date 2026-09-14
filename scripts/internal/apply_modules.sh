@@ -58,11 +58,13 @@ APPLY_MODULE()
         . "$MODPATH/customize.sh"
     fi
 
-    if [ -d "$MODPATH/smali" ]; then
+    if [ "${SKIP_SMALI_PATCHES:-false}" != "true" ] && [ -d "$MODPATH/smali" ]; then
         while IFS= read -r f; do
             APPLY_SMALI_PATCHES "$MODPATH/smali" "$f"
         done < <(find "$MODPATH/smali" -type d \( -name "*.apk" -o -name "*.jar" \) | sed "s|$MODPATH/smali/||")
     fi
+
+    unset SKIP_SMALI_PATCHES
 
     LOG_STEP_OUT
 
@@ -133,8 +135,12 @@ elif [ ! -d "$1" ]; then
     exit 1
 fi
 
-while IFS= read -r f; do
-    APPLY_MODULE "$f"
-done < <(find "$1" -mindepth 1 -maxdepth 1 -type d | LC_ALL=C sort)
+if [ -f "$1/module.prop" ]; then
+    APPLY_MODULE "$1"
+else
+    while IFS= read -r f; do
+        APPLY_MODULE "$f"
+    done < <(find "$1" -mindepth 1 -maxdepth 1 -type d | LC_ALL=C sort)
+fi
 
 exit 0

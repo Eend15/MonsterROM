@@ -112,6 +112,33 @@ EXTRACT_OS_PARTITIONS()
         LOG "- Unpacking $(basename "$f")..."
 
         mkdir -p "$FW_DIR/${MODEL}_${CSC}/$PARTITION"
+        if [[ "$(stat -f -c %T /)" == "wslfs" ]]; then
+            local IMAGE_FS
+            IMAGE_FS="$(GET_IMAGE_FILE_SYSTEM "$FW_DIR/${MODEL}_${CSC}/$f")"
+            rm -rf "$FW_DIR/${MODEL}_${CSC}/$PARTITION" "$FW_DIR/${MODEL}_${CSC}/config"
+            if [[ "$IMAGE_FS" == "erofs" ]]; then
+                EVAL "extract.erofs -i \"$FW_DIR/${MODEL}_${CSC}/$f\" -x -f -T0 -o \"$FW_DIR/${MODEL}_${CSC}\"" || exit 1
+                EVAL "mv -f \"$FW_DIR/${MODEL}_${CSC}/config/${PARTITION}_fs_config\" \"$FW_DIR/${MODEL}_${CSC}/fs_config-$PARTITION\"" || exit 1
+                EVAL "mv -f \"$FW_DIR/${MODEL}_${CSC}/config/${PARTITION}_file_contexts\" \"$FW_DIR/${MODEL}_${CSC}/file_context-$PARTITION\"" || exit 1
+                rm -rf "$FW_DIR/${MODEL}_${CSC}/config"
+                EVAL "python3 \"$SRC_DIR/scripts/utils/normalize_erofs_metadata.py\" \
+                    \"$FW_DIR/${MODEL}_${CSC}/$PARTITION\" \"$PARTITION\" \
+                    \"$FW_DIR/${MODEL}_${CSC}/fs_config-$PARTITION\" \
+                    \"$FW_DIR/${MODEL}_${CSC}/file_context-$PARTITION\"" || exit 1
+            elif [[ "$IMAGE_FS" == "ext4" ]]; then
+                EVAL "python3 \"$SRC_DIR/scripts/utils/extract_ext4_wsl1.py\" \
+                    \"$FW_DIR/${MODEL}_${CSC}/$f\" \"$PARTITION\" \
+                    \"$FW_DIR/${MODEL}_${CSC}/$PARTITION\" \
+                    \"$FW_DIR/${MODEL}_${CSC}/fs_config-$PARTITION\" \
+                    \"$FW_DIR/${MODEL}_${CSC}/file_context-$PARTITION\"" || exit 1
+            else
+                LOGE "Unsupported $IMAGE_FS filesystem in $f on WSL1"
+                exit 1
+            fi
+            rm -f "$FW_DIR/${MODEL}_${CSC}/$f"
+            continue
+        fi
+
         sudo umount "$FW_DIR/${MODEL}_${CSC}/$f" &> /dev/null
         if [[ "$(GET_IMAGE_FILE_SYSTEM "$FW_DIR/${MODEL}_${CSC}/$f")" == "erofs" ]]; then
             EVAL "sudo env \"PATH=$PATH\" fuse.erofs \"$FW_DIR/${MODEL}_${CSC}/$f\" \"$TMP_DIR\"" || exit 1
@@ -147,7 +174,9 @@ EXTRACT_OS_PARTITIONS()
                 sed -i "$(sed -n "/simpleperf_app_runner/=" "$FW_DIR/${MODEL}_${CSC}/fs_config-system") s/0x0/0xc0/g" "$FW_DIR/${MODEL}_${CSC}/fs_config-system"
         fi
 
-        EVAL "sudo umount \"$TMP_DIR\"" || exit 1
+        if mountpoint -q "$TMP_DIR"; then
+            EVAL "sudo umount \"$TMP_DIR\"" || exit 1
+        fi
         rm -f "$FW_DIR/${MODEL}_${CSC}/$f"
     done
 

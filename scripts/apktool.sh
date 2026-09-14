@@ -27,6 +27,37 @@ BUILD()
 
     LOG "- Building ${INPUT_FILE//$WORK_DIR/}"
 
+    # The Android 16 S23 FE framework's classes3.dex is already at the
+    # 65,536 method-reference ceiling in the donor image.  The integrity and
+    # Settings compatibility hooks add a handful of references to classes
+    # that apktool normally keeps in classes3, which makes smali fail with an
+    # unsigned-short overflow.  Keep those patched classes in a fresh dex;
+    # class names and runtime lookup are unchanged, while the original dex
+    # remains within its reference budget.  Only move files that actually
+    # contain our hooks so stock/pre-QPR2 builds retain their original layout.
+    if [[ "$INPUT_FILE" == *"/system/framework/framework.jar" ]] && \
+            [ -d "$OUTPUT_PATH/smali_classes3" ]; then
+        local REHOME_DIR="$OUTPUT_PATH/smali_classes8"
+        local MOVED_COUNT="0"
+        local REHOME_FILE
+        for REHOME_FILE in \
+            "android/os/SemSystemProperties.smali" \
+            "android/provider/Settings\$Global.smali" \
+            "android/security/KeyStore2.smali" \
+            "android/security/keystore2/AndroidKeyStoreSpi.smali" \
+            "android/security/keystore2/KeymasterUtils.smali"; do
+            if [ -f "$OUTPUT_PATH/smali_classes3/$REHOME_FILE" ] && \
+                    grep -qE "unica|PlayIntegrityHooks|KnoxPatchHooks" "$OUTPUT_PATH/smali_classes3/$REHOME_FILE"; then
+                mkdir -p "$REHOME_DIR/$(dirname "$REHOME_FILE")"
+                mv "$OUTPUT_PATH/smali_classes3/$REHOME_FILE" "$REHOME_DIR/$REHOME_FILE"
+                MOVED_COUNT="$((MOVED_COUNT + 1))"
+            fi
+        done
+        if [ "$MOVED_COUNT" -gt "0" ]; then
+            LOG "- Repacking $MOVED_COUNT patched framework classes as classes8"
+        fi
+    fi
+
     # Copy original META-INF
     mkdir -p "$OUTPUT_PATH/build/apk"
     cp -a "$OUTPUT_PATH/original/META-INF" "$OUTPUT_PATH/build/apk/META-INF"
@@ -136,6 +167,9 @@ PREPARE_SCRIPT()
         # Split 3/4 of total system memory between the requested instances
         HEAP_SIZE="$(bc -l <<< "scale=0; (($MEM_TOTAL_MB * 3) / 4) / $JOBS")"
         [ "$HEAP_SIZE" -lt "1024" ] && HEAP_SIZE="1024"
+        # Keep concurrent builds from reserving the whole WSL instance. The
+        # largest framework APK builds reliably with a 2 GiB Java heap.
+        [ "$HEAP_SIZE" -gt "2048" ] && HEAP_SIZE="2048"
 
         MAX_THREADS="$(bc -l <<< "scale=0; $(nproc) / $JOBS")"
         [ "$MAX_THREADS" -lt "1" ] && MAX_THREADS="1"

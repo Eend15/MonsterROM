@@ -54,7 +54,7 @@ elif [ ! -f "$SYS_EXT_DIR/apex/com.android.vndk.v$TARGET_BOARD_API_LEVEL.apex" ]
     DELETE_FROM_WORK_DIR "system_ext" "apex/com.android.vndk.v$SOURCE_BOARD_API_LEVEL.apex"
     ADD_TARGET_VNDK_APEX
     LOG "- Patching ${SYS_EXT_DIR//$WORK_DIR/}/etc/vintf/manifest.xml"
-    EVAL "sed -i \"s/version>$SOURCE_BOARD_API_LEVEL/version>$TARGET_BOARD_API_LEVEL/g\" \"$SYS_EXT_DIR/etc/vintf/manifest.xml\""
+    EVAL "sed -i -E \"s|<version>[0-9]+</version>|<version>$TARGET_BOARD_API_LEVEL</version>|g\" \"$SYS_EXT_DIR/etc/vintf/manifest.xml\""
 fi
 
 unset SYS_EXT_DIR

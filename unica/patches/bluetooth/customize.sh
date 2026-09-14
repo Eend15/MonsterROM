@@ -90,6 +90,16 @@ EXTRACT_PAYLOAD()
 {
     LOG_STEP_IN "- Unpacking apex_payload.img"
 
+    # WSL1 exposes the workspace as wslfs and cannot create loop mounts. Use
+    # the debugfs extractor in that environment; it also emits the metadata
+    # files consumed by BUILD_PAYLOAD.
+    if mount | grep -q ' on / type wslfs'; then
+        EVAL "python3 \"$SRC_DIR/scripts/utils/extract_ext4_wsl1.py\" \"$TMP_DIR/unknown/apex_payload.img\" system \"$TMP_DIR/unknown/apex_payload\" \"$TMP_DIR/unknown/fs_config-apex_payload\" \"$TMP_DIR/unknown/file_context-apex_payload\""
+        rm -f "$TMP_DIR/unknown/apex_payload.img"
+        LOG_STEP_OUT
+        return 0
+    fi
+
     if ! sudo -n -v &> /dev/null; then
         LOG "\033[0;33m! Asking user for sudo password\033[0m"
         if ! sudo -v 2> /dev/null; then
@@ -170,17 +180,35 @@ fi
 DECODE_APEX "$WORK_DIR/system/system/apex/com.android.bt.apex"
 EXTRACT_PAYLOAD
 
+# The app directory includes the source build identifier, which changes
+# between firmware releases. Resolve it from the payload instead of assuming
+# one S23 FE build string.
+BT_APK_REL="$(find "$TMP_DIR/unknown/apex_payload/app" -type f -name Bluetooth.apk -printf '%P\n' | sort | head -n 1)"
+if [ -z "$BT_APK_REL" ]; then
+    ABORT "Bluetooth.apk is missing from com.android.bt apex payload"
+fi
+BT_APK="$TMP_DIR/unknown/apex_payload/app/$BT_APK_REL"
+BT_APK_TARGET="system/app/$BT_APK_REL"
+
+APPLY_OPTIONAL_PATCH()
+{
+    if ! APPLY_PATCH "$@"; then
+        LOGW "Bluetooth patch does not match this firmware; keeping the stock implementation"
+    fi
+    return 0
+}
+
 # SEC_PRODUCT_FEATURE_BLUETOOTH_SUPPORT_A2DPSINK_PROFILE
 if $SOURCE_BLUETOOTH_SUPPORT_A2DPSINK_PROFILE; then
     if ! $TARGET_BLUETOOTH_SUPPORT_A2DPSINK_PROFILE; then
-        DECODE_APK_IN_APEX "$TMP_DIR/unknown/apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        LOG "- Applying \"Disable SUPPORT_A2DPSINK_PROFILE support\" to apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        APPLY_PATCH "system" "system/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk" \
+        DECODE_APK_IN_APEX "$BT_APK"
+        LOG "- Applying \"Disable SUPPORT_A2DPSINK_PROFILE support\" to apex_payload/app/$BT_APK_REL"
+        APPLY_OPTIONAL_PATCH "system" "$BT_APK_TARGET" \
             "$MODPATH/a2dp_sink/Bluetooth.apk/0001-Disable-SUPPORT_A2DPSINK_PROFILE-support.patch" \
             > /dev/null
         DECODE_APK_IN_APEX "$TMP_DIR/unknown/apex_payload/javalib/framework-bluetooth.jar"
         LOG "- Applying \"Disable SUPPORT_A2DPSINK_PROFILE support\" to apex_payload/javalib/framework-bluetooth.jar"
-        APPLY_PATCH "system" "system/framework/framework-bluetooth.jar" \
+        APPLY_OPTIONAL_PATCH "system" "system/framework/framework-bluetooth.jar" \
             "$MODPATH/a2dp_sink/framework-bluetooth.jar/0001-Disable-SUPPORT_A2DPSINK_PROFILE-support.patch" \
             > /dev/null
     fi
@@ -194,9 +222,9 @@ fi
 # SEC_PRODUCT_FEATURE_BLUETOOTH_SUPPORT_A2DP_SBM
 if ! $SOURCE_BLUETOOTH_SUPPORT_A2DP_SBM; then
     if $TARGET_BLUETOOTH_SUPPORT_A2DP_SBM; then
-        DECODE_APK_IN_APEX "$TMP_DIR/unknown/apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        LOG "- Applying \"Enable SUPPORT_A2DP_SBM support\" to apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        APPLY_PATCH "system" "system/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk" \
+        DECODE_APK_IN_APEX "$BT_APK"
+        LOG "- Applying \"Enable SUPPORT_A2DP_SBM support\" to apex_payload/app/$BT_APK_REL"
+        APPLY_OPTIONAL_PATCH "system" "$BT_APK_TARGET" \
             "$MODPATH/sbm/Bluetooth.apk/0001-Enable-SUPPORT_A2DP_SBM-support.patch" \
             > /dev/null
     fi
@@ -210,9 +238,9 @@ fi
 # SEC_PRODUCT_FEATURE_BLUETOOTH_SUPPORT_HEAD_SAR_BACKOFF
 if ! $SOURCE_BLUETOOTH_SUPPORT_HEAD_SAR_BACKOFF; then
     if $TARGET_BLUETOOTH_SUPPORT_HEAD_SAR_BACKOFF; then
-        DECODE_APK_IN_APEX "$TMP_DIR/unknown/apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        LOG "- Applying \"Enable SUPPORT_HEAD_SAR_BACKOFF support\" to apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        APPLY_PATCH "system" "system/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk" \
+        DECODE_APK_IN_APEX "$BT_APK"
+        LOG "- Applying \"Enable SUPPORT_HEAD_SAR_BACKOFF support\" to apex_payload/app/$BT_APK_REL"
+        APPLY_OPTIONAL_PATCH "system" "$BT_APK_TARGET" \
             "$MODPATH/head_sar/Bluetooth.apk/0001-Enable-SUPPORT_HEAD_SAR_BACKOFF-support.patch" \
             > /dev/null
     fi
@@ -226,17 +254,17 @@ fi
 # SEC_PRODUCT_FEATURE_BLUETOOTH_SUPPORT_XLNA_CONTROL
 if $SOURCE_BLUETOOTH_SUPPORT_XLNA_CONTROL; then
     if ! $TARGET_BLUETOOTH_SUPPORT_XLNA_CONTROL; then
-        DECODE_APK_IN_APEX "$TMP_DIR/unknown/apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        LOG "- Applying \"Disable SUPPORT_XLNA_CONTROL support\" to apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        APPLY_PATCH "system" "system/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk" \
+        DECODE_APK_IN_APEX "$BT_APK"
+        LOG "- Applying \"Disable SUPPORT_XLNA_CONTROL support\" to apex_payload/app/$BT_APK_REL"
+        APPLY_OPTIONAL_PATCH "system" "$BT_APK_TARGET" \
             "$MODPATH/xlna/Bluetooth.apk/0001-Disable-SUPPORT_XLNA_CONTROL-support.patch" \
             > /dev/null
     fi
 else
     if $TARGET_BLUETOOTH_SUPPORT_XLNA_CONTROL; then
-        DECODE_APK_IN_APEX "$TMP_DIR/unknown/apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        LOG "- Applying \"Enable SUPPORT_XLNA_CONTROL support\" to apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
-        APPLY_PATCH "system" "system/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk" \
+        DECODE_APK_IN_APEX "$BT_APK"
+        LOG "- Applying \"Enable SUPPORT_XLNA_CONTROL support\" to apex_payload/app/$BT_APK_REL"
+        APPLY_OPTIONAL_PATCH "system" "$BT_APK_TARGET" \
             "$MODPATH/xlna/Bluetooth.apk/0001-Enable-SUPPORT_XLNA_CONTROL-support.patch" \
             > /dev/null
     fi
@@ -246,10 +274,12 @@ fi
 # Before: [tbnz w8, #0, #0xXXXXXX]
 # After: [b #0xXXXXXX]
 LOG "- Patching \"2897773948050037\" to \"289777392a000014\" in apex_payload/lib64/libbluetooth_jni.so"
-HEX_PATCH "$TMP_DIR/unknown/apex_payload/lib64/libbluetooth_jni.so" \
-    "2897773948050037" "289777392a000014" > /dev/null
+if ! HEX_PATCH "$TMP_DIR/unknown/apex_payload/lib64/libbluetooth_jni.so" \
+    "2897773948050037" "289777392a000014" > /dev/null; then
+    LOGW "Bluetooth native patch does not match this firmware; keeping the stock implementation"
+fi
 
-BUILD_APK_IN_APEX "$TMP_DIR/unknown/apex_payload/app/Bluetooth@BP2A.250605.031.A3/Bluetooth.apk"
+BUILD_APK_IN_APEX "$BT_APK"
 BUILD_APK_IN_APEX "$TMP_DIR/unknown/apex_payload/javalib/framework-bluetooth.jar"
 BUILD_PAYLOAD
 SIGN_PAYLOAD
@@ -258,7 +288,7 @@ SIGN_APEX "$WORK_DIR/system/system/apex/com.android.bt.apex"
 
 rm -rf "$TMP_DIR"
 
-unset SOURCE_FIRMWARE_PATH
+unset SOURCE_FIRMWARE_PATH BT_APK_REL BT_APK BT_APK_TARGET
 unset -f BUILD_APK_IN_APEX BUILD_APEX BUILD_PAYLOAD \
     DECODE_APEX DECODE_APK_IN_APEX EXTRACT_PAYLOAD \
-    LOG_MISSING_PATCHES SIGN_APEX SIGN_PAYLOAD
+    LOG_MISSING_PATCHES SIGN_APEX SIGN_PAYLOAD APPLY_OPTIONAL_PATCH

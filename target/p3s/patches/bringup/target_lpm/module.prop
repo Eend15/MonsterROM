@@ -1,0 +1,7 @@
+id=target_lpm
+name=Galaxy S21 Ultra low-power charging compatibility
+version=1.0
+versionCode=1
+author=UN1CA
+description=Use the p3s low-power charging userspace and prevent an incompatible LPM exit from panicking init.
+

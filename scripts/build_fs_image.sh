@@ -396,6 +396,17 @@ ROUND_UP_TO_4K()
 
 PREPARE_SCRIPT "$@"
 
+# ESSI/system-as-root work trees can gain files from another firmware during
+# the patch phase.  Their parent directories are not always present in the
+# donor canned metadata, and mkfs.erofs aborts on the first missing entry.
+# Reconcile the system tree and both metadata files immediately before image
+# creation so every physical path has a deterministic fs_config/SELinux
+# entry (the normalizer is a no-op for other partitions).
+if [[ "$PARTITION" == "system" ]] && [ -f "$SRC_DIR/scripts/utils/normalize_erofs_metadata.py" ]; then
+    LOG "- Normalizing system EROFS metadata"
+    EVAL "python3 \"$SRC_DIR/scripts/utils/normalize_erofs_metadata.py\" \"$INPUT_DIR\" \"$PARTITION\" \"$FS_CONFIG_FILE\" \"$FILE_CONTEXT_FILE\"" || exit 1
+fi
+
 if $SPARSE; then
     LOG_STEP_IN "- Starting build_fs_image for $(basename "$OUTPUT_FILE") ($FS_TYPE+sparse)..."
 else

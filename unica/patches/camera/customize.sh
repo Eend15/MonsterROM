@@ -16,6 +16,17 @@ LOG_MISSING_PATCHES()
 SOURCE_FIRMWARE_PATH="$(cut -d "/" -f 1 -s <<< "$SOURCE_FIRMWARE")_$(cut -d "/" -f 2 -s <<< "$SOURCE_FIRMWARE")"
 TARGET_FIRMWARE_PATH="$(cut -d "/" -f 1 -s <<< "$TARGET_FIRMWARE")_$(cut -d "/" -f 2 -s <<< "$TARGET_FIRMWARE")"
 
+if [[ "$TARGET_CODENAME" == "p3s" ]] && [ "$SOURCE_PLATFORM_SDK_VERSION" -ge 36 ]; then
+    # QPR2 BeautyVideoMaker and still postprocessing instantiate codec v2.
+    # Target v1 alone selects ImageCodecDummyNode and crashes on initialize().
+    P3S_CAMERA_LIB_INFO="$(GET_FLOATING_FEATURE_CONFIG SEC_FLOATING_FEATURE_CAMERA_CONFIG_VENDOR_LIB_INFO)"
+    if [[ ",$P3S_CAMERA_LIB_INFO," != *,image_codec.samsung.v2,* ]]; then
+        SET_FLOATING_FEATURE_CONFIG SEC_FLOATING_FEATURE_CAMERA_CONFIG_VENDOR_LIB_INFO \
+            "$P3S_CAMERA_LIB_INFO,image_codec.samsung.v2"
+    fi
+    unset P3S_CAMERA_LIB_INFO
+fi
+
 DELETE_FROM_WORK_DIR "system" "system/cameradata/portrait_data"
 ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/cameradata/portrait_data" 0 0 755 "u:object_r:system_file:s0"
 if [ -f "$SRC_DIR/target/$TARGET_CODENAME/camera/singletake/service-feature.xml" ]; then

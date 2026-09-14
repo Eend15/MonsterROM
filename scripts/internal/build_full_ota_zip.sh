@@ -5,7 +5,7 @@
 # [
 source "$SRC_DIR/scripts/utils/install_utils.sh" || exit 1
 
-TMP_DIR="$OUT_DIR/target/$TARGET_CODENAME/zip"
+TMP_DIR="${UNICA_TMP_ZIP_DIR:-$OUT_DIR/target/$TARGET_CODENAME/zip}"
 
 PRIVATE_KEY_PATH="$SRC_DIR/security/"
 PUBLIC_KEY_PATH="$SRC_DIR/security/"

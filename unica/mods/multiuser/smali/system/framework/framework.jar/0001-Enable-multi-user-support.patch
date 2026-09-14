@@ -7,10 +7,10 @@ Subject: [PATCH] Enable multi user support
  .../multiuser/MultiUserSupportsHelper.smali   | 22 +------------------
  1 file changed, 1 insertion(+), 21 deletions(-)
 
-diff --git a/smali_classes6/com/samsung/android/core/pm/multiuser/MultiUserSupportsHelper.smali b/smali_classes6/com/samsung/android/core/pm/multiuser/MultiUserSupportsHelper.smali
+diff --git a/smali_classes8/com/samsung/android/core/pm/multiuser/MultiUserSupportsHelper.smali b/smali_classes8/com/samsung/android/core/pm/multiuser/MultiUserSupportsHelper.smali
 index c4045340..89638bdf 100644
---- a/smali_classes6/com/samsung/android/core/pm/multiuser/MultiUserSupportsHelper.smali
-+++ b/smali_classes6/com/samsung/android/core/pm/multiuser/MultiUserSupportsHelper.smali
+--- a/smali_classes8/com/samsung/android/core/pm/multiuser/MultiUserSupportsHelper.smali
++++ b/smali_classes8/com/samsung/android/core/pm/multiuser/MultiUserSupportsHelper.smali
 @@ -15,32 +15,12 @@
  .method static constructor blacklist <clinit>()V
      .locals 2

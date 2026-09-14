@@ -1,0 +1,2 @@
+# Diagnostic bring-up only: preserve user data and expose the original crash.
+persist.sys.disable_rescue=true

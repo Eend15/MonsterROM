@@ -1,6 +1,14 @@
 # shellcheck disable=SC2034
 SKIPUNZIP=1
 
+# These patches target older donor telephony/framework layouts. The p3s port
+# retains its native Exynos 2100 telephony stack; donor smali changes are not
+# required for first boot and are unsafe when the S23 FE revision changes.
+if [[ "$TARGET_CODENAME" == "p3s" ]]; then
+    LOGW "Skipping donor legacy smali patches for p3s"
+    return 0
+fi
+
 # [
 BACKPORT_SF_PROPS()
 {

@@ -73,6 +73,16 @@ SMALI_PATCH()
     local FILE_PATH="$APKTOOL_DIR/$PARTITION/${FILE//system\//}"
 
     # Check if provided smali exists
+    # Auto-resolve multidex smali if displaced by R8 compiler
+    if [ ! -f "$FILE_PATH/$SMALI" ]; then
+        local REL_CLASS="$(sed -E 's|^smali(_classes[0-9]+)?/||' <<< "$SMALI")"
+        local FOUND="$(find "$FILE_PATH" -type f -path "*/$REL_CLASS" | head -n 1)"
+        if [ "$FOUND" ]; then
+            SMALI="${FOUND#$FILE_PATH/}"
+            LOG "- Auto-resolved multidex smali to $SMALI"
+        fi
+    fi
+
     if [ ! -f "$FILE_PATH/$SMALI" ]; then
         LOGE "Smali not found: \"/$PARTITION/$FILE/$SMALI\""
 
@@ -337,6 +347,11 @@ SMALI_PATCH()
 
         AFTER="$(sha1sum "$FILE_PATH/$SMALI")"
         if [[ "$BEFORE" == "$AFTER" ]]; then
+            local METHOD_BODY="$(awk -v FN="$METHOD" '/^\.method/ && index($0, FN) { inside = 1 } inside { print } inside && /^\.end method/ { inside = 0 }' "$FILE_PATH/$SMALI")"
+            if grep -F -q -- "$VAL" <<< "$METHOD_BODY"; then
+                LOGW "Return value of method \"$METHOD\" in /$PARTITION/$FILE/$SMALI is already \"$VALUE\""
+                return 0
+            fi
             LOGE "Failed to replace return value of method \"$METHOD\" in /$PARTITION/$FILE/$SMALI to \"$VALUE\""
             return 1
         fi
@@ -346,7 +361,14 @@ SMALI_PATCH()
         LOG "- Replacing value \"$VALUE\" of method \"$METHOD\" in /$PARTITION/$FILE/$SMALI with \"$REPLACEMENT\""
 
         awk -v FN="$METHOD" -v STR="$VALUE" -v REP="$REPLACEMENT" '
-            BEGIN { inside = 0; isline = (index(REP, "\n") > 0) }
+            BEGIN {
+                inside = 0
+                # A complete const-string instruction must be treated as a
+                # line, not as the quoted payload of a const-string. This is
+                # required for empty-string constants introduced by A16 QPR2.
+                isline = (index(REP, "\n") > 0 ||
+                    STR ~ /^const-string(\/jumbo)?[[:space:]]/)
+            }
             /^\.method/ && index($0, FN) { inside = 1 }
             inside {
                 if (isline) {
@@ -375,6 +397,11 @@ SMALI_PATCH()
 
         AFTER="$(sha1sum "$FILE_PATH/$SMALI")"
         if [[ "$BEFORE" == "$AFTER" ]]; then
+            local METHOD_BODY="$(awk -v FN="$METHOD" '/^\.method/ && index($0, FN) { inside = 1 } inside { print } inside && /^\.end method/ { inside = 0 }' "$FILE_PATH/$SMALI")"
+            if grep -F -q -- "${REPLACEMENT//\\n/$'\n'}" <<< "$METHOD_BODY" || grep -F -q -- "$REPLACEMENT" <<< "$METHOD_BODY"; then
+                LOGW "Value \"$VALUE\" of method \"$METHOD\" in /$PARTITION/$FILE/$SMALI was already replaced with \"$REPLACEMENT\""
+                return 0
+            fi
             LOGE "Failed to replace value \"$VALUE\" of method \"$METHOD\" in /$PARTITION/$FILE/$SMALI with \"$REPLACEMENT\""
             return 1
         fi
@@ -387,6 +414,11 @@ SMALI_PATCH()
 
         AFTER="$(sha1sum "$FILE_PATH/$SMALI")"
         if [[ "$BEFORE" == "$AFTER" ]]; then
+            local CLEAN_REP="${REPLACEMENT//\\/}"
+            if grep -F -q -- "$REPLACEMENT" "$FILE_PATH/$SMALI" || grep -F -q -- "$CLEAN_REP" "$FILE_PATH/$SMALI"; then
+                LOGW "All occurrences of \"$VALUE\" in /$PARTITION/$FILE/$SMALI were already replaced with \"$REPLACEMENT\""
+                return 0
+            fi
             LOGE "Failed to replace all occurrences of \"$VALUE\" with \"$REPLACEMENT\" in /$PARTITION/$FILE/$SMALI"
             return 1
         fi

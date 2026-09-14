@@ -43,8 +43,27 @@ APPLY_PATCH()
 
     DECODE_APK "$PARTITION" "$FILE" || return 1
 
-    LOG "- Applying \"$(grep "^Subject:" "$PATCH" | sed "s/.*PATCH] //")\" to /$PARTITION/$FILE"
-    EVAL "LC_ALL=C git apply --directory=\"$APKTOOL_DIR/$PARTITION/${FILE//system\//}\" --verbose --unsafe-paths \"$PATCH\"" || return 1
+    local TARGET_DIR="$APKTOOL_DIR/$PARTITION/${FILE//system\//}"
+    local PATCH_NAME="$(grep "^Subject:" "$PATCH" | sed "s/.*PATCH] //")"
+
+    if LC_ALL=C git apply --reverse --check --directory="$TARGET_DIR" --unsafe-paths "$PATCH" &>/dev/null; then
+        LOG "- Patch \"$PATCH_NAME\" already applied to /$PARTITION/$FILE"
+        return 0
+    fi
+
+    if grep -q "CONFIG_" "$PATCH"; then
+        local TEMP_PATCH="$(mktemp)"
+        sed -E "s/CONFIG_[A-Z0-9_]+/$TARGET_WLAN_CONFIG_CONNECTION_PERSONALIZATION/g" "$PATCH" > "$TEMP_PATCH"
+        if LC_ALL=C git apply --reverse --check --directory="$TARGET_DIR" --unsafe-paths "$TEMP_PATCH" &>/dev/null; then
+            rm -f "$TEMP_PATCH"
+            LOG "- Patch \"$PATCH_NAME\" already applied to /$PARTITION/$FILE"
+            return 0
+        fi
+        rm -f "$TEMP_PATCH"
+    fi
+
+    LOG "- Applying \"$PATCH_NAME\" to /$PARTITION/$FILE"
+    EVAL "LC_ALL=C git apply --directory=\"$TARGET_DIR\" --verbose --unsafe-paths \"$PATCH\"" || return 1
 }
 
 # DECODE_APK <partition> <apk/jar>
@@ -178,6 +197,10 @@ HEX_PATCH()
     TO="$(tr "[:upper:]" "[:lower:]" <<< "$TO")"
 
     if ! xxd -p -c 0 "$FILE" | grep -q "$FROM"; then
+        if xxd -p -c 0 "$FILE" | grep -q "$TO"; then
+            LOGW "Hex pattern \"$FROM\" already patched to \"$TO\" in ${FILE//$WORK_DIR/}"
+            return 0
+        fi
         LOGE "No \"$FROM\" match in ${FILE//$WORK_DIR/}"
         return 1
     fi

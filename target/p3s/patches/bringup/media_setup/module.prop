@@ -1,0 +1,4 @@
+id=p3s_media_setup
+name=p3s media and setup compatibility
+author=MonsterROM
+description=Keeps the Exynos 2100 Codec2 service alive and installs valid setup permission XML.

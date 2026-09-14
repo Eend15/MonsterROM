@@ -7,7 +7,7 @@ Subject: [PATCH] Introduce FloatingFeatureHooks
  .../android/feature/SemFloatingFeature.smali  | 106 ++++-
  .../mesalabs/unica/FloatingFeatureHooks.smali | 394 ++++++++++++++++++
  2 files changed, 485 insertions(+), 15 deletions(-)
- create mode 100644 smali_classes6/io/mesalabs/unica/FloatingFeatureHooks.smali
+ create mode 100644 smali_classes8/io/mesalabs/unica/FloatingFeatureHooks.smali
 
 diff --git a/smali_classes6/com/samsung/android/feature/SemFloatingFeature.smali b/smali_classes6/com/samsung/android/feature/SemFloatingFeature.smali
 index ef456f39..ef696b8e 100644
@@ -241,11 +241,11 @@ index ef456f39..ef696b8e 100644
 +    :goto_0
      return-object p0
  .end method
-diff --git a/smali_classes6/io/mesalabs/unica/FloatingFeatureHooks.smali b/smali_classes6/io/mesalabs/unica/FloatingFeatureHooks.smali
+diff --git a/smali_classes8/io/mesalabs/unica/FloatingFeatureHooks.smali b/smali_classes8/io/mesalabs/unica/FloatingFeatureHooks.smali
 new file mode 100644
 index 00000000..c8afba57
 --- /dev/null
-+++ b/smali_classes6/io/mesalabs/unica/FloatingFeatureHooks.smali
++++ b/smali_classes8/io/mesalabs/unica/FloatingFeatureHooks.smali
 @@ -0,0 +1,394 @@
 +.class public final Lio/mesalabs/unica/FloatingFeatureHooks;
 +.super Ljava/lang/Object;

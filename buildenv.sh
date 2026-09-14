@@ -152,7 +152,7 @@ unset -f _PRINT_USAGE
 
 export APKTOOL_DIR="$OUT_DIR/target/$SELECTED_TARGET/apktool"
 export WORK_DIR="$OUT_DIR/target/$SELECTED_TARGET/work_dir"
-export TMP_DIR="$OUT_DIR/target/$SELECTED_TARGET/tmp"
+export TMP_DIR="${UNICA_TMP_DIR:-$OUT_DIR/target/$SELECTED_TARGET/tmp}"
 
 mkdir -p "$OUT_DIR/target/$SELECTED_TARGET"
 # shellcheck disable=SC2046

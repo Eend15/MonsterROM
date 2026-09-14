@@ -1,0 +1,4 @@
+id=p3s_bringup
+name=p3s boot compatibility
+author=MonsterROM
+description=Applies the nested p3s kernel and diagnostics modules in full builds.

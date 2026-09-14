@@ -1,5 +1,14 @@
 KERNEL_API_URL="https://api.github.com/repos/UN1CA/kernel_samsung_exynos2100/releases/latest"
 
+# p3s bring-up pins a boot-tested Floppy kernel. Downloading and installing a
+# moving "latest" Chiclet release here only to overwrite it in the following
+# device stage makes full builds non-reproducible.
+if [[ "$TARGET_CODENAME" == "p3s" ]] && \
+        [ -f "$SRC_DIR/target/p3s/patches/bringup/floppy_kernel/Image" ]; then
+    LOGW "Skipping Chiclet: p3s uses its pinned Floppy kernel"
+    return 0
+fi
+
 LATEST_TAG="$(
     curl -s "$KERNEL_API_URL" \
     | grep -m1 '"tag_name"' \

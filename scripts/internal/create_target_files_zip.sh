@@ -158,7 +158,14 @@ LOG "- Generating build_info.txt"
 GENERATE_BUILD_INFO
 
 LOG "- Creating zip"
-rm -f "$OUTPUT_FILE"
-EVAL "cd \"$TMP_DIR\" && 7z a -tzip -mx=3 -mmt=$(nproc) -mtc=off -mtm=off \"$OUTPUT_FILE\" -r *" || exit 1
+if [ -n "$UNICA_TARGET_FILES_DIR" ] && [ -d "$UNICA_TARGET_FILES_DIR" ]; then
+    REAL_OUTPUT="$UNICA_TARGET_FILES_DIR/$(basename "$OUTPUT_FILE")"
+    rm -f "$REAL_OUTPUT" "$OUTPUT_FILE"
+    EVAL "cd \"$TMP_DIR\" && 7z a -tzip -mx=3 -mmt=$(nproc) -mtc=off -mtm=off \"$REAL_OUTPUT\" -r *" || exit 1
+    ln -sf "$REAL_OUTPUT" "$OUTPUT_FILE"
+else
+    rm -f "$OUTPUT_FILE"
+    EVAL "cd \"$TMP_DIR\" && 7z a -tzip -mx=3 -mmt=$(nproc) -mtc=off -mtm=off \"$OUTPUT_FILE\" -r *" || exit 1
+fi
 
 exit 0

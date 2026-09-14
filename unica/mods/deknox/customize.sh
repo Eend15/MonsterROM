@@ -1,3 +1,8 @@
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -ge "36" ]; then
+    LOG "- Skipping Knox removal for Android 16+ (no compatible donor binaries)"
+    return 0
+fi
+
 SET_PROP_IF_DIFF "vendor" "ro.security.fips.ux" "Disabled"
 
 if [[ "$TARGET_OS_SINGLE_SYSTEM_IMAGE" == "qssi" ]]; then

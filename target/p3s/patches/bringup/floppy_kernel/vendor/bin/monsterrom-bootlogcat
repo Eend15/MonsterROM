@@ -1,0 +1,27 @@
+#!/system/bin/sh
+
+echo "<3>monsterrom-logger: bootlogcat starting" > /dev/kmsg 2>/dev/null
+
+LOGROOT=/cache/monsterrom-bootlogs
+
+if ! grep -q ' /cache ' /proc/mounts 2>/dev/null; then
+    mkdir -p /cache 2>/dev/null
+    mount -t f2fs -o rw,nosuid,nodev /dev/block/by-name/cache /cache 2>/dev/null || \
+        mount -t f2fs -o rw /dev/block/by-name/cache /cache 2>/dev/null || \
+        mount -t f2fs -o rw,nosuid,nodev /dev/block/sda31 /cache 2>/dev/null || \
+        mount -t ext4 -o rw,nosuid,nodev /dev/block/by-name/cache /cache 2>/dev/null
+fi
+
+if ! grep -q ' /cache ' /proc/mounts 2>/dev/null; then
+    LOGROOT=/metadata/monsterrom-bootlogs
+fi
+
+mkdir -p "$LOGROOT" 2>/dev/null
+
+echo "<3>monsterrom-logger: streaming logcat to $LOGROOT/logcat.txt" > /dev/kmsg 2>/dev/null
+
+while true; do
+    /system/bin/logcat -b all -v threadtime -f "$LOGROOT/logcat.txt" -r 10240 -n 3 2>/dev/null
+    sleep 2
+done
+

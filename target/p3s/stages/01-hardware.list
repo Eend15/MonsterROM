@@ -1,0 +1,6 @@
+# First layer on top of the proven minimal boot.
+# It restores the Exynos 2100 platform and p3s device compatibility patches,
+# but deliberately contains no generic UN1CA feature patches or mods.
+platform/exynos2100/patches
+target/p3s/patches/camera_guard
+target/p3s/patches/variants
