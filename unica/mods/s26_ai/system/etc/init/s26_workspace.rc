@@ -1,0 +1,9 @@
+service s26_workspace /system/bin/sh /system/bin/s26_workspace.sh
+    user root
+    group root
+    disabled
+    oneshot
+    seclabel u:r:su:s0
+
+on post-fs-data
+    start s26_workspace
