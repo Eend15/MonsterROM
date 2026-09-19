@@ -2,6 +2,7 @@
 platform/exynos2100/patches
 target/p3s/patches/camera_guard
 target/p3s/patches/variants
+target/p3s/patches/floppy_kernel
 unica/mods/batteryhealth
 target/p3s/patches/fingerprint
 target/p3s/patches/resolution

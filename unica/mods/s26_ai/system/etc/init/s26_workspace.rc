@@ -3,7 +3,17 @@ service s26_workspace /system/bin/sh /system/bin/s26_workspace.sh
     group root
     disabled
     oneshot
-    seclabel u:r:su:s0
+    seclabel u:r:init:s0
+
+service ksu_provision /system/bin/sh /system/bin/ksu_provision.sh
+    user root
+    group root
+    disabled
+    oneshot
+    seclabel u:r:init:s0
 
 on post-fs-data
     start s26_workspace
+
+on property:sys.boot_completed=1
+    start ksu_provision

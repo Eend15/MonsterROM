@@ -1,0 +1,66 @@
+#!/system/bin/sh
+
+echo "<3>monsterrom-logger: early bootlogger starting" > /dev/kmsg 2>/dev/null
+
+# Vendor-init logger: this runs before system_server and SurfaceFlinger.
+LOGROOT=/cache/monsterrom-bootlogs
+
+# The Floppy 5.4 kernel rejects Samsung's obsolete barrier=1 cache mount.
+# Mount the physical p3s cache ourselves so early diagnostics persist.
+if ! grep -q ' /cache ' /proc/mounts 2>/dev/null; then
+    mkdir -p /cache 2>/dev/null
+    # p3s cache is F2FS. Keep ext4 as a fallback for engineering images.
+    mount -t f2fs -o rw,nosuid,nodev /dev/block/by-name/cache /cache 2>/dev/null || \
+        mount -t f2fs -o rw /dev/block/by-name/cache /cache 2>/dev/null || \
+        mount -t f2fs -o rw,nosuid,nodev /dev/block/sda31 /cache 2>/dev/null || \
+        mount -t f2fs -o rw /dev/block/sda31 /cache 2>/dev/null || \
+        mount -t ext4 -o rw,nosuid,nodev /dev/block/by-name/cache /cache 2>/dev/null || \
+        mount -t ext4 -o rw /dev/block/by-name/cache /cache 2>/dev/null
+fi
+
+if ! grep -q ' /cache ' /proc/mounts 2>/dev/null; then
+    echo "<3>monsterrom-logger: WARNING: /cache could not be mounted! Falling back to /metadata" > /dev/kmsg 2>/dev/null
+    LOGROOT=/metadata/monsterrom-bootlogs
+fi
+
+STAMP=$(date +%Y%m%d-%H%M%S 2>/dev/null)
+[ -n "$STAMP" ] || STAMP=unknown
+RUN="$LOGROOT/early-$STAMP"
+
+mkdir -p "$RUN" 2>/dev/null
+chmod 0755 "$LOGROOT" "$RUN" 2>/dev/null
+exec >> "$RUN/early-boot.log" 2>&1
+
+echo "<3>monsterrom-logger: writing early boot log to $RUN/early-boot.log" > /dev/kmsg 2>/dev/null
+
+echo "===== MonsterROM vendor early logger $STAMP ====="
+echo "cmdline:"
+cat /proc/cmdline 2>/dev/null
+echo "properties:"
+getprop 2>/dev/null
+echo "mounts:"
+mount 2>/dev/null
+echo "disk:"
+df -h 2>/dev/null
+echo "dmesg:"
+dmesg 2>/dev/null
+
+if [ -d /sys/fs/pstore ]; then
+    for f in /sys/fs/pstore/*; do
+        [ -f "$f" ] || continue
+        echo "===== $f ====="
+        cat "$f" 2>/dev/null
+    done
+fi
+
+# Keep a small checkpoint stream through the complete userspace boot.
+while true; do
+    echo "===== checkpoint $(date +%H:%M:%S 2>/dev/null) ====="
+    echo "boot_completed=$(getprop sys.boot_completed 2>/dev/null)"
+    echo "zygote=$(getprop init.svc.zygote 2>/dev/null)"
+    echo "zygote64=$(getprop init.svc.zygote64 2>/dev/null)"
+    echo "system_server=$(getprop init.svc.system_server 2>/dev/null)"
+    echo "surfaceflinger=$(getprop init.svc.surfaceflinger 2>/dev/null)"
+    ps -A 2>/dev/null | grep -E 'init|vold|zygote|system_server|surfaceflinger|servicemanager|hwservicemanager' 2>/dev/null
+    sleep 5
+done

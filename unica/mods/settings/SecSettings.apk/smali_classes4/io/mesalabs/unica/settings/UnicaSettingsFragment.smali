@@ -118,8 +118,6 @@
 
     if-nez p1, :cond_1
 
-    new-instance p1, Landroidx/appcompat/widget/PopupMenu;
-
     invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
 
     move-result-object v2
@@ -131,6 +129,34 @@
     invoke-virtual {v3, v1}, Landroid/app/Activity;->findViewById(I)Landroid/view/View;
 
     move-result-object v1
+
+    if-nez v1, :cond_anchor_ok
+
+    invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getView()Landroid/view/View;
+
+    move-result-object v1
+
+    if-nez v1, :cond_anchor_ok
+
+    if-eqz v3, :cond_anchor_ok
+
+    invoke-virtual {v3}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
+
+    move-result-object v4
+
+    if-eqz v4, :cond_anchor_ok
+
+    invoke-virtual {v4}, Landroid/view/Window;->getDecorView()Landroid/view/View;
+
+    move-result-object v1
+
+    :cond_anchor_ok
+    if-nez v1, :cond_popup_ok
+
+    return v0
+
+    :cond_popup_ok
+    new-instance p1, Landroidx/appcompat/widget/PopupMenu;
 
     invoke-direct {p1, v2, v1}, Landroidx/appcompat/widget/PopupMenu;-><init>(Landroid/content/Context;Landroid/view/View;)V
 
@@ -197,11 +223,12 @@
     :cond_1
     iget-object p0, p0, Lio/mesalabs/unica/settings/UnicaSettingsFragment;->mPopupMenu:Landroidx/appcompat/widget/PopupMenu;
 
+    if-eqz p0, :cond_exit
+
     invoke-virtual {p0}, Landroidx/appcompat/widget/PopupMenu;->show()V
 
-    const/4 p0, 0x1
-
-    return p0
+    :cond_exit
+    return v0
 .end method
 
 .method public final getLogTag()Ljava/lang/String;
@@ -323,6 +350,7 @@
     invoke-virtual {v0, p0}, Lcom/samsung/android/settings/widget/SecRelativeLinkView;->create(Ljava/lang/Object;)V
 
     :cond_1
+    :try_start_0
     const-string v0, "unica_logo"
 
     invoke-virtual {p0, v0}, Lcom/android/settings/core/InstrumentedPreferenceFragment;->findPreference(Ljava/lang/CharSequence;)Landroidx/preference/Preference;
@@ -345,6 +373,8 @@
 
     iget-object v0, v0, Lcom/android/settingslib/widget/LayoutPreference;->mRootView:Landroid/view/View;
 
+    if-eqz v0, :cond_2
+
     invoke-virtual {v0, v1}, Landroid/view/View;->findViewById(I)Landroid/view/View;
 
     move-result-object v0
@@ -355,20 +385,29 @@
 
     invoke-virtual {p0}, Landroidx/fragment/app/Fragment;->getContext()Landroid/content/Context;
 
-    move-result-object p0
+    move-result-object v1
 
-    invoke-static {p0}, Landroid/app/WallpaperManager;->getInstance(Landroid/content/Context;)Landroid/app/WallpaperManager;
+    if-eqz v1, :cond_2
 
-    move-result-object p0
+    invoke-static {v1}, Landroid/app/WallpaperManager;->getInstance(Landroid/content/Context;)Landroid/app/WallpaperManager;
 
-    const/4 v1, 0x1
+    move-result-object v1
 
-    invoke-virtual {p0, v1}, Landroid/app/WallpaperManager;->getDrawable(I)Landroid/graphics/drawable/Drawable;
+    if-eqz v1, :cond_2
 
-    move-result-object p0
+    const/4 v2, 0x1
 
-    invoke-virtual {v0, p0}, Landroidx/appcompat/widget/AppCompatImageView;->setImageDrawable(Landroid/graphics/drawable/Drawable;)V
+    invoke-virtual {v1, v2}, Landroid/app/WallpaperManager;->getDrawable(I)Landroid/graphics/drawable/Drawable;
 
+    move-result-object v1
+
+    if-eqz v1, :cond_2
+
+    invoke-virtual {v0, v1}, Landroidx/appcompat/widget/AppCompatImageView;->setImageDrawable(Landroid/graphics/drawable/Drawable;)V
+    :try_end_0
+    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_0} :catch_0
+
+    :catch_0
     :cond_2
     return-void
 .end method

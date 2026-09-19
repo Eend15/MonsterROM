@@ -20,13 +20,7 @@ SMALI_PATCH "system" "system/framework/framework.jar" \
 
 DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 
-# Disable stock OTA references
-if [ ! -f "$WORK_DIR/system/system/priv-app/ChoiDujour/ChoiDujour.apk" ]; then
-    SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-        "smali_classes3/com/samsung/android/settings/softwareupdate/SoftwareUpdateUtils.smali" "return" \
-        'isOTAUpgradeAllowed(Landroid/content/Context;)Z' \
-        'false'
-fi
+# Stock OTA references retained
 
 # Always show One UI minor version
 SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \

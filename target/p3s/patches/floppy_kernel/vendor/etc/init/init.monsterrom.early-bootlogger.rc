@@ -1,0 +1,12 @@
+on post-fs
+    mkdir /cache/monsterrom-bootlogs 0777 root root
+    start monsterrom_early_bootlogger
+
+service monsterrom_early_bootlogger /system/bin/sh /vendor/bin/monsterrom-early-bootlogger
+    class core
+    user root
+    group root log system
+    seclabel u:r:init:s0
+    stdio_to_kmsg
+    oneshot
+

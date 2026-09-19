@@ -1,0 +1,12 @@
+on post-fs
+    mkdir /cache/monsterrom-bootlogs 0777 root root
+    start monsterrom_logcat_debug
+
+service monsterrom_logcat_debug /system/bin/sh /vendor/bin/monsterrom-bootlogcat
+    class core
+    user root
+    group root log system
+    seclabel u:r:init:s0
+    stdio_to_kmsg
+    oneshot
+

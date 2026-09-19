@@ -4,6 +4,13 @@ LOG "- Downloading Samsung Internet app"
 DOWNLOAD_FILE "$(GET_GALAXY_STORE_DOWNLOAD_URL "com.sec.android.app.sbrowser")" \
     "$WORK_DIR/system/system/preload/SBrowser/SBrowser.apk"
 
+# KernelSU Next Manager (user-removable preload)
+if [ -f "$SRC_DIR/prebuilts/apps/KernelSU_Next.apk" ]; then
+    LOG "- Preloading KernelSU Next app"
+    mkdir -p "$WORK_DIR/system/system/preload/KernelSU_Next"
+    cp -f "$SRC_DIR/prebuilts/apps/KernelSU_Next.apk" "$WORK_DIR/system/system/preload/KernelSU_Next/KernelSU_Next.apk"
+fi
+
 while IFS= read -r i; do
     i="${i//$WORK_DIR\/system\//}"
 

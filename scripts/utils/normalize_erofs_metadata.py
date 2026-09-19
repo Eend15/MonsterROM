@@ -128,7 +128,7 @@ def main() -> None:
         for child in children:
             relative = child.relative_to(args.tree).as_posix()
             source_fs_path = f"system/{relative}"
-            source_fields = fs_fields.get(source_fs_path)
+            source_fields = fs_fields.get(source_fs_path) or fs_fields.get(relative)
             if source_fields is not None:
                 root_line = f"{relative} {' '.join(source_fields[1:])}"
                 if child.is_dir():
@@ -163,6 +163,16 @@ def main() -> None:
                         fs_lines[idx] = " ".join(parts)
                 else:
                     fs_lines.append(f"{relative} 0 0 0755 capabilities=0x0")
+            else:
+                stat = child.lstat()
+                mode = stat.st_mode & 0o7777
+                idx = next(
+                    (i for i, line in enumerate(fs_lines)
+                     if line.split(maxsplit=1)[0] == relative),
+                    None,
+                )
+                if idx is None:
+                    fs_lines.append(f"{relative} 0 0 {mode:04o} capabilities=0x0")
 
             escaped_relative = escape_context_path(relative)
             desired_context = f"/{escaped_relative}"

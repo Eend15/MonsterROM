@@ -48,3 +48,7 @@ SET_PROP "system" "debug.sf.latch_unsignaled" "0"
 SET_PROP "system" "debug.sf.high_fps_late_app_phase_offset_ns" "1000000"
 SET_PROP "system" "debug.sf.high_fps_late_sf_phase_offset_ns" "1000000"
 SET_PROP "system" "log.tag.View" "WARN"
+
+# Display density for Galaxy S21 Ultra (WQHD+ 1440x3200 @ 560 DPI)
+SET_PROP "vendor" "ro.sf.lcd_density" "420"
+SET_PROP "system" "ro.sf.lcd_density" "420"

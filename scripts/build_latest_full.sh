@@ -54,7 +54,7 @@ echo "[4/4] Symlinking flashable zip..."
 ln -sf "$FLASHABLE_ZIP" "$OUT_DIR/UN1CA_${TARGET_CODENAME}_OneUI8.5_Final-sign.zip"
 
 echo "Cleaning up temporary files..."
-rm -rf "$BUILD_BASE_DIR/tmp" "$BUILD_BASE_DIR/zip-tmp"
+rm -rf "$BUILD_BASE_DIR/tmp"/* "$BUILD_BASE_DIR/zip-tmp"/*
 
 echo "=========================================================="
 echo "  BUILD COMPLETED SUCCESSFULLY!"

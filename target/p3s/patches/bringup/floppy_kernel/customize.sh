@@ -73,7 +73,7 @@ VENDOR_BOOT_ARGS="$(unpack_bootimg --boot_img "$WORK_DIR/kernel/vendor_boot.img"
 # The bootloader preserves vendor_boots command line on this device. Keep
 # the Floppy init-protection override there as well as in boot.img so the
 # kernel actually receives it during the Samsung boot path.
-VENDOR_BOOT_ARGS="$(sed -E "s|--vendor_cmdline [^ ]+|--vendor_cmdline 'loop.max_part=7 init_protection=0'|" <<< "$VENDOR_BOOT_ARGS")"
+VENDOR_BOOT_ARGS="$(sed -E "s|--vendor_cmdline .* --board|--vendor_cmdline 'loop.max_part=7 init_protection=0' --board|" <<< "$VENDOR_BOOT_ARGS")"
 EVAL "gzip -dc \"$VENDOR_TMP/out/vendor_ramdisk\" | cpio --quiet -i -D \"$VENDOR_TMP/ramdisk\""
 while IFS= read -r f; do
     PATCH_FSTAB_AVB "$f"

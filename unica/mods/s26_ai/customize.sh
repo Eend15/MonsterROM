@@ -58,7 +58,8 @@ SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_GENAI_SUPPORT_TIME_WEATHER_WAL
 if [ -f "$WORK_DIR/system/system/etc/mss_v0.23.0_VMWO_2_fp32.sorione" ]; then
     cp -f "$WORK_DIR/system/system/etc/mss_v0.23.0_VMWO_2_fp32.sorione"           "$WORK_DIR/system/system/etc/mss_v0.13.0_4ch.sorione" 2>/dev/null || true
 fi
-# S26 default workspace layout permissions
+# S26 default workspace layout and KernelSU provisioner permissions
 chmod 755 "$WORK_DIR/system/system/bin/s26_workspace.sh" 2>/dev/null || true
+chmod 755 "$WORK_DIR/system/system/bin/ksu_provision.sh" 2>/dev/null || true
 chmod 644 "$WORK_DIR/system/system/etc/default_workspace.xml" 2>/dev/null || true
 chmod 644 "$WORK_DIR/system/system/etc/init/s26_workspace.rc" 2>/dev/null || true
