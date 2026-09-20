@@ -20,7 +20,12 @@ SMALI_PATCH "system" "system/framework/framework.jar" \
 
 DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 
-# Stock OTA references retained
+# Allow stock OTA / Software Update tab in Settings
+SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+    "smali/com/samsung/android/settings/softwareupdate/SoftwareUpdateUtils.smali" "return" \
+    'isOTAUpgradeAllowed(Landroid/content/Context;)Z' \
+    'true'
+
 
 # Always show One UI minor version
 SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
