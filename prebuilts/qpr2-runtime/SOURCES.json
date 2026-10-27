@@ -1,0 +1,32 @@
+{
+  "profile": "trial-r15",
+  "components": [
+    {
+      "module": "com.android.art",
+      "feature": "art_runtime",
+      "old": "com.google.android.art_compressed.apex",
+      "new": "com.google.android.art.apex",
+      "old_sha256": "65583494b57dac762dc76a24fee5fb9f8fa160b92f4e6e2a9138f883c8963d99",
+      "new_sha256": "f583268c55ed624b947fc78adc3fa6902bcb0ddef0aa157a58fb7a5cdb369b55",
+      "repository_path": "prebuilts/qpr2-runtime/system/system/apex/com.google.android.art.apex",
+      "source": "/mnt/g/CodexWork/UN1CA-QPR2-port-20261008/review-candidates/apex-cohorts/com.google.android.art.membarrier-dual.custom-signed.apex",
+      "first_preinstalled_custom_ROM_identity": true
+    },
+    {
+      "module": "com.android.conscrypt",
+      "feature": "conscrypt_trust",
+      "old": "com.google.android.conscrypt_compressed.apex",
+      "new": "com.google.android.conscrypt.apex",
+      "old_sha256": "8e06997fe666a2429f7ae2910fea03dd5fd8d10e064582c27ff9887a4d9b5430",
+      "new_sha256": "4d5881208615078ed816687106e7843a8fec516bea72adc7fbc6329a5d8ab15d",
+      "repository_path": "prebuilts/qpr2-runtime/system/system/apex/com.google.android.conscrypt.apex",
+      "source": "/home/jonathan/UN1CA/out/oneui95/qpr2-r15/review-candidates/apex-cohorts/com.google.android.conscrypt.samsung-trust.custom-signed.apex",
+      "first_preinstalled_custom_ROM_identity": true
+    }
+  ],
+  "private_keys_included": false,
+  "APK_signing_key_unchanged": true,
+  "APEX_signers": "Existing persistent custom-ROM module identities, not original Google signatures",
+  "host_generated_cache_is_review_only": true,
+  "existing_data_APEX_migration_not_performed": true
+}
