@@ -1,0 +1,25 @@
+Subject: [PATCH] build: pin UN1CA vendor load policy and reproducible CPIO
+
+The four retained target firmware vendor partitions request the same two
+modules. Derive their dependency closure from the freshly verified build,
+not a previous ROM/kernel cache. Keep image assembly in the upstream script.
+The caller normalizes ramdisk mtimes before this reproducible CPIO operation.
+
+diff --git a/build/unica/vendor.modules.load b/build/unica/vendor.modules.load
+new file mode 100644
+--- /dev/null
++++ b/build/unica/vendor.modules.load
+@@ -0,0 +1,2 @@
++input_booster_lkm.ko
++sec_debug_sched_info.ko
+diff --git a/build/scripts/images.sh b/build/scripts/images.sh
+--- a/build/scripts/images.sh
++++ b/build/scripts/images.sh
+@@ -65,6 +65,6 @@ build_images() {
+ 
+     echo -e "\n$(log_info "Building vendor_boot image...")"
+     cd "$RAMDISK_DIR"
+-    find . | cpio --quiet -o -H newc -R root:root | gzip -9 > "../ramdisk.cpio.gz"
++    find . -print0 | LC_ALL=C sort -z | cpio --null --reproducible --quiet -o -H newc -R root:root | gzip -n -9 > "../ramdisk.cpio.gz"
+     cd ..
+ 
