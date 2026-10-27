@@ -1,0 +1,8 @@
+sys.unica.prophide.vbmeta_digest u:object_r:unica_prophide_stage_prop:s0 exact string
+sys.unica.prophide.vbmeta_public_key_digest u:object_r:unica_prophide_stage_prop:s0 exact string
+sys.unica.prophide.vbmeta_size u:object_r:unica_prophide_stage_prop:s0 exact uint
+sys.unica.prophide.security_patch u:object_r:unica_prophide_stage_prop:s0 exact string
+sys.unica.prophide.ready u:object_r:unica_prophide_stage_prop:s0 exact bool
+sys.unica.prophide.status u:object_r:unica_prophide_stage_prop:s0 exact enum staging failed verified
+sys.unica.prophide.result.vendor_warranty_bit u:object_r:unica_prophide_result_prop:s0 exact string
+sys.unica.prophide.result.done u:object_r:unica_prophide_result_prop:s0 exact bool
