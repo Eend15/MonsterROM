@@ -1,0 +1,35 @@
+Subject: [PATCH] Recheck actual Camera processor release after a timed wait
+
+A timed condition wait may return false after the processor has actually
+been released while the waiter reacquires the lock. Recheck the predicate,
+not just the timer result. Notify every waiter; each still checks the same
+locked predicate. Keep the seven-second failure for a genuinely busy
+processor, retain releaseNodeChain, and do not force-free native buffers.
+This addresses the Java wait race, not a lost native release callback.
+
+--- a/smali_classes2/com/samsung/android/camera/core2/processor/PictureProcessorManager.smali
++++ b/smali_classes2/com/samsung/android/camera/core2/processor/PictureProcessorManager.smali
+@@ -1248,7 +1248,7 @@
+     :goto_0
+     iget-object v1, p0, Lcom/samsung/android/camera/core2/processor/PictureProcessorManager;->mImmediateProcessorReleaseCond:Ljava/util/concurrent/locks/Condition;
+ 
+-    invoke-interface {v1}, Ljava/util/concurrent/locks/Condition;->signal()V
++    invoke-interface {v1}, Ljava/util/concurrent/locks/Condition;->signalAll()V
+ 
+     const-string v1, "deinitialize X"
+ 
+@@ -1453,8 +1453,12 @@
+ 
+     goto :goto_0
+ 
+-    :cond_0
+-    new-instance p1, Lcom/samsung/android/camera/core2/exception/InvalidOperationException;
++    :cond_0
++    iget-object v0, p0, Lcom/samsung/android/camera/core2/processor/PictureProcessorManager;->mImmediateProcessor:Lcom/samsung/android/camera/core2/processor/ImmediateProcessor;
++
++    if-eqz v0, :cond_1
++
++    new-instance p1, Lcom/samsung/android/camera/core2/exception/InvalidOperationException;
+ 
+     sget-object p2, Ljava/util/Locale;->UK:Ljava/util/Locale;
+ 
