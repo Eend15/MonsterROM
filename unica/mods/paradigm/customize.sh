@@ -832,6 +832,39 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 subject_cpu
+    MODPATH="$PARADIGM_MODPATH/qpr2/subject_cpu"
+    LOG_STEP_IN "- Adding QPR2 subject_cpu"
+    # Standalone preview only. Never advertise a working live subject extension.
+    if [ "${UN1CA_QPR2_SUBJECT_CPU_PREVIEW:-false}" = "true" ]; then
+        [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ] || {
+            ABORT "Subject CPU preview was reviewed only for the Samsung SDK-37 cohort"
+            return 1
+        }
+        QPR2_SOURCE_FW="$(cut -d '/' -f 1,2 <<< "$SOURCE_FIRMWARE" | tr '/' '_')"
+        [ "$(sha256sum "$FW_DIR/$QPR2_SOURCE_FW/system/system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk" | cut -d ' ' -f 1)" = \
+            "02b170921cd511e4dbb69c642db9af1e70548867a293861808ed0b7e46eca414" ] || {
+            ABORT "Subject preview needs the reviewed CameraExtensionsProxy baseline"
+            return 1
+        }
+        (cd "$MODPATH" && sha256sum -c payload.sha256) || return 1
+        DECODE_APK "system" "system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk"
+        QPR2_SUBJECT_APK="$APKTOOL_DIR/system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk"
+        for QPR2_SUBJECT_FILE in lib/arm64-v8a/libunica_subject_cpu.so lib/arm64-v8a/libtensorflowlite_c.2.16.1.camera.samsung.so assets/unica/subject-humanseg.tflite; do
+            [ ! -e "$QPR2_SUBJECT_APK/$QPR2_SUBJECT_FILE" ] || {
+                ABORT "Refusing to overwrite an existing subject preview asset"
+                return 1
+            }
+        done
+        EVAL "mkdir -p \"$QPR2_SUBJECT_APK/lib/arm64-v8a\" \"$QPR2_SUBJECT_APK/assets/unica\""
+        EVAL "cp -a \"$MODPATH/files/arm64-v8a/libunica_subject_cpu.so\" \"$MODPATH/files/arm64-v8a/libtensorflowlite_c.2.16.1.camera.samsung.so\" \"$QPR2_SUBJECT_APK/lib/arm64-v8a/\""
+        EVAL "cp -a \"$MODPATH/files/assets/unica/subject-humanseg.tflite\" \"$QPR2_SUBJECT_APK/assets/unica/subject-humanseg.tflite\""
+        APPLY_PATCH "system" "system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk" \
+            "$MODPATH/patches/CameraExtensionsProxy.apk/0001-Add-real-humanseg-CPU-preview-without-advertising-a-live-extension.patch"
+        unset QPR2_SOURCE_FW QPR2_SUBJECT_APK QPR2_SUBJECT_FILE
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
