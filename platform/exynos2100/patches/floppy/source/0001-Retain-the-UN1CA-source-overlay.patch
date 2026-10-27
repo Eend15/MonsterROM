@@ -1,0 +1,583 @@
+diff --git a/Makefile b/Makefile
+index 118bada7a..01bbcc8b1 100644
+--- a/Makefile
++++ b/Makefile
+@@ -921,6 +921,9 @@ endif
+ ifdef CONFIG_LTO_CLANG
+ ifdef CONFIG_THINLTO
+ CC_FLAGS_LTO_CLANG := -flto=thin -funified-lto -fno-split-lto-unit
++ifneq ($(KERNEL_BUILD_JOBS),)
++KBUILD_LDFLAGS += --thinlto-jobs=$(KERNEL_BUILD_JOBS) --threads=$(KERNEL_BUILD_JOBS)
++endif
+ ifeq ($(USE_THINLTO_CACHE),1)
+ KBUILD_LDFLAGS	+= --thinlto-cache-dir=.thinlto-cache
+ endif
+diff --git a/build/ckbuild.sh b/build/ckbuild.sh
+index 8a0b69e58..0382754b4 100755
+--- a/build/ckbuild.sh
++++ b/build/ckbuild.sh
+@@ -31,7 +31,7 @@ if [ ! -d drivers ]; then
+     exit 1
+ fi
+ 
+-export KBUILD_BUILD_TIMESTAMP="$(LC_ALL=C date)"
++export KBUILD_BUILD_TIMESTAMP="${KBUILD_BUILD_TIMESTAMP:-$(LC_ALL=C date)}"
+ export PATH="$(pwd)/build/bin:$PATH"
+ 
+ AK3_BRANCH="${AK3_BRANCH:-floppy-unity}"
+@@ -210,7 +210,9 @@ echo -e "\n$(log_info "Build info:")
+ [ -d "$IMAGES_DIR" ] && rm -rf "$IMAGES_DIR" || true
+ mkdir -p "$IMAGES_DIR"
+ 
+-source "$SCRIPTS_DIR/deps.sh"
++if [ "${SKIP_BUILD_DEPENDENCY_SETUP:-0}" != "1" ]; then
++    source "$SCRIPTS_DIR/deps.sh"
++fi
+ source "$SCRIPTS_DIR/tc.sh"
+ source "$SCRIPTS_DIR/build.sh"
+ source "$SCRIPTS_DIR/post.sh"
+diff --git a/build/scripts/build.sh b/build/scripts/build.sh
+index 77a929c0f..c42fd16ad 100755
+--- a/build/scripts/build.sh
++++ b/build/scripts/build.sh
+@@ -29,14 +29,14 @@ build() {
+ 
+     rm -rf "$MOD_OUTDIR" 2>/dev/null
+ 
+-    FRAGMENTS=""
++    FRAGMENTS="${EXTRA_CONFIG_FRAGMENTS:-}"
+     [ "$DO_KSU" = "1" ] && FRAGMENTS="$FRAGMENTS ksu.config"
+     [ "$DO_SUKI" = "1" ] && FRAGMENTS="$FRAGMENTS sukisu.config"
+     [ "$DO_XXKSU" = "1" ] && FRAGMENTS="$FRAGMENTS xxksu.config"
+     [ "$DO_NHMOD" = "1" ] && [ "$DO_REGEN" != "1" ] && FRAGMENTS="$FRAGMENTS nethunter.config"
+     [ "$DROIDSPACES" = "1" ] && [ "$DO_REGEN" != "1" ] && FRAGMENTS="$FRAGMENTS droidspaces.config"
+ 
+-    MAKE_JOBS="-j$(nproc --all)"
++    MAKE_JOBS="-j${KERNEL_BUILD_JOBS:-$(nproc --all)}"
+     MAKE_COMMON_ARGS=(
+         O="$OUTDIR"
+         CC="$CC"
+diff --git a/build/scripts/post.sh b/build/scripts/post.sh
+index b2e981702..9fe508ce3 100755
+--- a/build/scripts/post.sh
++++ b/build/scripts/post.sh
+@@ -75,6 +75,10 @@ kernel_modules() {
+ }
+ 
+ clean_tmp() {
++    if [ "${KEEP_KERNEL_BUILD_INTERMEDIATES:-0}" = "1" ]; then
++        log_info "Keeping compiled modules and vendor ramdisk for ABI verification"
++        return 0
++    fi
+     log_info "Cleaning after build..."
+     rm -rf "$TMPDIR" "$MOD_OUTDIR"
+     echo
+diff --git a/drivers/dma-buf/heaps/samsung/Kconfig b/drivers/dma-buf/heaps/samsung/Kconfig
+index 3ba1d2ee9..78b74c4ca 100644
+--- a/drivers/dma-buf/heaps/samsung/Kconfig
++++ b/drivers/dma-buf/heaps/samsung/Kconfig
+@@ -11,6 +11,17 @@ config DMABUF_SAMSUNG_HEAPS
+ 	  This options creates per heap chardevs in /dev/dma_heap/* which allows
+ 	  userspace to allocate dma-bufs that can be shared between drivers.
+ 
++config DMABUF_HEAPS_ION_COMPAT
++	bool "Keep legacy Samsung ION clients with DMA-BUF system heaps"
++	depends on DMABUF_SAMSUNG_HEAPS && ION
++	select DMABUF_HEAPS_SAMSUNG_SYSTEM
++	help
++	  Enable the cached and uncached Samsung system DMA-BUF heaps while
++	  preserving ION for existing vendor HALs, camera, DSP and protected
++	  media. Reserved-memory and secure heaps remain owned exclusively by
++	  ION, avoiding duplicate carveout and secure-IOVA allocators.
++	  The dma_buf_env boot feature still controls the DMA-BUF system heaps.
++
+ config DMABUF_HEAPS_SAMSUNG_CHUNK
+ 	bool "DMA-BUF CHUNK Samsung Heap"
+ 	help
+diff --git a/drivers/dma-buf/heaps/samsung/dma-buf-trace.c b/drivers/dma-buf/heaps/samsung/dma-buf-trace.c
+index da68893e6..1041851ef 100644
+--- a/drivers/dma-buf/heaps/samsung/dma-buf-trace.c
++++ b/drivers/dma-buf/heaps/samsung/dma-buf-trace.c
+@@ -958,7 +958,9 @@ static const struct file_operations dmabuf_trace_fops = {
+ 
+ static struct miscdevice dmabuf_trace_dev = {
+ 	.minor = MISC_DYNAMIC_MINOR,
+-	.name = "dmabuf_trace",
++	/* ION's existing tracer already owns /dev/dmabuf_trace in coexistence. */
++	.name = IS_ENABLED(CONFIG_DMABUF_HEAPS_ION_COMPAT) ?
++		"dmabuf_heap_trace" : "dmabuf_trace",
+ 	.fops = &dmabuf_trace_fops,
+ };
+ 
+diff --git a/drivers/dma-buf/heaps/samsung/hpa_heap.c b/drivers/dma-buf/heaps/samsung/hpa_heap.c
+index 73bb94b83..4d03c9351 100644
+--- a/drivers/dma-buf/heaps/samsung/hpa_heap.c
++++ b/drivers/dma-buf/heaps/samsung/hpa_heap.c
+@@ -970,7 +970,7 @@ static int __init hpa_dma_heap_init(void)
+ 	struct dma_heap *dma_heap;
+ 	int ret, i = 0;
+ 
+-	if (!is_dma_buf_env()) {
++	if (!is_dma_buf_exclusive()) {
+ 		pr_info("FK_FEATURE_ENABLE_DMA_BUF is disabled so HPA dma-heap can't probe\n");
+ 		return 0;
+ 	}
+diff --git a/drivers/dma-buf/heaps/samsung/samsung_heap.c b/drivers/dma-buf/heaps/samsung/samsung_heap.c
+index ca0e478f2..1982775ce 100644
+--- a/drivers/dma-buf/heaps/samsung/samsung_heap.c
++++ b/drivers/dma-buf/heaps/samsung/samsung_heap.c
+@@ -459,6 +459,10 @@ static void dma_heap_add_exception_area(void)
+ 	}
+ }
+ 
++static char *allocator_mode = "disabled";
++module_param(allocator_mode, charp, 0444);
++MODULE_PARM_DESC(allocator_mode, "Active allocator ABI (read-only)");
++
+ static int __init samsung_dma_heap_init(void)
+ {
+ 	int ret;
+@@ -468,6 +472,23 @@ static int __init samsung_dma_heap_init(void)
+ 		return 0;
+ 	}
+ 
++	if (IS_ENABLED(CONFIG_DMABUF_HEAPS_ION_COMPAT)) {
++		ret = dmabuf_trace_create();
++		if (ret)
++			return ret;
++		/* Create tracing before registering the allocator's callbacks. */
++		ret = system_dma_heap_init();
++		if (ret) {
++			dmabuf_trace_remove();
++			return ret;
++		}
++		dma_heap_add_exception_area();
++		dma_heap_debug_init();
++		allocator_mode = "dma-buf-system+legacy-ion";
++		pr_info("DMA-BUF system heaps enabled; legacy ION ABI and secure owners retained\n");
++		return 0;
++	}
++
+ 	ret = chunk_dma_heap_init();
+ 	if (ret)
+ 		return ret;
+@@ -494,6 +515,7 @@ static int __init samsung_dma_heap_init(void)
+ 
+ 	dma_heap_add_exception_area();
+ 	dma_heap_debug_init();
++	allocator_mode = "dma-buf-exclusive";
+ 
+ 	return 0;
+ err_rbin:
+@@ -512,6 +534,13 @@ static int __init samsung_dma_heap_init(void)
+ 
+ static void __exit samsung_dma_heap_exit(void)
+ {
++	if (!is_dma_buf_env())
++		return;
++	if (IS_ENABLED(CONFIG_DMABUF_HEAPS_ION_COMPAT)) {
++		system_dma_heap_exit();
++		dmabuf_trace_remove();
++		return;
++	}
+ 	rbin_dma_heap_exit();
+ 	dmabuf_trace_remove();
+ 	system_dma_heap_exit();
+diff --git a/drivers/iommu/samsung-iommu.c b/drivers/iommu/samsung-iommu.c
+index 2addf536d..80c57df48 100755
+--- a/drivers/iommu/samsung-iommu.c
++++ b/drivers/iommu/samsung-iommu.c
+@@ -1013,7 +1013,7 @@ samsung_sysmmu_get_resv_regions(struct device *dev, struct list_head *head)
+ 	struct platform_device *pdev;
+ 	int ret;
+ 
+-	if (!is_dma_buf_env()) {
++	if (!is_dma_buf_exclusive()) {
+ 		pr_info("Reserved iova mapping can't be registered on ION mode\n");
+ 		return;
+ 	}
+diff --git a/drivers/iommu/samsung-secure-iova.c b/drivers/iommu/samsung-secure-iova.c
+index fc565b885..1f4efd1ea 100644
+--- a/drivers/iommu/samsung-secure-iova.c
++++ b/drivers/iommu/samsung-secure-iova.c
+@@ -65,7 +65,7 @@ static int __init samsung_secure_iova_init(void)
+ 	phys_addr_t base = SECURE_DMA_BASE, size = SECURE_DMA_SIZE;
+ 	int ret;
+ 
+-	if (!is_dma_buf_env()) {
++	if (!is_dma_buf_exclusive()) {
+ 		pr_info("FK_FEATURE_ENABLE_DMA_BUF is disabled so Secure IOVA can't probe\n");
+ 		return 0;
+ 	}
+diff --git a/drivers/media/platform/exynos/camera/is-mem_v2.c b/drivers/media/platform/exynos/camera/is-mem_v2.c
+index a0d362e2a..790169bcf 100755
+--- a/drivers/media/platform/exynos/camera/is-mem_v2.c
++++ b/drivers/media/platform/exynos/camera/is-mem_v2.c
+@@ -1597,7 +1597,7 @@ int is_mem_init(struct is_mem *mem, struct platform_device *pdev)
+ 
+ 	if (IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS) && IS_ENABLED(CONFIG_ION)) {
+ 		/* both allocators built: runtime-select */
+-		if (is_dma_buf_env()) {
++		if (is_dma_buf_exclusive()) {
+ 			mem->is_mem_ops = &pablo_mem_ops_dmabuf_heap;
+ 			mem->priv = CALL_PTR_MEMOP(mem, init, pdev);
+ 			if (IS_ERR(mem->priv))
+diff --git a/drivers/media/platform/exynos/mfc/mfc_buf.c b/drivers/media/platform/exynos/mfc/mfc_buf.c
+index 0246a08d3..503853531 100755
+--- a/drivers/media/platform/exynos/mfc/mfc_buf.c
++++ b/drivers/media/platform/exynos/mfc/mfc_buf.c
+@@ -730,7 +730,7 @@ int mfc_alloc_firmware(struct mfc_core *core)
+ 	}
+ 
+ #if IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS) && IS_ENABLED(CONFIG_SAMSUNG_SECURE_IOVA)
+-	if (is_dma_buf_env()) {
++	if (is_dma_buf_exclusive()) {
+ 		/* allocate Secure-DVA region */
+ 		secure_daddr = secure_iova_alloc(core->drm_fw_buf.size,
+ 				EXYNOS_SECBUF_PROT_ALIGNMENTS);
+@@ -855,7 +855,7 @@ int mfc_release_firmware(struct mfc_core *core)
+ #if IS_ENABLED(CONFIG_EXYNOS_CONTENT_PATH_PROTECTION)
+ 	/* free Secure-DVA region */
+ #if IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS) && IS_ENABLED(CONFIG_SAMSUNG_SECURE_IOVA)
+-	if (is_dma_buf_env()) {
++	if (is_dma_buf_exclusive()) {
+ 		if (core->drm_fw_buf.daddr)
+ 			secure_iova_free(core->drm_fw_buf.daddr, core->drm_fw_buf.size);
+ 		core->drm_fw_buf.daddr = 0;
+diff --git a/drivers/media/platform/exynos/mfc/mfc_core_ops.c b/drivers/media/platform/exynos/mfc/mfc_core_ops.c
+index d9f6d0798..c7fa68671 100755
+--- a/drivers/media/platform/exynos/mfc/mfc_core_ops.c
++++ b/drivers/media/platform/exynos/mfc/mfc_core_ops.c
+@@ -55,7 +55,7 @@ static int __mfc_core_init(struct mfc_core *core, struct mfc_ctx *ctx)
+ 		core->fw.drm_status = 0;
+ 	} else {
+ #if IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS)
+-		if (is_dma_buf_env()) {
++		if (is_dma_buf_exclusive()) {
+ 			phys_addr_t protdesc_phys;
+ 			dma_addr_t protdesc_daddr;
+ 
+@@ -101,7 +101,7 @@ static int __mfc_core_init(struct mfc_core *core, struct mfc_ctx *ctx)
+ 			call_dop(core, dump_and_stop_debug_mode, core);
+ 			core->fw.drm_status = 0;
+ #if IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS)
+-			if (is_dma_buf_env() && core->drm_fw_prot) {
++			if (is_dma_buf_exclusive() && core->drm_fw_prot) {
+ 				phys_addr_t protdesc_phys = virt_to_phys(core->drm_fw_prot);
+ 
+ 				exynos_smc(SMC_DRM_PPMP_UNPROT, protdesc_phys, 0, 0);
+@@ -175,7 +175,7 @@ static int __mfc_core_init(struct mfc_core *core, struct mfc_ctx *ctx)
+ 		}
+ 
+ #if IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS)
+-		if (is_dma_buf_env() && core->drm_fw_prot) {
++		if (is_dma_buf_exclusive() && core->drm_fw_prot) {
+ 			phys_addr_t protdesc_phys = virt_to_phys(core->drm_fw_prot);
+ 
+ 			smc_ret = exynos_smc(SMC_DRM_PPMP_UNPROT, protdesc_phys, 0, 0);
+@@ -300,7 +300,7 @@ static int __mfc_core_deinit(struct mfc_core *core, struct mfc_ctx *ctx)
+ 			}
+ 
+ #if IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS)
+-			if (is_dma_buf_env() && core->drm_fw_prot) {
++			if (is_dma_buf_exclusive() && core->drm_fw_prot) {
+ 				phys_addr_t protdesc_phys = virt_to_phys(core->drm_fw_prot);
+ 
+ 				/* Request buffer Secure-DVA unset */
+diff --git a/drivers/media/platform/exynos/mfc/mfc_mem.c b/drivers/media/platform/exynos/mfc/mfc_mem.c
+index ad7d0bfd7..2fc3c51b1 100755
+--- a/drivers/media/platform/exynos/mfc/mfc_mem.c
++++ b/drivers/media/platform/exynos/mfc/mfc_mem.c
+@@ -395,7 +395,7 @@ int mfc_mem_special_buf_alloc(struct mfc_dev *dev,
+ {
+ #if IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS) && IS_ENABLED(CONFIG_ION_EXYNOS)
+ 	/* both allocators built: runtime-select */
+-	if (is_dma_buf_env()) {
++	if (is_dma_buf_exclusive()) {
+ 		if (special_buf->buftype == MFCBUF_DRM_FW)
+ 			return mfc_mem_fw_alloc(dev, special_buf);
+ 		return mfc_mem_dma_heap_alloc(dev, special_buf);
+@@ -418,7 +418,7 @@ void mfc_mem_special_buf_free(struct mfc_dev *dev, struct mfc_special_buf *speci
+ {
+ #if IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS) && IS_ENABLED(CONFIG_ION_EXYNOS)
+ 	/* both allocators built: runtime-select */
+-	if (is_dma_buf_env()) {
++	if (is_dma_buf_exclusive()) {
+ 		if (special_buf->buftype == MFCBUF_DRM_FW)
+ 			mfc_mem_fw_free(dev, special_buf);
+ 		else
+@@ -813,7 +813,7 @@ int mfc_iommu_map_firmware(struct mfc_core *core, struct mfc_special_buf *fw_buf
+ {
+ #if IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS) && IS_ENABLED(CONFIG_ION_EXYNOS)
+ 	/* both allocators built: runtime-select */
+-	if (is_dma_buf_env())
++	if (is_dma_buf_exclusive())
+ 		return mfc_iommu_map_firmware_dmabuf(core, fw_buf);
+ 	return mfc_iommu_map_firmware_ion(core, fw_buf);
+ #elif IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS)
+@@ -872,7 +872,7 @@ void mfc_check_iova(struct mfc_dev *dev)
+ 	struct mfc_ctx *ctx;
+ 	unsigned long total_iova = 0;
+ 
+-	if (!is_dma_buf_env()) {
++	if (!is_dma_buf_exclusive()) {
+ 		dev->skip_lazy_unmap = 1;
+ 		return;
+ 	}
+diff --git a/drivers/media/platform/exynos/scaler/scaler-core.c b/drivers/media/platform/exynos/scaler/scaler-core.c
+index 8596c5f86..231cd8c0e 100755
+--- a/drivers/media/platform/exynos/scaler/scaler-core.c
++++ b/drivers/media/platform/exynos/scaler/scaler-core.c
+@@ -2144,7 +2144,7 @@ static void destroy_intermediate_frame(struct sc_ctx *ctx)
+ 	if (ctx->i_frame) {
+ 		free_intermediate_frame(ctx);
+ #if IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS)
+-		if (is_dma_buf_env() && ctx->i_frame->dma_heap)
++		if (is_dma_buf_exclusive() && ctx->i_frame->dma_heap)
+ 			dma_heap_put(ctx->i_frame->dma_heap);
+ #endif
+ 		kfree(ctx->i_frame);
+@@ -2161,7 +2161,7 @@ alloc_intermediate_buffer(struct device *dev,
+ {
+ #if IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS) && IS_ENABLED(CONFIG_ION)
+ 	/* both allocators built: runtime-select */
+-	if (is_dma_buf_env())
++	if (is_dma_buf_exclusive())
+ 		iframe->dma_buf[i] = dma_heap_buffer_alloc(
+ 					iframe->dma_heap, size, 0, 0);
+ 	else
+@@ -2272,7 +2272,7 @@ static bool initialize_initermediate_frame(struct sc_ctx *ctx)
+ 
+ #if IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS) && IS_ENABLED(CONFIG_ION)
+ 	/* both allocators built: runtime-select */
+-	if (is_dma_buf_env()) {
++	if (is_dma_buf_exclusive()) {
+ 		if (test_bit(CTX_INT_FRAME_CP, &ctx->flags))
+ 			heap_name = "vscaler-secure";
+ 		else
+@@ -2352,7 +2352,7 @@ static bool initialize_initermediate_frame(struct sc_ctx *ctx)
+ err_ion_alloc:
+ 	free_intermediate_frame(ctx);
+ #if IS_ENABLED(CONFIG_DMABUF_SAMSUNG_HEAPS)
+-	if (is_dma_buf_env() && ctx->i_frame->dma_heap)
++	if (is_dma_buf_exclusive() && ctx->i_frame->dma_heap)
+ 		dma_heap_put(ctx->i_frame->dma_heap);
+ #endif
+ 	return false;
+diff --git a/drivers/soc/samsung/cal-if/Makefile b/drivers/soc/samsung/cal-if/Makefile
+index 2cc5860b8..733d01613 100755
+--- a/drivers/soc/samsung/cal-if/Makefile
++++ b/drivers/soc/samsung/cal-if/Makefile
+@@ -5,7 +5,8 @@
+ # Object files in subdirectories
+ 
+ obj-$(CONFIG_CAL_IF)			+= cmupmucal.o
+-cmupmucal-y				+= cal-if.o cmucal.o ra.o vclk.o pll_spec.o cmucal-debug.o
++cmupmucal-y				+= cal-if.o cmucal.o ra.o vclk.o pll_spec.o
++cmupmucal-$(CONFIG_CMUCAL_DEBUG)	+= cmucal-debug.o
+ cmupmucal-$(CONFIG_PMUCAL)		+= pmucal_system.o pmucal_local.o pmucal_cpu.o pmucal_rae.o pmucal_powermode.o
+ cmupmucal-$(CONFIG_PMUCAL_DBG)		+= pmucal_dbg.o
+ cmupmucal-$(CONFIG_SOC_EXYNOS9820)	+= exynos9820/cal_data.o
+diff --git a/drivers/soc/samsung/exynos-pd.c b/drivers/soc/samsung/exynos-pd.c
+index 51f663902..b90fcd232 100755
+--- a/drivers/soc/samsung/exynos-pd.c
++++ b/drivers/soc/samsung/exynos-pd.c
+@@ -547,7 +547,8 @@ static int exynos_pd_probe(struct platform_device *pdev)
+ 	}
+ 
+ #ifdef CONFIG_DEBUG_FS
+-	cal_register_pd_lookup_cmu_id(exynos_pd_lookup_cmu_id);
++	if (IS_ENABLED(CONFIG_CMUCAL_DEBUG))
++		cal_register_pd_lookup_cmu_id(exynos_pd_lookup_cmu_id);
+ #endif
+ 	dev_info(dev, EXYNOS_PD_PREFIX "PM Domain Initialize\n");
+ 	return ret;
+diff --git a/drivers/staging/android/ion/exynos/ion_exynos.c b/drivers/staging/android/ion/exynos/ion_exynos.c
+index 3d115a809..517416a20 100755
+--- a/drivers/staging/android/ion/exynos/ion_exynos.c
++++ b/drivers/staging/android/ion/exynos/ion_exynos.c
+@@ -648,7 +648,7 @@ static int __init ion_exynos_init(void)
+ {
+ 	int ret;
+ 
+-	if (is_dma_buf_env()) {
++	if (is_dma_buf_exclusive()) {
+ 		pr_info("FK_FEATURE_ENABLE_DMA_BUF is enabled so ION Exynos can't probe\n");
+ 		return 0;
+ 	}
+diff --git a/drivers/staging/android/ion/exynos/ion_hpa_heap.c b/drivers/staging/android/ion/exynos/ion_hpa_heap.c
+index a1d73a2e2..c0d3a6970 100755
+--- a/drivers/staging/android/ion/exynos/ion_hpa_heap.c
++++ b/drivers/staging/android/ion/exynos/ion_hpa_heap.c
+@@ -327,8 +327,7 @@ static int ion_hpa_allocate(struct ion_heap *heap,
+ 			    unsigned long flags)
+ {
+ 	struct ion_hpa_heap *hpa_heap = to_hpa_heap(heap);
+-	unsigned int count =
+-		(unsigned int)ION_HPA_PAGE_COUNT((unsigned int)len);
++	unsigned int count = DIV_ROUND_UP(len, ION_HPA_CHUNK_SIZE);
+ 	size_t desc_size = sizeof(struct page *) * count;
+ 	struct page **pages;
+ 	unsigned long *phys;
+@@ -339,7 +338,7 @@ static int ion_hpa_allocate(struct ion_heap *heap,
+ 
+ 	ion_bltin_event_begin();
+ 
+-	if (count > HPA_MAX_CHUNK_COUNT) {
++	if (!len || len > HPA_MAX_CHUNK_COUNT * ION_HPA_CHUNK_SIZE) {
+ 		pr_info("ION HPA heap does not allow buffers > %zu\n",
+ 			HPA_MAX_CHUNK_COUNT * ION_HPA_CHUNK_SIZE);
+ 		return -ENOMEM;
+@@ -381,6 +380,12 @@ static int ion_hpa_allocate(struct ion_heap *heap,
+ 	}
+ 
+ 	buffer->sg_table = sgt;
++	/*
++	 * HPA exports whole zeroed 64-KiB chunks. Advertise that actual size,
++	 * as the DMA-BUF HPA exporter does, so importers do not see an SG list
++	 * larger than dma_buf->size (e.g. a 4-KiB request backed by 64 KiB).
++	 */
++	buffer->size = (unsigned long)count * ION_HPA_CHUNK_SIZE;
+ 	ion_buffer_prep_noncached(buffer);
+ 
+ 	if (protected) {
+@@ -466,7 +471,7 @@ static int __init exynos_hpa_init(void)
+ {
+ 	int ret, i = 0;
+ 
+-	if (is_dma_buf_env()) {
++	if (is_dma_buf_exclusive()) {
+ 		pr_info("FK_FEATURE_ENABLE_DMA_BUF is enabled so ION HPA heap can't probe\n");
+ 		return 0;
+ 	}
+diff --git a/drivers/staging/android/ion/heaps/ion_exynos_system_heap.c b/drivers/staging/android/ion/heaps/ion_exynos_system_heap.c
+index 818b9795a..078911f7c 100755
+--- a/drivers/staging/android/ion/heaps/ion_exynos_system_heap.c
++++ b/drivers/staging/android/ion/heaps/ion_exynos_system_heap.c
+@@ -297,7 +297,7 @@ static int __init ion_system_heap_init(void)
+ 	struct device *dev;
+ 	int ret = -ENOMEM;
+ 
+-	if (is_dma_buf_env()) {
++	if (is_dma_buf_exclusive()) {
+ 		pr_info("FK_FEATURE_ENABLE_DMA_BUF is enabled so ION exynos system heap can't probe\n");
+ 		return 0;
+ 	}
+diff --git a/drivers/staging/android/ion/heaps/ion_rbin_heap.c b/drivers/staging/android/ion/heaps/ion_rbin_heap.c
+index a3c66b972..2d9d82e33 100755
+--- a/drivers/staging/android/ion/heaps/ion_rbin_heap.c
++++ b/drivers/staging/android/ion/heaps/ion_rbin_heap.c
+@@ -476,7 +476,7 @@ static struct platform_driver ion_rbin_heap_driver = {
+ 
+ int __init ion_rbin_heap_init(void)
+ {
+-	if (is_dma_buf_env()) {
++	if (is_dma_buf_exclusive()) {
+ 		pr_info("FK_FEATURE_ENABLE_DMA_BUF is enabled so ION rbin heap can't probe\n");
+ 		return 0;
+ 	}
+diff --git a/drivers/staging/android/ion/heaps/ion_system_heap.c b/drivers/staging/android/ion/heaps/ion_system_heap.c
+index f989c35d2..8f6d69e49 100644
+--- a/drivers/staging/android/ion/heaps/ion_system_heap.c
++++ b/drivers/staging/android/ion/heaps/ion_system_heap.c
+@@ -293,7 +293,7 @@ static int __init ion_system_heap_init(void)
+ {
+ 	int ret;
+ 
+-	if (is_dma_buf_env()) {
++	if (is_dma_buf_exclusive()) {
+ 		pr_info("FK_FEATURE_ENABLE_DMA_BUF is enabled so ION system heap can't probe\n");
+ 		return 0;
+ 	}
+diff --git a/drivers/staging/android/ion/ion.c b/drivers/staging/android/ion/ion.c
+index 893f39afe..4f93e2ad3 100644
+--- a/drivers/staging/android/ion/ion.c
++++ b/drivers/staging/android/ion/ion.c
+@@ -536,7 +536,7 @@ static int ion_device_create(void)
+ 	struct ion_device *idev;
+ 	int ret;
+ 
+-	if (is_dma_buf_env()) {
++	if (is_dma_buf_exclusive()) {
+ 		pr_info("FK_FEATURE_ENABLE_DMA_BUF is enabled so ION can't probe\n");
+ 		return 0;
+ 	}
+diff --git a/drivers/staging/android/ion/ion_buffer.c b/drivers/staging/android/ion/ion_buffer.c
+index 917115a90..2ac2d7eed 100644
+--- a/drivers/staging/android/ion/ion_buffer.c
++++ b/drivers/staging/android/ion/ion_buffer.c
+@@ -69,7 +69,7 @@ static struct ion_buffer *ion_buffer_create(struct ion_heap *heap,
+ 
+ 	spin_lock(&heap->stat_lock);
+ 	heap->num_of_buffers++;
+-	heap->num_of_alloc_bytes += len;
++	heap->num_of_alloc_bytes += buffer->size;
+ 	if (heap->num_of_alloc_bytes > heap->alloc_bytes_wm)
+ 		heap->alloc_bytes_wm = heap->num_of_alloc_bytes;
+ 	if (heap->num_of_buffers == 1) {
+diff --git a/drivers/vision/dsp/hardware/O1/dsp-hw-o1-memory.c b/drivers/vision/dsp/hardware/O1/dsp-hw-o1-memory.c
+index f01580094..cb5263206 100755
+--- a/drivers/vision/dsp/hardware/O1/dsp-hw-o1-memory.c
++++ b/drivers/vision/dsp/hardware/O1/dsp-hw-o1-memory.c
+@@ -781,7 +781,7 @@ static int dsp_hw_o1_memory_probe(struct dsp_system *sys)
+ 	struct dsp_reserved_mem *rmem;
+ 
+ 	dsp_enter();
+-	if (is_dma_buf_env()) {
++	if (is_dma_buf_exclusive()) {
+ 		dsp_info("FK_FEATURE_ENABLE_DMA_BUF is enabled so DSP O1 memory can't probe\n");
+ 		return -ENODEV;
+ 	}
+diff --git a/include/linux/workarounds.h b/include/linux/workarounds.h
+index 536c0b3b6..d72e15315 100644
+--- a/include/linux/workarounds.h
++++ b/include/linux/workarounds.h
+@@ -10,6 +10,13 @@ bool is_init_debug_enabled(void);
+ bool is_dma_buf_env(void);
+ bool is_panel_legacy_mode(void);
+ 
++/* Retain the legacy vendor ION ABI alongside the real system DMA-BUF heaps. */
++static inline bool is_dma_buf_exclusive(void)
++{
++	return is_dma_buf_env() &&
++		!IS_ENABLED(CONFIG_DMABUF_HEAPS_ION_COMPAT);
++}
++
+ #if defined(CONFIG_DEFAULT_SUPPORT_AOSP)
+ static inline bool is_aosp_mode(void)
+ {
+diff --git a/init/main.c b/init/main.c
+index b51bfac3f..7ded412d9 100644
+--- a/init/main.c
++++ b/init/main.c
+@@ -197,7 +197,7 @@ static char uname_bpf_spoof_default_arg[] = "uname_bpf_spoof=0";
+ static bool mass_storage_hack;
+ static char mass_storage_hack_default_arg[] = "mass_storage_hack=0";
+ static int selinux_mode = FK_SELINUX_MODE_DEFAULT;
+-static char selinux_mode_default_arg[] = "selinux_mode=0";
++static char selinux_mode_default_arg[] = "selinux_mode=2";
+ static int default_sbwc_mode = FK_SBWC_MODE_FULL;
+ static char default_sbwc_mode_default_arg[] = "default_sbwc_mode=0";
+ static bool init_protection = true;
+@@ -206,10 +206,10 @@ static bool init_debug;
+ static char init_debug_default_arg[] = "init_debug=0";
+ 
+ // Initialize to something
+-char mali_selected_version[8] = "r38p1";
++char mali_selected_version[8] = "r54p3";
+ EXPORT_SYMBOL(mali_selected_version);
+ // Actual consumed value
+-static char mali_selected_version_arg[] = "mali.version=r38p1";
++static char mali_selected_version_arg[] = "mali.version=r54p3";
+ 
+ #if !defined(CONFIG_DEFAULT_SUPPORT_AOSP)
+ static bool aosp_mode;
+@@ -488,7 +488,7 @@ bool is_init_debug_enabled(void)
+ }
+ 
+ static bool dma_buf_env;
+-static char dma_buf_env_default_arg[] = "dma_buf_env=0";
++static char dma_buf_env_default_arg[] = "dma_buf_env=1";
+ 
+ static int __init set_dma_buf_env(char *val)
+ {
