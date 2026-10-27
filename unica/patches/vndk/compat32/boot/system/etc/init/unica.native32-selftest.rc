@@ -1,0 +1,7 @@
+# Native ARM32 support is independent of the 64-bit-only Android app ABI.
+# Both services retain their stock failure/reboot and SELinux contracts.
+on early-init && property:ro.unica.compat32=s21fe-api36-native-only
+    exec_start boringssl_self_test32_vendor
+
+on init && property:ro.unica.compat32=s21fe-api36-native-only
+    exec_start boringssl_self_test32
