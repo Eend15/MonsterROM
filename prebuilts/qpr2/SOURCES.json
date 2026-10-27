@@ -1,0 +1,48 @@
+{
+  "gsi_build": "CP41.260831.007.A3",
+  "inputs": [
+    {
+      "kind": "whole-original-signed-APEX",
+      "module": "com.android.sdkext",
+      "source": "/mnt/g/crb_327_Patched/crb_327/Projects/android17QPR2gsi/ROM/system/system/apex/com.google.android.sdkext.apex",
+      "repository_path": "prebuilts/qpr2/system/system/apex/com.google.android.sdkext.apex",
+      "sha256": "ed540f04188bc554f0599ad0e3a12b8c9619773ede7f1841b5ea0ef496abcafd"
+    },
+    {
+      "kind": "whole-original-signed-APEX",
+      "module": "com.android.tzdata",
+      "source": "/mnt/g/crb_327_Patched/crb_327/Projects/android17QPR2gsi/ROM/system/system/apex/com.google.android.tzdata6.apex",
+      "repository_path": "prebuilts/qpr2/system/system/apex/com.google.android.tzdata6.apex",
+      "sha256": "d5cae30a04073ca6269154147547903add2de2f4c978d9314af474caca8da6da"
+    },
+    {
+      "kind": "reviewed-arm64-CPU-library",
+      "source": "/mnt/g/crb_327_Patched/crb_327/Projects/android17QPR2gsi/ROM/system/system/lib64/libsonic.so",
+      "repository_path": "prebuilts/qpr2/system/system/lib64/libsonic.so",
+      "sha256": "f042f121adf964023b94440a68915147fe0b26933751bd64e00d147271b496e2",
+      "original_target_sha256": "844628a0577dedc9d62d2d19d1e649c49a6a5220c67b33dea95753b7d03cc165"
+    },
+    {
+      "kind": "reviewed-arm64-CPU-library",
+      "source": "/mnt/g/crb_327_Patched/crb_327/Projects/android17QPR2gsi/ROM/system/system/lib64/libspeexresampler.so",
+      "repository_path": "prebuilts/qpr2/system/system/lib64/libspeexresampler.so",
+      "sha256": "10cff0297f7855c2ccf8de85e409f6426f354ccc495925c669fc722e171ffde9",
+      "original_target_sha256": "ecb46f2f3f963bbfb878fcc633a3e86045dd17138172f56a240f0401f1845842"
+    },
+    {
+      "kind": "reviewed-arm64-CPU-library",
+      "source": "/mnt/g/crb_327_Patched/crb_327/Projects/android17QPR2gsi/ROM/system/system/lib64/libETC1.so",
+      "repository_path": "prebuilts/qpr2/system/system/lib64/libETC1.so",
+      "sha256": "58e3d1383eff9baec395552b6392fd279b65ae769ec6b45bf9704549a6e151d5",
+      "original_target_sha256": "8ea37746fac84a1c5df0ec0476814a92290abe32d74a758d1666538d4bf6f7e2"
+    },
+    {
+      "kind": "whole-original-signed-APEX",
+      "module": "com.android.media.swcodec",
+      "source": "/mnt/g/crb_327_Patched/crb_327/Projects/android17QPR2gsi/ROM/system/system/apex/com.google.android.media.swcodec.apex",
+      "repository_path": "prebuilts/qpr2/system/system/apex/com.google.android.media.swcodec.apex",
+      "sha256": "6b7bd747ccf23aee92dfb041611dfd5d4c7db7d2299d747d41ea3749355cb3db"
+    }
+  ],
+  "private_keys_included": false
+}
