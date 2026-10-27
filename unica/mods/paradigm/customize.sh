@@ -1061,6 +1061,52 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 cpu_leaves
+    MODPATH="$PARADIGM_MODPATH/qpr2/cpu_leaves"
+    LOG_STEP_IN "- Adding QPR2 cpu_leaves"
+    # Selected by the reviewed SDK-37 profile; all retained-provider checks remain.
+    if [ "${UN1CA_QPR2_CPU_LEAVES:-false}" = "true" ]; then
+        [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ] || {
+            ABORT "QPR2 CPU leaves were reviewed only for the Samsung SDK-37 cohort"
+            return 1
+        }
+        [ -n "${UN1CA_QPR2_GSI_DIR:-}" ] && [ -d "$UN1CA_QPR2_GSI_DIR/system/system/lib64" ] || {
+            ABORT "Set UN1CA_QPR2_GSI_DIR to the reviewed CRB android17QPR2gsi/ROM directory"
+            return 1
+        }
+
+        # Preflight the entire set before copying any library. Do not silently replace
+        # a different platform/C++/Bionic cohort merely because symbol names match.
+        [ "$(sha256sum "$WORK_DIR/system/system/lib64/libc++.so" | cut -d ' ' -f 1)" = \
+            "cb118e98c74d3454858921123b9b51ba13df9cad7dfa141dd892c453661a4d78" ] || {
+            ABORT "QPR2 CPU leaves need the reviewed retained Samsung libc++"
+            return 1
+        }
+        PARADIGM_VERIFY_RUNTIME || {
+            ABORT "QPR2 cpu_leaves needs the reviewed unchanged Samsung ARM64 runtime"
+            return 1
+        }
+        while read -r QPR2_LIBRARY QPR2_BASELINE_SHA QPR2_SOURCE_SHA; do
+            QPR2_CURRENT_SHA="$(sha256sum "$WORK_DIR/system/system/lib64/$QPR2_LIBRARY" | cut -d ' ' -f 1)"
+            [ "$QPR2_CURRENT_SHA" = "$QPR2_BASELINE_SHA" ] || [ "$QPR2_CURRENT_SHA" = "$QPR2_SOURCE_SHA" ] || {
+                ABORT "Unreviewed existing CPU library: $QPR2_LIBRARY"
+                return 1
+            }
+            [ "$(sha256sum "$UN1CA_QPR2_GSI_DIR/system/system/lib64/$QPR2_LIBRARY" | cut -d ' ' -f 1)" = "$QPR2_SOURCE_SHA" ] || {
+                ABORT "Unreviewed GSI CPU library: $QPR2_LIBRARY"
+                return 1
+            }
+        done < "$MODPATH/libraries.sha256"
+
+        while read -r QPR2_LIBRARY QPR2_BASELINE_SHA QPR2_SOURCE_SHA; do
+            ADD_TO_WORK_DIR "$UN1CA_QPR2_GSI_DIR" "system" "system/lib64/$QPR2_LIBRARY" \
+                0 0 644 "u:object_r:system_lib_file:s0"
+        done < "$MODPATH/libraries.sha256"
+        SET_PROP "system" "ro.unica.qpr2.cpu_leaves" "sonic,speexresampler,ETC1"
+        unset QPR2_LIBRARY QPR2_BASELINE_SHA QPR2_SOURCE_SHA QPR2_CURRENT_SHA
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
