@@ -1320,7 +1320,14 @@ if ! $SOURCE_WLAN_SUPPORT_MOBILEAP_6G && $TARGET_WLAN_SUPPORT_MOBILEAP_6G; then
         "isSupportMobileAp6G()Z" \
         "true"
 elif $SOURCE_WLAN_SUPPORT_MOBILEAP_6G && ! $TARGET_WLAN_SUPPORT_MOBILEAP_6G; then
-    DELETE_FROM_WORK_DIR "product" "overlay/SoftapOverlay6GHz"
+    if [ -f "$WORK_DIR/product/overlay/SoftapOverlay/SoftapOverlay.apk" ]; then
+        DECODE_APK "product" "overlay/SoftapOverlay/SoftapOverlay.apk"
+        EVAL "sed -i '/name=\"config_wifiSoftap6ghzSupported\"/s/>true</>false</' \"$APKTOOL_DIR/product/overlay/SoftapOverlay/SoftapOverlay.apk/res/values/bools.xml\""
+        EVAL "sed -i '/name=\"config_wifiLocalOnlyHotspot6ghz\"/s/>true</>false</' \"$APKTOOL_DIR/product/overlay/SoftapOverlay/SoftapOverlay.apk/res/values/bools.xml\""
+    fi
+    if [ -d "$WORK_DIR/product/overlay/SoftapOverlay6GHz" ]; then
+        DELETE_FROM_WORK_DIR "product" "overlay/SoftapOverlay6GHz"
+    fi
 
     SMALI_PATCH "system" "system/framework/semwifi-service.jar" \
         "smali/com/samsung/android/server/wifi/ap/SemSoftApConfiguration.smali" "replaceall" \
