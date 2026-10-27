@@ -1,0 +1,20 @@
+Subject: [PATCH] Disable Mainline RescueParty using the original UN1CA policy
+
+The SDK37 observer's boot-loop and package-failure callbacks all use this
+bridge. Keep the Mainline service, watchdog, rollback observer, flags and
+factory-reset policy intact; port the original unconditional disable hook.
+
+diff --git a/smali/com/android/server/RescueParty.smali b/smali/com/android/server/RescueParty.smali
+--- a/smali/com/android/server/RescueParty.smali
++++ b/smali/com/android/server/RescueParty.smali
+@@ -125,9 +125,7 @@
+ .method static bridge synthetic -$$Nest$smisDisabled()Z
+     .locals 1
+ 
+-    invoke-static {}, Lcom/android/server/RescueParty;->isDisabled()Z
+-
+-    move-result v0
++    const/4 v0, 0x1
+ 
+     return v0
+ .end method
