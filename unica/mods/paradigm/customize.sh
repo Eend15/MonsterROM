@@ -199,6 +199,55 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
     fi
     LOG_STEP_OUT
 
+    # QPR2 swcodec
+    MODPATH="$PARADIGM_MODPATH/qpr2/swcodec"
+    LOG_STEP_IN "- Adding QPR2 swcodec"
+    # Keep the original signed whole cohort and its isolated native providers.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ] && [ "${UN1CA_QPR2_SWCODEC:-false}" = "true" ]; then
+        # xHE-AAC keeps its real minor-API gate. Do not install this candidate on
+        # the older profile where that existing codec would stop creating.
+        [ "$(GET_PROP "system" "ro.build.version.sdk_full")" = "37.2" ] || {
+            ABORT "QPR2 software codecs require the reviewed SDK-full 37.2 build profile"
+            return 1
+        }
+        [ "$(sha256sum "$SRC_DIR/prebuilts/qpr2/system/system/apex/com.google.android.media.swcodec.apex" | cut -d ' ' -f 1)" = "6b7bd747ccf23aee92dfb041611dfd5d4c7db7d2299d747d41ea3749355cb3db" ] || {
+            ABORT "Unreviewed QPR2 software-codec input"
+            return 1
+        }
+        if [ -f "$WORK_DIR/system/system/apex/com.google.android.media.swcodec_compressed.apex" ]; then
+            [ "$(sha256sum "$WORK_DIR/system/system/apex/com.google.android.media.swcodec_compressed.apex" | cut -d ' ' -f 1)" = "d66fd3d1b7d3f3686a9ba685dc49199bd6ed8fbe6ed5bccb039768a1a0608fa9" ] || {
+                ABORT "Existing software-codec container has unreviewed changes"
+                return 1
+            }
+        fi
+        if [ -f "$WORK_DIR/system/system/apex/com.google.android.media.swcodec.apex" ]; then
+            [ "$(sha256sum "$WORK_DIR/system/system/apex/com.google.android.media.swcodec.apex" | cut -d ' ' -f 1)" = "6b7bd747ccf23aee92dfb041611dfd5d4c7db7d2299d747d41ea3749355cb3db" ] || {
+                ABORT "Existing new-name software-codec container is unreviewed"
+                return 1
+            }
+        elif [ ! -f "$WORK_DIR/system/system/apex/com.google.android.media.swcodec_compressed.apex" ]; then
+            ABORT "Missing current software-codec container"
+            return 1
+        fi
+        PARADIGM_VERIFY_RUNTIME
+        # This finite platform boundary was actually loaded on both ABIs; do not
+        # flatten source libui/libc++ or weaken linker namespaces to cover changes.
+        while read -r QPR2_CODEC_PROVIDER QPR2_CODEC_SHA; do
+            [ "$(sha256sum "$WORK_DIR/$QPR2_CODEC_PROVIDER" | cut -d ' ' -f 1)" = "$QPR2_CODEC_SHA" ] || {
+                ABORT "Retained software-codec provider changed: $QPR2_CODEC_PROVIDER"
+                return 1
+            }
+        done < "$MODPATH/retained-providers.sha256"
+        ADD_TO_WORK_DIR "$SRC_DIR/prebuilts/qpr2" "system" "system/apex/com.google.android.media.swcodec.apex" 0 0 644
+        [ "$(sha256sum "$WORK_DIR/system/system/apex/com.google.android.media.swcodec.apex" | cut -d ' ' -f 1)" = "6b7bd747ccf23aee92dfb041611dfd5d4c7db7d2299d747d41ea3749355cb3db" ] || return 1
+        if [ -f "$WORK_DIR/system/system/apex/com.google.android.media.swcodec_compressed.apex" ]; then
+            DELETE_FROM_WORK_DIR "system" "system/apex/com.google.android.media.swcodec_compressed.apex"
+        fi
+        SET_PROP "system" "ro.unica.qpr2.swcodec" "373040140"
+        unset QPR2_CODEC_PROVIDER QPR2_CODEC_SHA
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
