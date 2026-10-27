@@ -1,0 +1,26 @@
+Subject: [PATCH] init: respect the explicit caller-scoped BPF spoof boot option
+
+Apply the existing default before parsing command-line options, not after.
+Otherwise uname_bpf_spoof=1 is always reset to the compiled disabled default.
+Keep the disabled default and all root/caller restrictions unchanged; the ROM
+selects partial mode explicitly. Do not bypass any BPF verifier or load error.
+
+diff --git a/init/main.c b/init/main.c
+--- a/init/main.c
++++ b/init/main.c
+@@ -1252,6 +1252,7 @@ asmlinkage __visible void __init start_kernel(void)
+ #endif
+ 	/* parameters may set static keys */
+ 	jump_label_init();
++	apply_uname_bpf_spoof_default();
+ 	parse_early_param();
+ 	after_dashes = parse_args("Booting kernel",
+ 				  static_command_line, __start___param,
+@@ -1264,7 +1265,6 @@ asmlinkage __visible void __init start_kernel(void)
+ 		parse_args("Setting extra init args", extra_init_args,
+ 			   NULL, 0, -1, -1, NULL, set_init_arg);
+ 
+-	apply_uname_bpf_spoof_default();
+ 	apply_mass_storage_hack_default();
+ 	apply_selinux_mode_default();
+ 	apply_default_sbwc_mode_default();
