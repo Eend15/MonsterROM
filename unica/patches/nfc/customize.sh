@@ -1,3 +1,62 @@
+NFC_SDK37_ANTENNA()
+{
+    perl - "$@" <<'PERL'
+use strict;
+use warnings;
+use JSON::PP;
+use File::Find;
+use File::Path qw(make_path);
+use File::Basename qw(dirname basename);
+use File::Temp qw(tempfile tempdir);
+use File::Spec;
+sub need($$) { die "UN1CA: $_[1]\n" unless $_[0] }
+sub raw { open my $f,'<:raw',$_[0] or die "$_[0]: $!\n"; local $/; return <$f>//'' }
+sub same { JSON::PP->new->canonical->encode($_[0]) eq JSON::PP->new->canonical->encode($_[1]) }
+sub put {
+    my($path,$data)=@_; return if -f $path && raw($path) eq $data;
+    make_path(dirname($path)); my($f,$name)=tempfile('.unica-native-XXXXXX',DIR=>dirname($path),UNLINK=>0);
+    binmode $f; print $f $data or die "write $path: $!"; close $f or die "close $path: $!";
+    chmod((-e $path ? (stat($path))[2]&0777 : 0644),$name) or die "chmod $name: $!";
+    rename($name,$path) or die "rename $path: $!";
+}
+sub walk { my($root)=@_; my @paths; find({no_chdir=>1,wanted=>sub {push @paths,$File::Find::name if -f $_||-l $_}},$root) if -d $root; return sort @paths }
+sub capture {
+    my @cmd=@_; my($err,$name)=tempfile('unica-stderr-XXXXXX',DIR=>scratch_root(),UNLINK=>1); close $err;
+    my $pid=open my $p,'-|'; defined $pid or die "fork: $!";
+    if(!$pid) { open STDERR,'>:raw',$name or die "stderr: $!"; exec {$cmd[0]} @cmd; exit 127 }
+    binmode $p; local $/; my $out=<$p>//''; close $p; my $status=$?; my $error=raw($name);
+    return ($out,$error,$status);
+}
+sub run { my @cmd=@_; my($out,$err,$status)=capture(@cmd); die "Command failed (@cmd): $err$out" if $status; return $out }
+sub scratch_root {return $ENV{UNICA_TEST_TMPDIR}//$ENV{TMPDIR}//(-d '/tmp/opencode'?'/tmp/opencode':File::Spec->tmpdir())}
+sub methods { my($text)=@_; my %m; while($text =~ /^(\.method [^\n]+\n.*?^\.end method)/msg) {my $raw=$1; my($first)=split /\n/,$raw; my($name)=$first =~ /(\S+)$/; need(!exists $m{$name},"Duplicate method $name"); $m{$name}=$raw} return \%m }
+sub once { my($text,$old,$new)=@_; my $count=()=$text =~ /\Q$old\E/g; need($count==1,"Expected one exact anchor, found $count: $old"); $text =~ s/\Q$old\E/$new/; return $text }
+my($decoded,$apk,$position)=@ARGV;
+my %resources=(0=>"center",1=>"center",2=>"above",3=>"bottom",4=>"above_mid",5=>"right_top",6=>"left",7=>"right",8=>"above",9=>"above_mid",10=>"flex",11=>"right_center",12=>"bottom",13=>"flip",14=>"right_top_port_tab",15=>"left_dcm",16=>"right_top_port",17=>"right_center_delta",18=>"center_tab",19=>"flip_b5",20=>"flip_b6",21=>"flex_q6",22=>"active5pro",27=>"antenna_animation");
+need($position =~ /^(?:0|[1-9][0-9]*)$/ && exists $resources{$position},"Unreviewed target NFC antenna position");
+my $base="$decoded/smali_classes3/com/samsung/android/settings/nfc"; my $enum=raw("$base/NfcAntennaInfo.smali");
+my $count=()=$enum =~ /new-instance v0, Lcom\/samsung\/android\/settings\/nfc\/NfcAntennaInfo;/g;
+need($count==1 && index($enum,"0x7f140087")>=0,"Unexpected SDK37 NFC DEFAULT animation contract");
+my %owners=(NfcSettings=>"populateViewForOrientation(Lcom/android/settingslib/widget/LayoutPreference;)V",NfcAntennaGuideDialog=>"onCreate(Landroid/os/Bundle;)V"); my %writes;
+for my $owner(sort keys %owners) {
+    my $path="$base/$owner.smali"; my $text=raw($path); my $m=methods($text); my $signature=$owners{$owner}; need(exists $m->{$signature},"Missing NFC method $signature"); my $body=$m->{$signature};
+    for my $anchor("ro.vendor.nfc.info.antpos","SEC_PRODUCT_FEATURE_NFC_CONFIG_ANTENNA_POSITION Value="," must be equal to value of ro.vendor.nfc.info.antpos=") {need(index($body,$anchor)>=0,"Missing original NFC antenna validation")}
+    my $n=($body =~ s/^    const-string v1, "(?:27|\Q$position\E)"$/    const-string v1, "$position"/mg);
+    need($n==1,"Unexpected inlined NFC antenna position"); $writes{$path}=once($text,$m->{$signature},$body);
+}
+my $animation="sec_nfc_antenna_animation.json"; my @actual=grep {m{/raw[^/]*/\Q$animation\E$}} walk("$decoded/res");
+need(same(\@actual,[sort "$decoded/res/raw/$animation","$decoded/res/raw-night/$animation"]),"Unexpected SDK37 day/night animation layout");
+my @members=split /\n/,run("unzip","-Z1",$apk); my $name=$position==27?"sec_nfc_antenna_animation.json":"sec_nfc_ant_$resources{$position}.json";
+for my $q(qw(raw raw-night)) {
+    my @names=("res/$q/$name"); push @names,"res/raw-night-v8/$name" if $q eq "raw-night"; my @matches=grep {my $n=$_; scalar grep {$_ eq $n} @members} @names;
+    need(@matches==1,"Missing/ambiguous target NFC animation for $q"); my $data=run("unzip","-p",$apk,$matches[0]); my $j=decode_json($data);
+    need(ref($j) eq "HASH" && !scalar(grep {!exists $j->{$_}} qw(v fr w h layers)),"Target NFC resource is not a Lottie composition");
+    for my $asset(@{$j->{assets}//[]}) {need(!($asset->{p}//"") || $asset->{p}=~/^data:/,"Target NFC animation needs external assets")}
+    $writes{"$decoded/res/$q/$animation"}=$data;
+}
+put($_,$writes{$_}) for sort keys %writes;
+PERL
+}
 # [
 _LOG() { if $DEBUG; then LOGW "$1"; else ABORT "$1"; fi }
 # ]
@@ -13,6 +72,37 @@ if [ -f "$FW_DIR/$TARGET_FIRMWARE_PATH/system/system/etc/libnfc-nci_temp.conf" ]
     ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/etc/libnfc-nci_temp.conf" 0 0 644 "u:object_r:system_file:s0"
 else
     DELETE_FROM_WORK_DIR "system" "system/etc/libnfc-nci_temp.conf"
+fi
+
+# Android 17 ships a complete, matched NFC APK/framework/JNI cohort in an
+# APEX. Its inspected adaptation still implements HIDL 1.0/1.1/1.2. The S21
+# already has the matching NXP 1.2 service and vendor driver; do not request
+# obsolete global 32-bit JNI prebuilts or mix an older app into that APEX.
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    if [ "$(sha256sum "$WORK_DIR/system/system/apex/com.android.nfcservices.capex" | cut -d ' ' -f 1)" != \
+            "408f490bf488a6ef364ed0d1d1c249a7546fe6cec1efecfce6552c9192dab597" ] || \
+            [ ! -s "$WORK_DIR/vendor/bin/hw/nxp.android.hardware.nfc@1.2-service" ] || \
+            [ ! -s "$WORK_DIR/vendor/lib64/nfc_nci_nxpsn.so" ] || \
+            ! grep -Fq '<version>1.2</version>' \
+            "$WORK_DIR/vendor/etc/vintf/manifest/nxp.android.hardware.nfc@1.2-service.xml"; then
+        ABORT "Review the modular SDK-37 NFC/target HIDL contract before changing this cohort"
+        return 1
+    fi
+    LOG "- Retaining the complete SDK-37 NFC APEX with the target NXP HIDL 1.2 service"
+    # Settings is outside the NFC APEX. Its inlined donor antenna position and
+    # animation must describe the target, while its mismatch checks stay intact.
+    NFC_ANTENNA_POSITION="$(GET_PROP "vendor" "ro.vendor.nfc.info.antpos")"
+    if ! [[ "$NFC_ANTENNA_POSITION" =~ ^[0-9]+$ ]]; then
+        ABORT "SDK37 NFC Settings requires a numeric target vendor antenna position"
+        return 1
+    fi
+    DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk" || return 1
+    NFC_SDK37_ANTENNA "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" \
+        "$FW_DIR/$TARGET_FIRMWARE_PATH/system/system/priv-app/SecSettings/SecSettings.apk" "$NFC_ANTENNA_POSITION" || return 1
+    unset NFC_ANTENNA_POSITION
+    unset TARGET_FIRMWARE_PATH
+    unset -f _LOG
+    return 0
 fi
 
 if [ "$(GET_PROP "vendor" "ro.vendor.nfc.feature.chipname")" ]; then
