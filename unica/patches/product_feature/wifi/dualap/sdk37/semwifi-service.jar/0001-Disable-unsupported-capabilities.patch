@@ -1,0 +1,311 @@
+From 11f3ab1c0f48854c21990b52f1264dd6fe94cc88 Mon Sep 17 00:00:00 2001
+From: ditternation <ditternation@outlook.com>
+Date: Wed, 30 Sep 2026 17:29:49 +0200
+Subject: [PATCH] Match hotspot capabilities to target
+
+---
+ .../wifi/ap/SemSoftApConfiguration.smali      | 114 +++++++++----------
+ .../server/wifi/ap/SemWifiApConfigStore.smali |  16 +++
+ .../server/wifi/ap/SemWifiApServiceImpl.smali | 101 +----------------
+ 3 files changed, 77 insertions(+), 154 deletions(-)
+
+diff --git a/smali/com/samsung/android/server/wifi/ap/SemSoftApConfiguration.smali b/smali/com/samsung/android/server/wifi/ap/SemSoftApConfiguration.smali
+index 7902d12..edd26c0 100644
+--- a/smali/com/samsung/android/server/wifi/ap/SemSoftApConfiguration.smali
++++ b/smali/com/samsung/android/server/wifi/ap/SemSoftApConfiguration.smali
+@@ -2647,65 +2647,9 @@
+ .end method
+ 
+ .method public isWifiApEnabledWithDualBand()Z
+-    .locals 2
+-
+-    iget-object p0, p0, Lcom/samsung/android/server/wifi/ap/SemSoftApConfiguration;->mWifiApServiceImpl:Lcom/samsung/android/server/wifi/ap/SemWifiApServiceImpl;
+-
+-    invoke-virtual {p0}, Lcom/samsung/android/server/wifi/ap/SemWifiApServiceImpl;->getSoftApConfiguration()Landroid/net/wifi/SoftApConfiguration;
+-
+-    move-result-object p0
+-
+-    if-eqz p0, :cond_0
+-
+-    invoke-virtual {p0}, Landroid/net/wifi/SoftApConfiguration;->getChannels()Landroid/util/SparseIntArray;
+-
+-    move-result-object p0
+-
+-    goto :goto_0
+-
+-    :cond_0
+-    const/4 p0, 0x0
+-
+-    :goto_0
+-    if-eqz p0, :cond_1
+-
+-    invoke-virtual {p0}, Landroid/util/SparseIntArray;->size()I
+-
+-    move-result p0
+-
+-    const/4 v0, 0x1
+-
+-    if-le p0, v0, :cond_1
+-
+-    invoke-static {}, Lcom/samsung/android/server/wifi/SemWifiInjector;->getInstance()Lcom/samsung/android/server/wifi/SemWifiInjector;
+-
+-    move-result-object p0
+-
+-    invoke-virtual {p0}, Lcom/samsung/android/server/wifi/SemWifiInjector;->getSoftApManager()Lcom/samsung/android/server/wifi/ap/SemSoftApManager;
+-
+-    move-result-object p0
+-
+-    invoke-virtual {p0}, Lcom/samsung/android/server/wifi/ap/SemSoftApManager;->checkDualBandHostapd()Z
+-
+-    move-result p0
+-
+-    if-eqz p0, :cond_1
+-
+-    goto :goto_1
+-
+-    :cond_1
++    .locals 1
++
+     const/4 v0, 0x0
+-
+-    :goto_1
+-    const-string p0, "isWifiApEnabledWithDualBand API:"
+-
+-    invoke-static {p0, v0}, Lcom/samsung/android/server/wifi/ByteUtil$$ExternalSyntheticOutline0;->m(Ljava/lang/String;Z)Ljava/lang/String;
+-
+-    move-result-object p0
+-
+-    const-string v1, "SemSoftApConfiguration"
+-
+-    invoke-static {v1, p0}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
+ 
+     return v0
+ .end method
+@@ -4618,6 +4562,10 @@
+ 
+     move-result-object v0
+ 
++    invoke-static/range {v0 .. v0}, Lcom/samsung/android/server/wifi/ap/SemSoftApConfiguration;->normalizeSingleApConfiguration(Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
++
++    move-result-object v0
++
+     return-object v0
+ .end method
+ 
+@@ -4761,3 +4709,53 @@
+ 
+     return-void
+ .end method
++
++.method public static normalizeSingleApConfiguration(Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
++    .locals 3
++
++    if-eqz p0, :done
++
++    invoke-virtual {p0}, Landroid/net/wifi/SoftApConfiguration;->getChannels()Landroid/util/SparseIntArray;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Landroid/util/SparseIntArray;->size()I
++
++    move-result v1
++
++    const/4 v2, 0x1
++
++    if-le v1, v2, :done
++
++    const/4 v1, 0x0
++
++    invoke-virtual {v0, v1}, Landroid/util/SparseIntArray;->keyAt(I)I
++
++    move-result v2
++
++    invoke-virtual {v0, v1}, Landroid/util/SparseIntArray;->valueAt(I)I
++
++    move-result v1
++
++    new-instance v0, Landroid/net/wifi/SoftApConfiguration$Builder;
++
++    invoke-direct {v0, p0}, Landroid/net/wifi/SoftApConfiguration$Builder;-><init>(Landroid/net/wifi/SoftApConfiguration;)V
++
++    if-nez v1, :explicit_channel
++
++    invoke-virtual {v0, v2}, Landroid/net/wifi/SoftApConfiguration$Builder;->setBand(I)Landroid/net/wifi/SoftApConfiguration$Builder;
++
++    goto :build_configuration
++
++    :explicit_channel
++    invoke-virtual {v0, v1, v2}, Landroid/net/wifi/SoftApConfiguration$Builder;->setChannel(II)Landroid/net/wifi/SoftApConfiguration$Builder;
++
++    :build_configuration
++
++    invoke-virtual {v0}, Landroid/net/wifi/SoftApConfiguration$Builder;->build()Landroid/net/wifi/SoftApConfiguration;
++
++    move-result-object p0
++
++    :done
++    return-object p0
++.end method
+diff --git a/smali/com/samsung/android/server/wifi/ap/SemWifiApConfigStore.smali b/smali/com/samsung/android/server/wifi/ap/SemWifiApConfigStore.smali
+index 2f5b9a4..63ca0ef 100644
+--- a/smali/com/samsung/android/server/wifi/ap/SemWifiApConfigStore.smali
++++ b/smali/com/samsung/android/server/wifi/ap/SemWifiApConfigStore.smali
+@@ -2594,6 +2594,10 @@
+ 
+     monitor-exit p0
+ 
++    invoke-static/range {v0 .. v0}, Lcom/samsung/android/server/wifi/ap/SemSoftApConfiguration;->normalizeSingleApConfiguration(Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
++
++    move-result-object v0
++
+     return-object v0
+ 
+     :cond_12
+@@ -2603,6 +2607,10 @@
+     .catchall {:try_start_a .. :try_end_a} :catchall_0
+ 
+     monitor-exit p0
++
++    invoke-static/range {v0 .. v0}, Lcom/samsung/android/server/wifi/ap/SemSoftApConfiguration;->normalizeSingleApConfiguration(Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
++
++    move-result-object v0
+ 
+     return-object v0
+ 
+@@ -6730,6 +6738,10 @@
+ .method public final setAndSaveWifiApConfiguration(Landroid/net/wifi/SoftApConfiguration;Ljava/lang/String;Ljava/lang/String;)V
+     .locals 8
+ 
++    invoke-static/range {p1 .. p1}, Lcom/samsung/android/server/wifi/ap/SemSoftApConfiguration;->normalizeSingleApConfiguration(Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
++
++    move-result-object p1
++
+     const-string v0, "SemWifiApConfigStore"
+ 
+     const-string v1, "wifi_ap_settings_smart_switch_restoring"
+@@ -6889,6 +6901,10 @@
+ 
+ .method public declared-synchronized setApConfiguration(Landroid/net/wifi/SoftApConfiguration;Ljava/lang/String;Ljava/lang/String;)V
+     .locals 8
++
++    invoke-static/range {p1 .. p1}, Lcom/samsung/android/server/wifi/ap/SemSoftApConfiguration;->normalizeSingleApConfiguration(Landroid/net/wifi/SoftApConfiguration;)Landroid/net/wifi/SoftApConfiguration;
++
++    move-result-object p1
+ 
+     const-string v0, " setApConfiguration() "
+ 
+diff --git a/smali/com/samsung/android/server/wifi/ap/SemWifiApServiceImpl.smali b/smali/com/samsung/android/server/wifi/ap/SemWifiApServiceImpl.smali
+index bb64317..d8e0b14 100644
+--- a/smali/com/samsung/android/server/wifi/ap/SemWifiApServiceImpl.smali
++++ b/smali/com/samsung/android/server/wifi/ap/SemWifiApServiceImpl.smali
+@@ -13749,102 +13749,11 @@
+ .end method
+ 
+ .method public supportBridgedApStaConcurrency()Z
+-    .locals 5
+-
+-    sget-boolean v0, Lcom/samsung/android/wifi/SemWifiApCust;->DBG:Z
+-
+-    const/4 v1, 0x1
+-
+-    const/4 v2, 0x0
+-
+-    if-eqz v0, :cond_0
+-
+-    const-string v0, "vendor.wifiap.debug.BridgedApSta"
+-
+-    invoke-static {v0, v2}, Landroid/os/SystemProperties;->getInt(Ljava/lang/String;I)I
+-
+-    move-result v0
+-
+-    if-ne v0, v1, :cond_0
+-
+-    move v2, v1
+-
+-    :cond_0
+-    iget-object v0, p0, Lcom/samsung/android/server/wifi/ap/SemWifiApServiceImpl;->mFacade:Lcom/samsung/android/server/wifi/SemFrameworkFacade;
+-
+-    const-string v3, "ro.product.first_api_level"
+-
+-    const/4 v4, -0x1
+-
+-    invoke-virtual {v0, v3, v4}, Lcom/samsung/android/server/wifi/SemFrameworkFacade;->getSystemProperties(Ljava/lang/String;I)I
+-
+-    move-result v0
+-
+-    invoke-virtual {p0}, Lcom/samsung/android/server/wifi/ap/SemWifiApServiceImpl;->getAospWifiManager()Landroid/net/wifi/WifiManager;
+-
+-    move-result-object p0
+-
+-    invoke-virtual {p0}, Landroid/net/wifi/WifiManager;->isStaBridgedApConcurrencySupported()Z
+-
+-    move-result p0
+-
+-    invoke-static {}, Lcom/samsung/android/server/wifi/SemWifiInjector;->getInstance()Lcom/samsung/android/server/wifi/SemWifiInjector;
+-
+-    move-result-object v3
+-
+-    invoke-virtual {v3}, Lcom/samsung/android/server/wifi/SemWifiInjector;->getWifiVersionProvider()Lcom/samsung/android/server/wifi/driver/WifiDriverVersionProvider;
+-
+-    move-result-object v3
+-
+-    invoke-virtual {v3}, Lcom/samsung/android/server/wifi/driver/WifiDriverVersionProvider;->getWifiChipVendor()Lcom/samsung/android/server/wifi/driver/WifiChipVendor;
+-
+-    move-result-object v3
+-
+-    invoke-virtual {v3}, Ljava/lang/Enum;->name()Ljava/lang/String;
+-
+-    move-result-object v3
+-
+-    const/16 v4, 0x24
+-
+-    if-lt v0, v4, :cond_1
+-
+-    if-eqz p0, :cond_1
+-
+-    goto :goto_0
+-
+-    :cond_1
+-    move v1, v2
+-
+-    :goto_0
+-    new-instance v0, Ljava/lang/StringBuilder;
+-
+-    const-string v2, "supportBridgedApStaConcurrency() "
+-
+-    invoke-direct {v0, v2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+-
+-    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;
+-
+-    const-string v2, ",mWifichip:"
+-
+-    invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+-
+-    invoke-virtual {v0, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+-
+-    const-string v2, ",overlay:"
+-
+-    invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+-
+-    invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(Z)Ljava/lang/StringBuilder;
+-
+-    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+-
+-    move-result-object p0
+-
+-    const-string v0, "SemWifiApServiceImpl"
+-
+-    invoke-static {v0, p0}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
+-
+-    return v1
++    .locals 1
++
++    const/4 v0, 0x0
++
++    return v0
+ .end method
+ 
+ .method public supportWifiAp5GBasedOnCountry()Z
+-- 
+2.53.0
+
