@@ -1,0 +1,162 @@
+From 7172c4688b62f637e9536b65977f4168ecf3ba6d Mon Sep 17 00:00:00 2001
+From: ditternation <ditternation@outlook.com>
+Date: Wed, 30 Sep 2026 17:15:50 +0200
+Subject: [PATCH] Disable QP text marquee
+
+---
+ res/layout/keyguard_status_bar.xml                  |  2 +-
+ res/layout/sec_qs_large_tile_label.xml              |  4 ++--
+ res/layout/sec_qs_tile_label.xml                    |  4 ++--
+ res/layout/sec_status_bar_notification_shelf.xml    |  4 ++--
+ res/layout/shade_carrier.xml                        |  2 +-
+ res/layout/shade_carrier_group.xml                  |  2 +-
+ res/layout/shade_carrier_new.xml                    |  2 +-
+ smali/com/android/keyguard/CarrierText.smali        |  9 ---------
+ .../phone/SwitchableDoubleShadowTextView.smali      | 13 -------------
+ .../android/systemui/util/AutoMarqueeTextView.smali |  2 +-
+ 10 files changed, 11 insertions(+), 33 deletions(-)
+
+diff --git a/res/layout/keyguard_status_bar.xml b/res/layout/keyguard_status_bar.xml
+index 40d3592..f63c48b 100644
+--- a/res/layout/keyguard_status_bar.xml
++++ b/res/layout/keyguard_status_bar.xml
+@@ -7,3 +7,3 @@
+                 <LinearLayout android:layout_width="0.0dp" android:layout_height="match_parent" android:layout_weight="1.0">
+-                    <com.android.keyguard.CarrierText android:textAppearance="@style/TextAppearance.Keyguard.Status.SamsungCarriers" android:textColor="?wallpaperTextColorSecondary" android:ellipsize="marquee" android:gravity="center_vertical" android:id="@id/keyguard_carrier_text" android:paddingTop="@dimen/status_bar_padding_top" android:layout_width="match_parent" android:layout_height="match_parent" android:singleLine="true" android:includeFontPadding="false" android:layout_toStartOf="@id/system_icons_container" systemui:debugLocation="Keyguard" systemui:showAirplaneMode="true" systemui:showMissingSim="true" />
++                    <com.android.keyguard.CarrierText android:textAppearance="@style/TextAppearance.Keyguard.Status.SamsungCarriers" android:textColor="?wallpaperTextColorSecondary" android:ellipsize="end" android:gravity="center_vertical" android:id="@id/keyguard_carrier_text" android:paddingTop="@dimen/status_bar_padding_top" android:layout_width="match_parent" android:layout_height="match_parent" android:singleLine="true" android:includeFontPadding="false" android:layout_toStartOf="@id/system_icons_container" systemui:debugLocation="Keyguard" systemui:showAirplaneMode="true" systemui:showMissingSim="true" />
+                 </LinearLayout>
+                 <include android:id="@id/keyguard_notification_icon_container" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="match_parent" layout="@layout/notification_icon_area" />
+             </LinearLayout>
+diff --git a/res/layout/sec_qs_large_tile_label.xml b/res/layout/sec_qs_large_tile_label.xml
+index 6a8bb0e..ce4675f 100644
+--- a/res/layout/sec_qs_large_tile_label.xml
++++ b/res/layout/sec_qs_large_tile_label.xml
+@@ -3,4 +3,4 @@
+   xmlns:android="http://schemas.android.com/apk/res/android">
+-    <TextView android:textSize="@dimen/sec_style_qs_tile_text_size" android:textColor="@color/qs_tile_label" android:ellipsize="marquee" android:gravity="start" android:layout_gravity="center" android:id="@id/tile_label" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="sec" android:textAlignment="viewStart" android:layoutDirection="locale" android:textFontWeight="600" />
+-    <com.android.systemui.util.AppLabelTextView android:textSize="@dimen/sec_style_qs_tile_second_text_size" android:textColor="@color/qs_tile_sub_label" android:ellipsize="marquee" android:gravity="start" android:layout_gravity="center" android:id="@id/app_label" android:visibility="gone" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_below="@id/label_group" android:fontFamily="sec" android:layoutDirection="locale" android:layout_alignStart="@id/label_group" android:layout_alignEnd="@id/label_group" android:textFontWeight="400" />
++    <TextView android:textSize="@dimen/sec_style_qs_tile_text_size" android:textColor="@color/qs_tile_label" android:ellipsize="end" android:gravity="start" android:layout_gravity="center" android:id="@id/tile_label" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:fontFamily="sec" android:textAlignment="viewStart" android:layoutDirection="locale" android:textFontWeight="600" />
++    <com.android.systemui.util.AppLabelTextView android:textSize="@dimen/sec_style_qs_tile_second_text_size" android:textColor="@color/qs_tile_sub_label" android:ellipsize="end" android:gravity="start" android:layout_gravity="center" android:id="@id/app_label" android:visibility="gone" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_below="@id/label_group" android:fontFamily="sec" android:layoutDirection="locale" android:layout_alignStart="@id/label_group" android:layout_alignEnd="@id/label_group" android:textFontWeight="400" />
+ </LinearLayout>
+diff --git a/res/layout/sec_qs_tile_label.xml b/res/layout/sec_qs_tile_label.xml
+index a61abdf..4e63b29 100644
+--- a/res/layout/sec_qs_tile_label.xml
++++ b/res/layout/sec_qs_tile_label.xml
+@@ -3,4 +3,4 @@
+   xmlns:android="http://schemas.android.com/apk/res/android">
+-    <TextView android:textSize="@dimen/sec_qs_tile_label_text_size" android:textColor="@color/qs_tile_label" android:ellipsize="marquee" android:gravity="center_horizontal" android:layout_gravity="center" android:id="@id/tile_label" android:padding="@dimen/sec_style_qs_tile_label_padding" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:importantForAccessibility="no" android:fontFamily="sec" android:textFontWeight="500" />
+-    <TextView android:textSize="@dimen/sec_qs_tile_label_text_size" android:textColor="@color/qs_tile_sub_label" android:ellipsize="marquee" android:gravity="center_horizontal" android:layout_gravity="center" android:id="@id/app_label" android:padding="@dimen/sec_style_qs_tile_label_padding" android:visibility="gone" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_below="@id/label_group" android:importantForAccessibility="no" android:fontFamily="sec" android:layout_alignStart="@id/label_group" android:layout_alignEnd="@id/label_group" android:textFontWeight="400" />
++    <TextView android:textSize="@dimen/sec_qs_tile_label_text_size" android:textColor="@color/qs_tile_label" android:ellipsize="end" android:gravity="center_horizontal" android:layout_gravity="center" android:id="@id/tile_label" android:padding="@dimen/sec_style_qs_tile_label_padding" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:importantForAccessibility="no" android:fontFamily="sec" android:textFontWeight="500" />
++    <TextView android:textSize="@dimen/sec_qs_tile_label_text_size" android:textColor="@color/qs_tile_sub_label" android:ellipsize="end" android:gravity="center_horizontal" android:layout_gravity="center" android:id="@id/app_label" android:padding="@dimen/sec_style_qs_tile_label_padding" android:visibility="gone" android:clickable="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:singleLine="true" android:layout_below="@id/label_group" android:importantForAccessibility="no" android:fontFamily="sec" android:layout_alignStart="@id/label_group" android:layout_alignEnd="@id/label_group" android:textFontWeight="400" />
+ </LinearLayout>
+diff --git a/res/layout/sec_status_bar_notification_shelf.xml b/res/layout/sec_status_bar_notification_shelf.xml
+index 59bfae7..ba5da94 100644
+--- a/res/layout/sec_status_bar_notification_shelf.xml
++++ b/res/layout/sec_status_bar_notification_shelf.xml
+@@ -8,3 +8,3 @@
+             <LinearLayout android:gravity="start" android:layout_width="0.0dp" android:layout_height="match_parent" android:layout_weight="0.48">
+-                <com.android.systemui.animation.view.LaunchableTextView android:ellipsize="marquee" android:id="@id/noti_setting" android:visibility="visible" android:layout_width="wrap_content" android:layout_height="match_parent" android:text="@string/noti_setting_text" android:marqueeRepeatLimit="3" style="@style/TextAppearance.NotificationShelf" />
++                <com.android.systemui.animation.view.LaunchableTextView android:ellipsize="end" android:id="@id/noti_setting" android:visibility="visible" android:layout_width="wrap_content" android:layout_height="match_parent" android:text="@string/noti_setting_text" style="@style/TextAppearance.NotificationShelf" />
+             </LinearLayout>
+@@ -12,3 +12,3 @@
+             <LinearLayout android:gravity="end" android:layout_width="0.0dp" android:layout_height="match_parent" android:layout_weight="0.48">
+-                <com.android.systemui.animation.view.LaunchableTextView android:ellipsize="marquee" android:id="@id/clear_all" android:visibility="visible" android:layout_width="wrap_content" android:layout_height="match_parent" android:text="@string/clear_all_text" android:marqueeRepeatLimit="3" style="@style/TextAppearance.NotificationShelf" />
++                <com.android.systemui.animation.view.LaunchableTextView android:ellipsize="end" android:id="@id/clear_all" android:visibility="visible" android:layout_width="wrap_content" android:layout_height="match_parent" android:text="@string/clear_all_text" style="@style/TextAppearance.NotificationShelf" />
+             </LinearLayout>
+         </LinearLayout>
+         <ViewStub android:layout_gravity="center" android:id="@id/sec_panel_data_usage_container_stub" android:layout="@layout/sec_panel_data_usage_container" android:layout_width="match_parent" android:layout_height="@dimen/sec_data_usage_view_height" android:layout_marginTop="@dimen/sec_data_usage_view_top_margin" android:layout_marginBottom="@dimen/sec_data_usage_view_bottom_margin" />
+diff --git a/res/layout/shade_carrier.xml b/res/layout/shade_carrier.xml
+index e404914..1f17a10 100644
+--- a/res/layout/shade_carrier.xml
++++ b/res/layout/shade_carrier.xml
+@@ -1,5 +1,5 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <com.android.systemui.shade.carrier.ShadeCarrier android:gravity="start|center" android:orientation="horizontal" android:id="@id/linear_carrier" android:background="@android:color/transparent" android:focusable="true" android:clickable="false" android:clipChildren="false" android:clipToPadding="false" android:layout_width="0.0dp" android:layout_height="match_parent" android:minWidth="48.0dp" android:layout_weight="1.0" android:layout_marginEnd="@dimen/shade_carrier_margin_end"
+   xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+-    <com.android.systemui.statusbar.phone.SwitchableDoubleShadowTextView android:textAppearance="@style/TextAppearance.QS.Status.SamsungCarriers" android:ellipsize="marquee" android:id="@id/shade_carrier_text" android:clipChildren="false" android:clipToPadding="false" android:layout_width="wrap_content" android:layout_height="wrap_content" android:singleLine="true" android:includeFontPadding="false" android:layout_weight="1.0" app:ambientShadowAlpha="0.0" app:ambientShadowBlur="@dimen/shadow_radius" app:ambientShadowOffsetX="@dimen/shadow_difference" app:ambientShadowOffsetY="@dimen/shadow_difference" app:keyShadowAlpha="0.2" app:keyShadowBlur="@dimen/shadow_radius" app:keyShadowOffsetX="@dimen/shadow_difference" app:keyShadowOffsetY="@dimen/shadow_difference" />
++    <com.android.systemui.statusbar.phone.SwitchableDoubleShadowTextView android:textAppearance="@style/TextAppearance.QS.Status.SamsungCarriers" android:ellipsize="end" android:id="@id/shade_carrier_text" android:clipChildren="false" android:clipToPadding="false" android:layout_width="wrap_content" android:layout_height="wrap_content" android:singleLine="true" android:includeFontPadding="false" android:layout_weight="1.0" app:ambientShadowAlpha="0.0" app:ambientShadowBlur="@dimen/shadow_radius" app:ambientShadowOffsetX="@dimen/shadow_difference" app:ambientShadowOffsetY="@dimen/shadow_difference" app:keyShadowAlpha="0.2" app:keyShadowBlur="@dimen/shadow_radius" app:keyShadowOffsetX="@dimen/shadow_difference" app:keyShadowOffsetY="@dimen/shadow_difference" />
+ </com.android.systemui.shade.carrier.ShadeCarrier>
+diff --git a/res/layout/shade_carrier_group.xml b/res/layout/shade_carrier_group.xml
+index 95bf3d9..8a3eff6 100644
+--- a/res/layout/shade_carrier_group.xml
++++ b/res/layout/shade_carrier_group.xml
+@@ -4,7 +4,7 @@
+     <FrameLayout android:gravity="center_vertical" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="match_parent">
+         <com.android.systemui.statusbar.policy.QSClockPopOverImmersiveView android:textSize="@dimen/status_bar_clock_size" android:textColor="@color/status_bar_clock_color" android:gravity="center_vertical" android:id="@id/pop_over_immersive_clock" android:tag="pop_over_immersive_clock" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="match_parent" android:singleLine="true" android:alpha="0.0" android:fontFamily="sec" android:textFontWeight="600" />
+         <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:id="@id/anim_view" android:layout_width="match_parent" android:layout_height="match_parent">
+-            <com.android.systemui.util.AutoMarqueeTextView android:textAppearance="@style/TextAppearance.QS.Status.SamsungCarriers" android:gravity="center_vertical" android:id="@id/no_carrier_text" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="48.0dp" android:minHeight="48.0dp" android:singleLine="true" android:marqueeRepeatLimit="marquee_forever" android:textDirection="locale" />
++            <com.android.systemui.util.AutoMarqueeTextView android:textAppearance="@style/TextAppearance.QS.Status.SamsungCarriers" android:gravity="center_vertical" android:ellipsize="end" android:id="@id/no_carrier_text" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="48.0dp" android:minHeight="48.0dp" android:singleLine="true" android:textDirection="locale" />
+             <include android:id="@id/carrier1" android:layout_weight="1.0" layout="@layout/shade_carrier" />
+             <TextView android:textColor="@color/shade_carrier_divider_dot" android:id="@id/shade_carrier_divider1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/shade_carrier_divider" />
+             <include android:id="@id/carrier2" android:visibility="gone" android:layout_weight="1.0" layout="@layout/shade_carrier" />
+diff --git a/res/layout/shade_carrier_new.xml b/res/layout/shade_carrier_new.xml
+index f40103c..eedf61d 100644
+--- a/res/layout/shade_carrier_new.xml
++++ b/res/layout/shade_carrier_new.xml
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernShadeCarrierGroupMobileView android:theme="@style/Theme.SystemUI.QuickSettings.Header" android:gravity="center_vertical" android:orientation="horizontal" android:id="@id/carrier_combo" android:layout_width="wrap_content" android:layout_height="match_parent"
+   xmlns:android="http://schemas.android.com/apk/res/android">
+-    <com.android.systemui.util.AutoMarqueeTextView android:textAppearance="@style/TextAppearance.QS.Status" android:id="@id/mobile_carrier_text" android:visibility="gone" android:layout_width="0.0dp" android:layout_height="wrap_content" android:maxEms="7" android:singleLine="true" android:layout_weight="1.0" android:marqueeRepeatLimit="marquee_forever" android:textDirection="locale" android:layout_marginEnd="@dimen/qs_carrier_margin_width" />
++    <com.android.systemui.util.AutoMarqueeTextView android:textAppearance="@style/TextAppearance.QS.Status" android:ellipsize="end" android:id="@id/mobile_carrier_text" android:visibility="gone" android:layout_width="0.0dp" android:layout_height="wrap_content" android:maxEms="7" android:singleLine="true" android:layout_weight="1.0" android:textDirection="locale" android:layout_marginEnd="@dimen/qs_carrier_margin_width" />
+     <include android:visibility="gone" layout="@layout/status_bar_mobile_signal_group_new" />
+ </com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernShadeCarrierGroupMobileView>
+diff --git a/smali/com/android/keyguard/CarrierText.smali b/smali/com/android/keyguard/CarrierText.smali
+index c246832..32ce555 100644
+--- a/smali/com/android/keyguard/CarrierText.smali
++++ b/smali/com/android/keyguard/CarrierText.smali
+@@ -111,15 +111,6 @@
+
+     invoke-super {p0, p1, p2}, Landroid/widget/TextView;->onVisibilityChanged(Landroid/view/View;I)V
+
+-    if-nez p2, :cond_0
+-
+-    sget-object p1, Landroid/text/TextUtils$TruncateAt;->MARQUEE:Landroid/text/TextUtils$TruncateAt;
+-
+-    invoke-virtual {p0, p1}, Landroid/widget/TextView;->setEllipsize(Landroid/text/TextUtils$TruncateAt;)V
+-
+-    return-void
+-
+-    :cond_0
+     sget-object p1, Landroid/text/TextUtils$TruncateAt;->END:Landroid/text/TextUtils$TruncateAt;
+
+     invoke-virtual {p0, p1}, Landroid/widget/TextView;->setEllipsize(Landroid/text/TextUtils$TruncateAt;)V
+diff --git a/smali_classes3/com/android/systemui/statusbar/phone/SwitchableDoubleShadowTextView.smali b/smali_classes3/com/android/systemui/statusbar/phone/SwitchableDoubleShadowTextView.smali
+index 0fce4ad..341fca1 100644
+--- a/smali_classes3/com/android/systemui/statusbar/phone/SwitchableDoubleShadowTextView.smali
++++ b/smali_classes3/com/android/systemui/statusbar/phone/SwitchableDoubleShadowTextView.smali
+@@ -345,19 +345,6 @@
+     :cond_0
+     iput-boolean p1, p0, Lcom/android/systemui/statusbar/phone/SwitchableDoubleShadowTextView;->aggregatedVisible:Z
+
+-    if-eqz p1, :cond_1
+-
+-    sget-object p1, Landroid/text/TextUtils$TruncateAt;->MARQUEE:Landroid/text/TextUtils$TruncateAt;
+-
+-    invoke-virtual {p0, p1}, Landroid/widget/TextView;->setEllipsize(Landroid/text/TextUtils$TruncateAt;)V
+-
+-    const/4 p1, 0x1
+-
+-    invoke-virtual {p0, p1}, Landroid/widget/TextView;->setSelected(Z)V
+-
+-    return-void
+-
+-    :cond_1
+     sget-object p1, Landroid/text/TextUtils$TruncateAt;->END:Landroid/text/TextUtils$TruncateAt;
+
+     invoke-virtual {p0, p1}, Landroid/widget/TextView;->setEllipsize(Landroid/text/TextUtils$TruncateAt;)V
+diff --git a/smali_classes4/com/android/systemui/util/AutoMarqueeTextView.smali b/smali_classes4/com/android/systemui/util/AutoMarqueeTextView.smali
+index aa1dc29..6fb3421 100644
+--- a/smali_classes4/com/android/systemui/util/AutoMarqueeTextView.smali
++++ b/smali_classes4/com/android/systemui/util/AutoMarqueeTextView.smali
+@@ -110,7 +110,7 @@
+
+     if-eqz p1, :cond_1
+
+-    sget-object p1, Landroid/text/TextUtils$TruncateAt;->MARQUEE:Landroid/text/TextUtils$TruncateAt;
++    sget-object p1, Landroid/text/TextUtils$TruncateAt;->END:Landroid/text/TextUtils$TruncateAt;
+
+     invoke-virtual {p0, p1}, Landroid/widget/TextView;->setEllipsize(Landroid/text/TextUtils$TruncateAt;)V
+
+--
+2.53.0
