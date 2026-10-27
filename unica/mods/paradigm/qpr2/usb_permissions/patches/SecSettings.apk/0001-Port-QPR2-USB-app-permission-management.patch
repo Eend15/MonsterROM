@@ -1,0 +1,1770 @@
+Subject: [PATCH] Port QPR2 USB device/app access review and revocation through Samsung authentication
+
+diff --git a/res/values-nl/unica_qpr2_usb.xml b/res/values-nl/unica_qpr2_usb.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values-nl/unica_qpr2_usb.xml
+@@ -0,0 +1,9 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <string name="unica_qpr2_usb_device">USB-apparaat</string>
++    <string name="unica_qpr2_usb_apps">Apps met USB-toegang</string>
++    <string name="unica_qpr2_usb_no_apps">Geen apps hebben toegang tot dit apparaat.</string>
++    <string name="unica_qpr2_usb_revoke">USB-toegang intrekken</string>
++    <string name="unica_qpr2_usb_unavailable">USB-machtigingsinformatie is niet beschikbaar</string>
++    <string name="unica_qpr2_usb_revoke_failed">Android heeft deze USB-machtiging niet ingetrokken</string>
++</resources>
+diff --git a/res/values/unica_qpr2_usb.xml b/res/values/unica_qpr2_usb.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values/unica_qpr2_usb.xml
+@@ -0,0 +1,9 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <string name="unica_qpr2_usb_device">USB device</string>
++    <string name="unica_qpr2_usb_apps">Apps with USB access</string>
++    <string name="unica_qpr2_usb_no_apps">No apps have permission to access this device.</string>
++    <string name="unica_qpr2_usb_revoke">Remove USB access</string>
++    <string name="unica_qpr2_usb_unavailable">USB permission information is unavailable</string>
++    <string name="unica_qpr2_usb_revoke_failed">Android did not remove this USB permission</string>
++</resources>
+diff --git a/smali/com/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController.smali b/smali/com/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController.smali
+--- a/smali/com/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController.smali
++++ b/smali/com/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController.smali
+@@ -2,10 +2,12 @@
+ .super Lcom/android/settings/connecteddevice/usb/UsbDetailsController;
+ .source "qb/115226349 0553ae3cd7639f9279853187d393fa81ed68baf65d5ecdd61f78393c6a8509dc"
+ 
+ 
+ # instance fields
++.field public qpr2Permissions:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
+ .field public mPreferenceGroup:Landroidx/preference/PreferenceGroup;
+ 
+ 
+ # direct methods
+ .method public static createDevicePreferenceKey(Landroid/hardware/usb/UsbDevice;)Ljava/lang/String;
+@@ -45,15 +47,17 @@
+ 
+     check-cast p1, Landroidx/preference/PreferenceGroup;
+ 
+     iput-object p1, p0, Lcom/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController;->mPreferenceGroup:Landroidx/preference/PreferenceGroup;
+ 
+-    const/4 p0, 0x0
++    const/4 v0, 0x0
+ 
+-    iput-boolean p0, p1, Landroidx/preference/PreferenceGroup;->mOrderingAsAdded:Z
++    iput-boolean v0, p1, Landroidx/preference/PreferenceGroup;->mOrderingAsAdded:Z
+ 
+-    invoke-virtual {p1, p0}, Landroidx/preference/Preference;->setVisible(Z)V
++    iget-object p0, p0, Lcom/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController;->qpr2Permissions:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    invoke-virtual {p0, p1}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->display(Landroidx/preference/PreferenceGroup;)V
+ 
+     return-void
+ .end method
+ 
+ .method public final getPreferenceKey()Ljava/lang/String;
+@@ -65,21 +69,33 @@
+ .end method
+ 
+ .method public final isAvailable()Z
+     .locals 0
+ 
++    iget-object p0, p0, Lcom/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController;->qpr2Permissions:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    if-eqz p0, :unica_usb_not_initialized
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->available()Z
++
++    move-result p0
++
++    return p0
++
++    :unica_usb_not_initialized
+     const/4 p0, 0x0
+ 
+     return p0
+ .end method
+ 
+ .method public final refresh(ZJII)V
+     .locals 0
+ 
+-    iget-object p0, p0, Lcom/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController;->mPreferenceGroup:Landroidx/preference/PreferenceGroup;
++    iget-object p0, p0, Lcom/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController;->qpr2Permissions:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
+ 
+-    const/4 p1, 0x0
++    if-eqz p0, :unica_usb_no_controller
+ 
+-    invoke-virtual {p0, p1}, Landroidx/preference/Preference;->setVisible(Z)V
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->refresh()V
+ 
++    :unica_usb_no_controller
+     return-void
+ .end method
+diff --git a/smali/com/android/settings/connecteddevice/usb/UsbDetailsFragment.smali b/smali/com/android/settings/connecteddevice/usb/UsbDetailsFragment.smali
+--- a/smali/com/android/settings/connecteddevice/usb/UsbDetailsFragment.smali
++++ b/smali/com/android/settings/connecteddevice/usb/UsbDetailsFragment.smali
+@@ -81,10 +81,20 @@
+ 
+     new-instance v1, Lcom/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController;
+ 
+     invoke-direct {v1, p0, p1, p2}, Lcom/android/settings/connecteddevice/usb/UsbDetailsController;-><init>(Landroid/content/Context;Lcom/android/settings/connecteddevice/usb/UsbBackend;Lcom/android/settings/connecteddevice/usb/UsbDetailsFragment;)V
+ 
++    if-eqz p2, :unica_usb_no_lifecycle
++
++    new-instance v2, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    invoke-direct {v2, p0, p2, v1}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;-><init>(Landroid/content/Context;Lcom/android/settings/connecteddevice/usb/UsbDetailsFragment;Lcom/android/settings/connecteddevice/usb/UsbDetailsController;)V
++
++    iput-object v2, v1, Lcom/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController;->qpr2Permissions:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    :unica_usb_no_lifecycle
++
+     invoke-virtual {v0, v1}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
+ 
+     new-instance v1, Lcom/android/settings/connecteddevice/usb/UsbDetailsDataRoleController;
+ 
+     invoke-direct {v1, p0, p1, p2}, Lcom/android/settings/connecteddevice/usb/UsbDetailsController;-><init>(Landroid/content/Context;Lcom/android/settings/connecteddevice/usb/UsbBackend;Lcom/android/settings/connecteddevice/usb/UsbDetailsFragment;)V
+diff --git a/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$1.smali b/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$1.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$1.smali
+@@ -0,0 +1,60 @@
++.class Lio/mesalabs/unica/usb/Qpr2UsbPermissions$1;
++.super Landroid/content/BroadcastReceiver;
++.source "Qpr2UsbPermissions.java"
++
++
++# annotations
++.annotation system Ldalvik/annotation/EnclosingClass;
++    value = Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++.end annotation
++
++.annotation system Ldalvik/annotation/InnerClass;
++    accessFlags = 0x0
++    name = null
++.end annotation
++
++
++# instance fields
++.field final synthetic this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++
++# direct methods
++.method constructor <init>(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;)V
++    .registers 2
++    .annotation system Ldalvik/annotation/MethodParameters;
++        accessFlags = {
++            0x8010
++        }
++        names = {
++            null
++        }
++    .end annotation
++
++    iput-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$1;->this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    invoke-direct {p0}, Landroid/content/BroadcastReceiver;-><init>()V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public onReceive(Landroid/content/Context;Landroid/content/Intent;)V
++    .registers 3
++
++    iget-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$1;->this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    # operator++ for: Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->generation:J
++    invoke-static {p1}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->access$008(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;)J
++
++    iget-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$1;->this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    # invokes: Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->dismiss()V
++    invoke-static {p1}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->access$100(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;)V
++
++    iget-object p0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$1;->this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->refresh()V
++
++    return-void
++.end method
+diff --git a/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$2$1.smali b/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$2$1.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$2$1.smali
+@@ -0,0 +1,78 @@
++.class Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2$1;
++.super Ljava/lang/Object;
++.source "Qpr2UsbPermissions.java"
++
++# interfaces
++.implements Ljava/lang/Runnable;
++
++
++# annotations
++.annotation system Ldalvik/annotation/EnclosingMethod;
++    value = Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;->onPreferenceClick(Landroidx/preference/Preference;)Z
++.end annotation
++
++.annotation system Ldalvik/annotation/InnerClass;
++    accessFlags = 0x0
++    name = null
++.end annotation
++
++
++# instance fields
++.field final synthetic this$1:Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;
++
++.field final synthetic val$device:Landroid/hardware/usb/UsbDevice;
++
++.field final synthetic val$requestGeneration:J
++
++
++# direct methods
++.method constructor <init>(Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;Landroid/hardware/usb/UsbDevice;J)V
++    .registers 5
++    .annotation system Ldalvik/annotation/MethodParameters;
++        accessFlags = {
++            0x8010,
++            0x1010,
++            0x1010
++        }
++        names = {
++            null,
++            null,
++            null
++        }
++    .end annotation
++
++    .annotation system Ldalvik/annotation/Signature;
++        value = {
++            "()V"
++        }
++    .end annotation
++
++    iput-object p2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2$1;->val$device:Landroid/hardware/usb/UsbDevice;
++
++    iput-wide p3, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2$1;->val$requestGeneration:J
++
++    iput-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2$1;->this$1:Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public run()V
++    .registers 5
++
++    iget-object v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2$1;->this$1:Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;
++
++    iget-object v0, v0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;->this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    iget-object v1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2$1;->val$device:Landroid/hardware/usb/UsbDevice;
++
++    iget-wide v2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2$1;->val$requestGeneration:J
++
++    # invokes: Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->showApps(Landroid/hardware/usb/UsbDevice;J)V
++    invoke-static {v0, v1, v2, v3}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->access$200(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;Landroid/hardware/usb/UsbDevice;J)V
++
++    return-void
++.end method
+diff --git a/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$2.smali b/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$2.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$2.smali
+@@ -0,0 +1,85 @@
++.class Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;
++.super Ljava/lang/Object;
++.source "Qpr2UsbPermissions.java"
++
++# interfaces
++.implements Landroidx/preference/Preference$OnPreferenceClickListener;
++
++
++# annotations
++.annotation system Ldalvik/annotation/EnclosingMethod;
++    value = Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->refresh()V
++.end annotation
++
++.annotation system Ldalvik/annotation/InnerClass;
++    accessFlags = 0x0
++    name = null
++.end annotation
++
++
++# instance fields
++.field final synthetic this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++.field final synthetic val$device:Landroid/hardware/usb/UsbDevice;
++
++
++# direct methods
++.method constructor <init>(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;Landroid/hardware/usb/UsbDevice;)V
++    .registers 3
++    .annotation system Ldalvik/annotation/MethodParameters;
++        accessFlags = {
++            0x8010,
++            0x1010
++        }
++        names = {
++            null,
++            null
++        }
++    .end annotation
++
++    .annotation system Ldalvik/annotation/Signature;
++        value = {
++            "()V"
++        }
++    .end annotation
++
++    iput-object p2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;->val$device:Landroid/hardware/usb/UsbDevice;
++
++    iput-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;->this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public onPreferenceClick(Landroidx/preference/Preference;)Z
++    .registers 6
++
++    iget-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;->this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    # getter for: Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->generation:J
++    invoke-static {p1}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->access$000(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;)J
++
++    move-result-wide v0
++
++    iget-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;->this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    # getter for: Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->controller:Lcom/android/settings/connecteddevice/usb/UsbDetailsController;
++    invoke-static {p1}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->access$300(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;)Lcom/android/settings/connecteddevice/usb/UsbDetailsController;
++
++    move-result-object p1
++
++    new-instance v2, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2$1;
++
++    iget-object v3, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;->val$device:Landroid/hardware/usb/UsbDevice;
++
++    invoke-direct {v2, p0, v3, v0, v1}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2$1;-><init>(Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;Landroid/hardware/usb/UsbDevice;J)V
++
++    invoke-virtual {p1, v2}, Lcom/android/settings/connecteddevice/usb/UsbDetailsController;->requireAuthAndExecute(Ljava/lang/Runnable;)V
++
++    const/4 p0, 0x1
++
++    return p0
++.end method
+diff --git a/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$3.smali b/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$3.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$3.smali
+@@ -0,0 +1,101 @@
++.class Lio/mesalabs/unica/usb/Qpr2UsbPermissions$3;
++.super Ljava/lang/Object;
++.source "Qpr2UsbPermissions.java"
++
++# interfaces
++.implements Landroid/content/DialogInterface$OnClickListener;
++
++
++# annotations
++.annotation system Ldalvik/annotation/EnclosingMethod;
++    value = Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->showApps(Landroid/hardware/usb/UsbDevice;J)V
++.end annotation
++
++.annotation system Ldalvik/annotation/InnerClass;
++    accessFlags = 0x0
++    name = null
++.end annotation
++
++
++# instance fields
++.field final synthetic this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++.field final synthetic val$apps:Ljava/util/ArrayList;
++
++.field final synthetic val$device:Landroid/hardware/usb/UsbDevice;
++
++.field final synthetic val$requestGeneration:J
++
++
++# direct methods
++.method constructor <init>(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;Ljava/util/ArrayList;Landroid/hardware/usb/UsbDevice;J)V
++    .registers 6
++    .annotation system Ldalvik/annotation/MethodParameters;
++        accessFlags = {
++            0x8010,
++            0x1010,
++            0x1010,
++            0x1010
++        }
++        names = {
++            null,
++            null,
++            null,
++            null
++        }
++    .end annotation
++
++    .annotation system Ldalvik/annotation/Signature;
++        value = {
++            "()V"
++        }
++    .end annotation
++
++    iput-object p2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$3;->val$apps:Ljava/util/ArrayList;
++
++    iput-object p3, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$3;->val$device:Landroid/hardware/usb/UsbDevice;
++
++    iput-wide p4, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$3;->val$requestGeneration:J
++
++    iput-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$3;->this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public onClick(Landroid/content/DialogInterface;I)V
++    .registers 6
++
++    if-ltz p2, :cond_1b
++
++    iget-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$3;->val$apps:Ljava/util/ArrayList;
++
++    invoke-virtual {p1}, Ljava/util/ArrayList;->size()I
++
++    move-result p1
++
++    if-ge p2, p1, :cond_1b
++
++    iget-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$3;->this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    iget-object v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$3;->val$device:Landroid/hardware/usb/UsbDevice;
++
++    iget-object v1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$3;->val$apps:Ljava/util/ArrayList;
++
++    invoke-virtual {v1, p2}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
++
++    move-result-object p2
++
++    check-cast p2, Landroid/content/pm/ApplicationInfo;
++
++    iget-wide v1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$3;->val$requestGeneration:J
++
++    # invokes: Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->confirm(Landroid/hardware/usb/UsbDevice;Landroid/content/pm/ApplicationInfo;J)V
++    invoke-static {p1, v0, p2, v1, v2}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->access$400(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;Landroid/hardware/usb/UsbDevice;Landroid/content/pm/ApplicationInfo;J)V
++
++    :cond_1b
++    return-void
++.end method
+diff --git a/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$4.smali b/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$4.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions$4.smali
+@@ -0,0 +1,84 @@
++.class Lio/mesalabs/unica/usb/Qpr2UsbPermissions$4;
++.super Ljava/lang/Object;
++.source "Qpr2UsbPermissions.java"
++
++# interfaces
++.implements Landroid/content/DialogInterface$OnClickListener;
++
++
++# annotations
++.annotation system Ldalvik/annotation/EnclosingMethod;
++    value = Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->confirm(Landroid/hardware/usb/UsbDevice;Landroid/content/pm/ApplicationInfo;J)V
++.end annotation
++
++.annotation system Ldalvik/annotation/InnerClass;
++    accessFlags = 0x0
++    name = null
++.end annotation
++
++
++# instance fields
++.field final synthetic this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++.field final synthetic val$app:Landroid/content/pm/ApplicationInfo;
++
++.field final synthetic val$device:Landroid/hardware/usb/UsbDevice;
++
++.field final synthetic val$requestGeneration:J
++
++
++# direct methods
++.method constructor <init>(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;Landroid/hardware/usb/UsbDevice;Landroid/content/pm/ApplicationInfo;J)V
++    .registers 6
++    .annotation system Ldalvik/annotation/MethodParameters;
++        accessFlags = {
++            0x8010,
++            0x1010,
++            0x1010,
++            0x1010
++        }
++        names = {
++            null,
++            null,
++            null,
++            null
++        }
++    .end annotation
++
++    .annotation system Ldalvik/annotation/Signature;
++        value = {
++            "()V"
++        }
++    .end annotation
++
++    iput-object p2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$4;->val$device:Landroid/hardware/usb/UsbDevice;
++
++    iput-object p3, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$4;->val$app:Landroid/content/pm/ApplicationInfo;
++
++    iput-wide p4, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$4;->val$requestGeneration:J
++
++    iput-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$4;->this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public onClick(Landroid/content/DialogInterface;I)V
++    .registers 6
++
++    iget-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$4;->this$0:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++
++    iget-object p2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$4;->val$device:Landroid/hardware/usb/UsbDevice;
++
++    iget-object v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$4;->val$app:Landroid/content/pm/ApplicationInfo;
++
++    iget-wide v1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$4;->val$requestGeneration:J
++
++    # invokes: Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->revoke(Landroid/hardware/usb/UsbDevice;Landroid/content/pm/ApplicationInfo;J)V
++    invoke-static {p1, p2, v0, v1, v2}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->access$500(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;Landroid/hardware/usb/UsbDevice;Landroid/content/pm/ApplicationInfo;J)V
++
++    return-void
++.end method
+diff --git a/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions.smali b/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/usb/Qpr2UsbPermissions.smali
+@@ -0,0 +1,1204 @@
++.class public final Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
++.super Ljava/lang/Object;
++.source "Qpr2UsbPermissions.java"
++
++# interfaces
++.implements Landroidx/lifecycle/DefaultLifecycleObserver;
++
++
++# instance fields
++.field private final changes:Landroid/content/BroadcastReceiver;
++
++.field private final context:Landroid/content/Context;
++
++.field private final controller:Lcom/android/settings/connecteddevice/usb/UsbDetailsController;
++
++.field private dialog:Landroid/app/AlertDialog;
++
++.field private generation:J
++
++.field private group:Landroidx/preference/PreferenceGroup;
++
++.field private registered:Z
++
++.field private started:Z
++
++.field private final usb:Landroid/hardware/usb/UsbManager;
++
++
++# direct methods
++.method public constructor <init>(Landroid/content/Context;Lcom/android/settings/connecteddevice/usb/UsbDetailsFragment;Lcom/android/settings/connecteddevice/usb/UsbDetailsController;)V
++    .registers 5
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    new-instance v0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$1;
++
++    invoke-direct {v0, p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$1;-><init>(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;)V
++
++    iput-object v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->changes:Landroid/content/BroadcastReceiver;
++
++    iput-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    iput-object p3, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->controller:Lcom/android/settings/connecteddevice/usb/UsbDetailsController;
++
++    const-class p3, Landroid/hardware/usb/UsbManager;
++
++    invoke-virtual {p1, p3}, Landroid/content/Context;->getSystemService(Ljava/lang/Class;)Ljava/lang/Object;
++
++    move-result-object p1
++
++    check-cast p1, Landroid/hardware/usb/UsbManager;
++
++    iput-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->usb:Landroid/hardware/usb/UsbManager;
++
++    invoke-virtual {p2}, Lcom/android/settings/connecteddevice/usb/UsbDetailsFragment;->getSettingsLifecycle()Lcom/android/settingslib/core/lifecycle/Lifecycle;
++
++    move-result-object p1
++
++    invoke-virtual {p1, p0}, Lcom/android/settingslib/core/lifecycle/Lifecycle;->addObserver(Landroidx/lifecycle/LifecycleObserver;)V
++
++    return-void
++.end method
++
++.method static synthetic access$000(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;)J
++    .registers 3
++
++    iget-wide v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->generation:J
++
++    return-wide v0
++.end method
++
++.method static synthetic access$008(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;)J
++    .registers 5
++
++    iget-wide v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->generation:J
++
++    const-wide/16 v2, 0x1
++
++    add-long/2addr v2, v0
++
++    iput-wide v2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->generation:J
++
++    return-wide v0
++.end method
++
++.method static synthetic access$100(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;)V
++    .registers 1
++
++    invoke-direct {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->dismiss()V
++
++    return-void
++.end method
++
++.method static synthetic access$200(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;Landroid/hardware/usb/UsbDevice;J)V
++    .registers 4
++
++    invoke-direct {p0, p1, p2, p3}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->showApps(Landroid/hardware/usb/UsbDevice;J)V
++
++    return-void
++.end method
++
++.method static synthetic access$300(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;)Lcom/android/settings/connecteddevice/usb/UsbDetailsController;
++    .registers 1
++
++    iget-object p0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->controller:Lcom/android/settings/connecteddevice/usb/UsbDetailsController;
++
++    return-object p0
++.end method
++
++.method static synthetic access$400(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;Landroid/hardware/usb/UsbDevice;Landroid/content/pm/ApplicationInfo;J)V
++    .registers 5
++
++    invoke-direct {p0, p1, p2, p3, p4}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->confirm(Landroid/hardware/usb/UsbDevice;Landroid/content/pm/ApplicationInfo;J)V
++
++    return-void
++.end method
++
++.method static synthetic access$500(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;Landroid/hardware/usb/UsbDevice;Landroid/content/pm/ApplicationInfo;J)V
++    .registers 5
++
++    invoke-direct {p0, p1, p2, p3, p4}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->revoke(Landroid/hardware/usb/UsbDevice;Landroid/content/pm/ApplicationInfo;J)V
++
++    return-void
++.end method
++
++.method private confirm(Landroid/hardware/usb/UsbDevice;Landroid/content/pm/ApplicationInfo;J)V
++    .registers 13
++
++    const-string v0, "unica_qpr2_usb_revoke"
++
++    :try_start_2
++    invoke-direct {p0, p1, p3, p4}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->current(Landroid/hardware/usb/UsbDevice;J)Landroid/hardware/usb/UsbDevice;
++
++    move-result-object v1
++
++    if-nez v1, :cond_9
++
++    return-void
++
++    :cond_9
++    new-instance v1, Landroid/app/AlertDialog$Builder;
++
++    iget-object v2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    invoke-direct {v1, v2}, Landroid/app/AlertDialog$Builder;-><init>(Landroid/content/Context;)V
++
++    invoke-direct {p0, v0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->text(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
++    invoke-virtual {v1, v2}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
++
++    move-result-object v1
++
++    new-instance v2, Ljava/lang/StringBuilder;
++
++    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
++
++    iget-object v3, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    invoke-virtual {v3}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
++
++    move-result-object v3
++
++    invoke-virtual {v3, p2}, Landroid/content/pm/PackageManager;->getApplicationLabel(Landroid/content/pm/ApplicationInfo;)Ljava/lang/CharSequence;
++
++    move-result-object v3
++
++    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
++
++    move-result-object v2
++
++    const-string v3, "\n"
++
++    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object v2
++
++    iget-object v3, p2, Landroid/content/pm/ApplicationInfo;->packageName:Ljava/lang/String;
++
++    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object v2
++
++    invoke-virtual {v2}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++
++    move-result-object v2
++
++    invoke-virtual {v1, v2}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
++
++    move-result-object v1
++
++    sget v2, Landroid/R$string;->cancel:I
++
++    const/4 v3, 0x0
++
++    invoke-virtual {v1, v2, v3}, Landroid/app/AlertDialog$Builder;->setNegativeButton(ILandroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
++
++    move-result-object v1
++
++    invoke-direct {p0, v0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->text(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
++    new-instance v2, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$4;
++    :try_end_4c
++    .catch Ljava/lang/RuntimeException; {:try_start_2 .. :try_end_4c} :catch_60
++
++    move-object v3, p0
++
++    move-object v4, p1
++
++    move-object v5, p2
++
++    move-wide v6, p3
++
++    :try_start_50
++    invoke-direct/range {v2 .. v7}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$4;-><init>(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;Landroid/hardware/usb/UsbDevice;Landroid/content/pm/ApplicationInfo;J)V
++
++    invoke-virtual {v1, v0, v2}, Landroid/app/AlertDialog$Builder;->setPositiveButton(Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
++
++    move-result-object p0
++
++    invoke-virtual {p0}, Landroid/app/AlertDialog$Builder;->show()Landroid/app/AlertDialog;
++
++    move-result-object p0
++
++    iput-object p0, v3, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->dialog:Landroid/app/AlertDialog;
++    :try_end_5d
++    .catch Ljava/lang/RuntimeException; {:try_start_50 .. :try_end_5d} :catch_5e
++
++    return-void
++
++    :catch_5e
++    move-exception v0
++
++    goto :goto_62
++
++    :catch_60
++    move-exception v0
++
++    move-object v3, p0
++
++    :goto_62
++    move-object p0, v0
++
++    invoke-direct {v3, p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->unavailable(Ljava/lang/RuntimeException;)V
++
++    return-void
++.end method
++
++.method private current(Landroid/hardware/usb/UsbDevice;J)Landroid/hardware/usb/UsbDevice;
++    .registers 8
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->started:Z
++
++    const/4 v1, 0x0
++
++    if-eqz v0, :cond_58
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->registered:Z
++
++    if-eqz v0, :cond_58
++
++    iget-wide v2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->generation:J
++
++    cmp-long p2, p2, v2
++
++    if-nez p2, :cond_58
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->available()Z
++
++    move-result p2
++
++    if-eqz p2, :cond_58
++
++    iget-object p2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    const-class p3, Landroid/app/KeyguardManager;
++
++    invoke-virtual {p2, p3}, Landroid/content/Context;->getSystemService(Ljava/lang/Class;)Ljava/lang/Object;
++
++    move-result-object p2
++
++    check-cast p2, Landroid/app/KeyguardManager;
++
++    if-eqz p2, :cond_58
++
++    invoke-virtual {p2}, Landroid/app/KeyguardManager;->isKeyguardLocked()Z
++
++    move-result p2
++
++    if-nez p2, :cond_58
++
++    iget-object p0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->usb:Landroid/hardware/usb/UsbManager;
++
++    invoke-virtual {p0}, Landroid/hardware/usb/UsbManager;->getDeviceList()Ljava/util/HashMap;
++
++    move-result-object p0
++
++    invoke-virtual {p1}, Landroid/hardware/usb/UsbDevice;->getDeviceName()Ljava/lang/String;
++
++    move-result-object p2
++
++    invoke-virtual {p0, p2}, Ljava/util/HashMap;->get(Ljava/lang/Object;)Ljava/lang/Object;
++
++    move-result-object p0
++
++    check-cast p0, Landroid/hardware/usb/UsbDevice;
++
++    if-eqz p0, :cond_58
++
++    invoke-virtual {p0}, Landroid/hardware/usb/UsbDevice;->getDeviceId()I
++
++    move-result p2
++
++    invoke-virtual {p1}, Landroid/hardware/usb/UsbDevice;->getDeviceId()I
++
++    move-result p3
++
++    if-ne p2, p3, :cond_58
++
++    invoke-virtual {p0}, Landroid/hardware/usb/UsbDevice;->getVendorId()I
++
++    move-result p2
++
++    invoke-virtual {p1}, Landroid/hardware/usb/UsbDevice;->getVendorId()I
++
++    move-result p3
++
++    if-ne p2, p3, :cond_58
++
++    invoke-virtual {p0}, Landroid/hardware/usb/UsbDevice;->getProductId()I
++
++    move-result p2
++
++    invoke-virtual {p1}, Landroid/hardware/usb/UsbDevice;->getProductId()I
++
++    move-result p1
++
++    if-ne p2, p1, :cond_58
++
++    return-object p0
++
++    :cond_58
++    return-object v1
++.end method
++
++.method private dismiss()V
++    .registers 2
++
++    iget-object v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->dialog:Landroid/app/AlertDialog;
++
++    if-eqz v0, :cond_a
++
++    invoke-virtual {v0}, Landroid/app/AlertDialog;->dismiss()V
++
++    const/4 v0, 0x0
++
++    iput-object v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->dialog:Landroid/app/AlertDialog;
++
++    :cond_a
++    return-void
++.end method
++
++.method private revoke(Landroid/hardware/usb/UsbDevice;Landroid/content/pm/ApplicationInfo;J)V
++    .registers 6
++
++    :try_start_0
++    invoke-direct {p0, p1, p3, p4}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->current(Landroid/hardware/usb/UsbDevice;J)Landroid/hardware/usb/UsbDevice;
++
++    move-result-object p1
++
++    if-nez p1, :cond_a
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->refresh()V
++
++    return-void
++
++    :cond_a
++    iget-object p3, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    invoke-virtual {p3}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
++
++    move-result-object p3
++
++    iget-object p4, p2, Landroid/content/pm/ApplicationInfo;->packageName:Ljava/lang/String;
++
++    const/4 v0, 0x0
++
++    invoke-virtual {p3, p4, v0}, Landroid/content/pm/PackageManager;->getApplicationInfo(Ljava/lang/String;I)Landroid/content/pm/ApplicationInfo;
++
++    move-result-object p3
++
++    iget p4, p3, Landroid/content/pm/ApplicationInfo;->uid:I
++
++    iget p2, p2, Landroid/content/pm/ApplicationInfo;->uid:I
++
++    if-ne p4, p2, :cond_6f
++
++    iget p2, p3, Landroid/content/pm/ApplicationInfo;->uid:I
++
++    invoke-static {p2}, Landroid/os/UserHandle;->getUserId(I)I
++
++    move-result p2
++
++    iget-object p4, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    invoke-virtual {p4}, Landroid/content/Context;->getUserId()I
++
++    move-result p4
++
++    if-ne p2, p4, :cond_6f
++
++    iget-object p2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->usb:Landroid/hardware/usb/UsbManager;
++
++    invoke-virtual {p2, p1}, Landroid/hardware/usb/UsbManager;->getPackagesWithPermission(Landroid/hardware/usb/UsbDevice;)Ljava/util/List;
++
++    move-result-object p2
++
++    iget-object p4, p3, Landroid/content/pm/ApplicationInfo;->packageName:Ljava/lang/String;
++
++    invoke-interface {p2, p4}, Ljava/util/List;->contains(Ljava/lang/Object;)Z
++
++    move-result p2
++
++    if-nez p2, :cond_3d
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->refresh()V
++
++    return-void
++
++    :cond_3d
++    iget-object p2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->usb:Landroid/hardware/usb/UsbManager;
++
++    iget-object p4, p3, Landroid/content/pm/ApplicationInfo;->packageName:Ljava/lang/String;
++
++    invoke-virtual {p2, p1, p4}, Landroid/hardware/usb/UsbManager;->revokePermission(Landroid/hardware/usb/UsbDevice;Ljava/lang/String;)V
++
++    iget-object p2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->usb:Landroid/hardware/usb/UsbManager;
++
++    invoke-virtual {p2, p1}, Landroid/hardware/usb/UsbManager;->getPackagesWithPermission(Landroid/hardware/usb/UsbDevice;)Ljava/util/List;
++
++    move-result-object p1
++
++    iget-object p2, p3, Landroid/content/pm/ApplicationInfo;->packageName:Ljava/lang/String;
++
++    invoke-interface {p1, p2}, Ljava/util/List;->contains(Ljava/lang/Object;)Z
++
++    move-result p1
++
++    if-eqz p1, :cond_63
++
++    iget-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    const-string p2, "unica_qpr2_usb_revoke_failed"
++
++    invoke-direct {p0, p2}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->text(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p2
++
++    sget p3, Landroid/widget/Toast;->LENGTH_LONG:I
++
++    invoke-static {p1, p2, p3}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
++
++    move-result-object p1
++
++    invoke-virtual {p1}, Landroid/widget/Toast;->show()V
++
++    :cond_63
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->refresh()V
++    :try_end_66
++    .catch Landroid/content/pm/PackageManager$NameNotFoundException; {:try_start_0 .. :try_end_66} :catch_6c
++    .catch Ljava/lang/RuntimeException; {:try_start_0 .. :try_end_66} :catch_67
++
++    return-void
++
++    :catch_67
++    move-exception p1
++
++    invoke-direct {p0, p1}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->unavailable(Ljava/lang/RuntimeException;)V
++
++    goto :goto_6f
++
++    :catch_6c
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->refresh()V
++
++    :cond_6f
++    :goto_6f
++    return-void
++.end method
++
++.method private showApps(Landroid/hardware/usb/UsbDevice;J)V
++    .registers 13
++
++    invoke-direct {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->dismiss()V
++
++    :try_start_3
++    invoke-direct {p0, p1, p2, p3}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->current(Landroid/hardware/usb/UsbDevice;J)Landroid/hardware/usb/UsbDevice;
++
++    move-result-object v0
++    :try_end_7
++    .catch Ljava/lang/RuntimeException; {:try_start_3 .. :try_end_7} :catch_c4
++
++    if-nez v0, :cond_d
++
++    :try_start_9
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->refresh()V
++    :try_end_c
++    .catch Ljava/lang/RuntimeException; {:try_start_9 .. :try_end_c} :catch_a4
++
++    return-void
++
++    :cond_d
++    :try_start_d
++    new-instance v1, Ljava/util/ArrayList;
++
++    new-instance v2, Ljava/util/HashSet;
++
++    iget-object v3, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->usb:Landroid/hardware/usb/UsbManager;
++
++    invoke-virtual {v3, v0}, Landroid/hardware/usb/UsbManager;->getPackagesWithPermission(Landroid/hardware/usb/UsbDevice;)Ljava/util/List;
++
++    move-result-object v0
++
++    invoke-direct {v2, v0}, Ljava/util/HashSet;-><init>(Ljava/util/Collection;)V
++
++    invoke-direct {v1, v2}, Ljava/util/ArrayList;-><init>(Ljava/util/Collection;)V
++
++    invoke-static {v1}, Ljava/util/Collections;->sort(Ljava/util/List;)V
++
++    new-instance v5, Ljava/util/ArrayList;
++
++    invoke-direct {v5}, Ljava/util/ArrayList;-><init>()V
++
++    new-instance v0, Ljava/util/ArrayList;
++
++    invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
++
++    iget-object v2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    invoke-virtual {v2}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
++
++    move-result-object v2
++
++    invoke-interface {v1}, Ljava/util/List;->iterator()Ljava/util/Iterator;
++
++    move-result-object v1
++
++    :catch_34
++    :cond_34
++    :goto_34
++    invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
++
++    move-result v3
++    :try_end_38
++    .catch Ljava/lang/RuntimeException; {:try_start_d .. :try_end_38} :catch_c4
++
++    const/4 v4, 0x0
++
++    if-eqz v3, :cond_7b
++
++    :try_start_3b
++    invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
++
++    move-result-object v3
++
++    check-cast v3, Ljava/lang/String;
++    :try_end_41
++    .catch Ljava/lang/RuntimeException; {:try_start_3b .. :try_end_41} :catch_a4
++
++    :try_start_41
++    invoke-virtual {v2, v3, v4}, Landroid/content/pm/PackageManager;->getApplicationInfo(Ljava/lang/String;I)Landroid/content/pm/ApplicationInfo;
++
++    move-result-object v3
++
++    iget v4, v3, Landroid/content/pm/ApplicationInfo;->uid:I
++
++    invoke-static {v4}, Landroid/os/UserHandle;->getUserId(I)I
++
++    move-result v4
++
++    iget-object v6, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    invoke-virtual {v6}, Landroid/content/Context;->getUserId()I
++
++    move-result v6
++
++    if-ne v4, v6, :cond_34
++
++    invoke-virtual {v5, v3}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
++
++    new-instance v4, Ljava/lang/StringBuilder;
++
++    invoke-direct {v4}, Ljava/lang/StringBuilder;-><init>()V
++
++    invoke-virtual {v2, v3}, Landroid/content/pm/PackageManager;->getApplicationLabel(Landroid/content/pm/ApplicationInfo;)Ljava/lang/CharSequence;
++
++    move-result-object v6
++
++    invoke-interface {v6}, Ljava/lang/CharSequence;->toString()Ljava/lang/String;
++
++    move-result-object v6
++
++    invoke-virtual {v4, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object v4
++
++    const-string v6, "\n"
++
++    invoke-virtual {v4, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object v4
++
++    iget-object v3, v3, Landroid/content/pm/ApplicationInfo;->packageName:Ljava/lang/String;
++
++    invoke-virtual {v4, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object v3
++
++    invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++
++    move-result-object v3
++
++    invoke-virtual {v0, v3}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
++    :try_end_7a
++    .catch Landroid/content/pm/PackageManager$NameNotFoundException; {:try_start_41 .. :try_end_7a} :catch_34
++    .catch Ljava/lang/RuntimeException; {:try_start_41 .. :try_end_7a} :catch_a4
++
++    goto :goto_34
++
++    :cond_7b
++    :try_start_7b
++    new-instance v1, Landroid/app/AlertDialog$Builder;
++
++    iget-object v2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    invoke-direct {v1, v2}, Landroid/app/AlertDialog$Builder;-><init>(Landroid/content/Context;)V
++
++    const-string v2, "unica_qpr2_usb_apps"
++
++    invoke-direct {p0, v2}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->text(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
++    invoke-virtual {v1, v2}, Landroid/app/AlertDialog$Builder;->setTitle(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
++
++    move-result-object v1
++
++    sget v2, Landroid/R$string;->cancel:I
++
++    const/4 v3, 0x0
++
++    invoke-virtual {v1, v2, v3}, Landroid/app/AlertDialog$Builder;->setNegativeButton(ILandroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
++
++    move-result-object v1
++
++    invoke-virtual {v5}, Ljava/util/ArrayList;->isEmpty()Z
++
++    move-result v2
++    :try_end_97
++    .catch Ljava/lang/RuntimeException; {:try_start_7b .. :try_end_97} :catch_c4
++
++    if-eqz v2, :cond_a8
++
++    :try_start_99
++    const-string p1, "unica_qpr2_usb_no_apps"
++
++    invoke-direct {p0, p1}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->text(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p1
++
++    invoke-virtual {v1, p1}, Landroid/app/AlertDialog$Builder;->setMessage(Ljava/lang/CharSequence;)Landroid/app/AlertDialog$Builder;
++    :try_end_a2
++    .catch Ljava/lang/RuntimeException; {:try_start_99 .. :try_end_a2} :catch_a4
++
++    move-object v4, p0
++
++    goto :goto_bb
++
++    :catch_a4
++    move-exception v0
++
++    move-object p1, v0
++
++    move-object v4, p0
++
++    goto :goto_c7
++
++    :cond_a8
++    :try_start_a8
++    new-array v2, v4, [Ljava/lang/CharSequence;
++
++    invoke-virtual {v0, v2}, Ljava/util/ArrayList;->toArray([Ljava/lang/Object;)[Ljava/lang/Object;
++
++    move-result-object v0
++
++    check-cast v0, [Ljava/lang/CharSequence;
++
++    new-instance v3, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$3;
++    :try_end_b2
++    .catch Ljava/lang/RuntimeException; {:try_start_a8 .. :try_end_b2} :catch_c4
++
++    move-object v4, p0
++
++    move-object v6, p1
++
++    move-wide v7, p2
++
++    :try_start_b5
++    invoke-direct/range {v3 .. v8}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$3;-><init>(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;Ljava/util/ArrayList;Landroid/hardware/usb/UsbDevice;J)V
++
++    invoke-virtual {v1, v0, v3}, Landroid/app/AlertDialog$Builder;->setItems([Ljava/lang/CharSequence;Landroid/content/DialogInterface$OnClickListener;)Landroid/app/AlertDialog$Builder;
++
++    :goto_bb
++    invoke-virtual {v1}, Landroid/app/AlertDialog$Builder;->show()Landroid/app/AlertDialog;
++
++    move-result-object p0
++
++    iput-object p0, v4, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->dialog:Landroid/app/AlertDialog;
++    :try_end_c1
++    .catch Ljava/lang/RuntimeException; {:try_start_b5 .. :try_end_c1} :catch_c2
++
++    goto :goto_ca
++
++    :catch_c2
++    move-exception v0
++
++    goto :goto_c6
++
++    :catch_c4
++    move-exception v0
++
++    move-object v4, p0
++
++    :goto_c6
++    move-object p1, v0
++
++    :goto_c7
++    invoke-direct {v4, p1}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->unavailable(Ljava/lang/RuntimeException;)V
++
++    :goto_ca
++    return-void
++.end method
++
++.method private text(Ljava/lang/String;)Ljava/lang/String;
++    .registers 5
++
++    iget-object v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    invoke-virtual {v0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
++
++    move-result-object v0
++
++    iget-object v1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    invoke-virtual {v1}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
++
++    move-result-object v1
++
++    const-string v2, "string"
++
++    invoke-virtual {v0, p1, v2, v1}, Landroid/content/res/Resources;->getIdentifier(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result v0
++
++    if-eqz v0, :cond_1b
++
++    iget-object p0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    invoke-virtual {p0, v0}, Landroid/content/Context;->getString(I)Ljava/lang/String;
++
++    move-result-object p0
++
++    return-object p0
++
++    :cond_1b
++    new-instance p0, Ljava/lang/IllegalStateException;
++
++    new-instance v0, Ljava/lang/StringBuilder;
++
++    const-string v1, "Missing reviewed USB resource "
++
++    invoke-direct {v0, v1}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
++
++    invoke-virtual {v0, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object p1
++
++    invoke-virtual {p1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++
++    move-result-object p1
++
++    invoke-direct {p0, p1}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
++
++    throw p0
++.end method
++
++.method private unavailable(Ljava/lang/RuntimeException;)V
++    .registers 4
++
++    const-string v0, "UN1CA-QPR2-USB"
++
++    const-string v1, "USB permission operation rejected"
++
++    invoke-static {v0, v1, p1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    iget-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    const-string v0, "unica_qpr2_usb_unavailable"
++
++    invoke-direct {p0, v0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->text(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v0
++
++    sget v1, Landroid/widget/Toast;->LENGTH_LONG:I
++
++    invoke-static {p1, v0, v1}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
++
++    move-result-object p1
++
++    invoke-virtual {p1}, Landroid/widget/Toast;->show()V
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->refresh()V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public available()Z
++    .registers 2
++
++    iget-object v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->usb:Landroid/hardware/usb/UsbManager;
++
++    if-eqz v0, :cond_14
++
++    iget-object p0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    invoke-virtual {p0}, Landroid/content/Context;->getPackageManager()Landroid/content/pm/PackageManager;
++
++    move-result-object p0
++
++    const-string v0, "android.hardware.usb.host"
++
++    invoke-virtual {p0, v0}, Landroid/content/pm/PackageManager;->hasSystemFeature(Ljava/lang/String;)Z
++
++    move-result p0
++
++    if-eqz p0, :cond_14
++
++    const/4 p0, 0x1
++
++    return p0
++
++    :cond_14
++    const/4 p0, 0x0
++
++    return p0
++.end method
++
++.method public display(Landroidx/preference/PreferenceGroup;)V
++    .registers 2
++
++    iput-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->group:Landroidx/preference/PreferenceGroup;
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->refresh()V
++
++    return-void
++.end method
++
++.method public onStart(Landroidx/lifecycle/LifecycleOwner;)V
++    .registers 6
++
++    const/4 p1, 0x1
++
++    iput-boolean p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->started:Z
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->available()Z
++
++    move-result v0
++
++    if-eqz v0, :cond_32
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->registered:Z
++
++    if-nez v0, :cond_32
++
++    new-instance v0, Landroid/content/IntentFilter;
++
++    sget-object v1, Landroid/hardware/usb/UsbManager;->ACTION_USB_DEVICE_ATTACHED:Ljava/lang/String;
++
++    invoke-direct {v0, v1}, Landroid/content/IntentFilter;-><init>(Ljava/lang/String;)V
++
++    sget-object v1, Landroid/hardware/usb/UsbManager;->ACTION_USB_DEVICE_DETACHED:Ljava/lang/String;
++
++    invoke-virtual {v0, v1}, Landroid/content/IntentFilter;->addAction(Ljava/lang/String;)V
++
++    const-string v1, "android.hardware.usb.action.USB_PERMISSION_CHANGED"
++
++    invoke-virtual {v0, v1}, Landroid/content/IntentFilter;->addAction(Ljava/lang/String;)V
++
++    :try_start_1e
++    iget-object v1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    iget-object v2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->changes:Landroid/content/BroadcastReceiver;
++
++    sget v3, Landroid/content/Context;->RECEIVER_EXPORTED:I
++
++    invoke-virtual {v1, v2, v0, v3}, Landroid/content/Context;->registerReceiver(Landroid/content/BroadcastReceiver;Landroid/content/IntentFilter;I)Landroid/content/Intent;
++
++    iput-boolean p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->registered:Z
++    :try_end_29
++    .catch Ljava/lang/RuntimeException; {:try_start_1e .. :try_end_29} :catch_2a
++
++    goto :goto_32
++
++    :catch_2a
++    move-exception p1
++
++    const-string v0, "UN1CA-QPR2-USB"
++
++    const-string v1, "USB observation unavailable"
++
++    invoke-static {v0, v1, p1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    :cond_32
++    :goto_32
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->refresh()V
++
++    return-void
++.end method
++
++.method public onStop(Landroidx/lifecycle/LifecycleOwner;)V
++    .registers 6
++
++    const/4 p1, 0x0
++
++    iput-boolean p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->started:Z
++
++    iget-wide v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->generation:J
++
++    const-wide/16 v2, 0x1
++
++    add-long/2addr v0, v2
++
++    iput-wide v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->generation:J
++
++    invoke-direct {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->dismiss()V
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->registered:Z
++
++    if-eqz v0, :cond_1a
++
++    iput-boolean p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->registered:Z
++
++    iget-object p1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    iget-object p0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->changes:Landroid/content/BroadcastReceiver;
++
++    invoke-virtual {p1, p0}, Landroid/content/Context;->unregisterReceiver(Landroid/content/BroadcastReceiver;)V
++
++    :cond_1a
++    return-void
++.end method
++
++.method public refresh()V
++    .registers 11
++
++    iget-object v0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->group:Landroidx/preference/PreferenceGroup;
++
++    if-nez v0, :cond_5
++
++    return-void
++
++    :cond_5
++    invoke-virtual {v0}, Landroidx/preference/PreferenceGroup;->removeAll()V
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->available()Z
++
++    move-result v0
++
++    const/4 v1, 0x0
++
++    if-nez v0, :cond_15
++
++    iget-object p0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->group:Landroidx/preference/PreferenceGroup;
++
++    invoke-virtual {p0, v1}, Landroidx/preference/PreferenceGroup;->setVisible(Z)V
++
++    return-void
++
++    :cond_15
++    const/4 v0, 0x1
++
++    :try_start_16
++    iget-object v2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->usb:Landroid/hardware/usb/UsbManager;
++
++    invoke-virtual {v2}, Landroid/hardware/usb/UsbManager;->getDeviceList()Ljava/util/HashMap;
++
++    move-result-object v2
++
++    new-instance v3, Ljava/util/ArrayList;
++
++    invoke-interface {v2}, Ljava/util/Map;->keySet()Ljava/util/Set;
++
++    move-result-object v4
++
++    invoke-direct {v3, v4}, Ljava/util/ArrayList;-><init>(Ljava/util/Collection;)V
++
++    invoke-static {v3}, Ljava/util/Collections;->sort(Ljava/util/List;)V
++
++    invoke-interface {v3}, Ljava/util/List;->iterator()Ljava/util/Iterator;
++
++    move-result-object v4
++
++    :cond_2c
++    :goto_2c
++    invoke-interface {v4}, Ljava/util/Iterator;->hasNext()Z
++
++    move-result v5
++
++    if-eqz v5, :cond_b8
++
++    invoke-interface {v4}, Ljava/util/Iterator;->next()Ljava/lang/Object;
++
++    move-result-object v5
++
++    check-cast v5, Ljava/lang/String;
++
++    invoke-interface {v2, v5}, Ljava/util/Map;->get(Ljava/lang/Object;)Ljava/lang/Object;
++
++    move-result-object v6
++
++    check-cast v6, Landroid/hardware/usb/UsbDevice;
++
++    if-eqz v6, :cond_2c
++
++    new-instance v7, Landroidx/preference/Preference;
++
++    iget-object v8, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    invoke-direct {v7, v8}, Landroidx/preference/Preference;-><init>(Landroid/content/Context;)V
++
++    new-instance v8, Ljava/lang/StringBuilder;
++
++    invoke-direct {v8}, Ljava/lang/StringBuilder;-><init>()V
++
++    const-string v9, "unica_qpr2_usb_"
++
++    invoke-virtual {v8, v9}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object v8
++
++    invoke-virtual {v8, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object v5
++
++    invoke-virtual {v5}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++
++    move-result-object v5
++
++    invoke-virtual {v7, v5}, Landroidx/preference/Preference;->setKey(Ljava/lang/String;)V
++
++    invoke-virtual {v6}, Landroid/hardware/usb/UsbDevice;->getProductName()Ljava/lang/String;
++
++    move-result-object v5
++
++    invoke-static {v5}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
++
++    move-result v8
++
++    if-eqz v8, :cond_6b
++
++    invoke-virtual {v6}, Landroid/hardware/usb/UsbDevice;->getManufacturerName()Ljava/lang/String;
++
++    move-result-object v5
++
++    :cond_6b
++    invoke-static {v5}, Landroid/text/TextUtils;->isEmpty(Ljava/lang/CharSequence;)Z
++
++    move-result v8
++
++    if-eqz v8, :cond_77
++
++    const-string v5, "unica_qpr2_usb_device"
++
++    invoke-direct {p0, v5}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->text(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v5
++
++    :cond_77
++    invoke-virtual {v7, v5}, Landroidx/preference/Preference;->setTitle(Ljava/lang/CharSequence;)V
++
++    iget-object v5, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->usb:Landroid/hardware/usb/UsbManager;
++
++    invoke-virtual {v5, v6}, Landroid/hardware/usb/UsbManager;->getPackagesWithPermission(Landroid/hardware/usb/UsbDevice;)Ljava/util/List;
++
++    move-result-object v5
++
++    new-instance v8, Ljava/lang/StringBuilder;
++
++    invoke-direct {v8}, Ljava/lang/StringBuilder;-><init>()V
++
++    const-string v9, "unica_qpr2_usb_apps"
++
++    invoke-direct {p0, v9}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->text(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v9
++
++    invoke-virtual {v8, v9}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object v8
++
++    const-string v9, ": "
++
++    invoke-virtual {v8, v9}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object v8
++
++    new-instance v9, Ljava/util/HashSet;
++
++    invoke-direct {v9, v5}, Ljava/util/HashSet;-><init>(Ljava/util/Collection;)V
++
++    invoke-virtual {v9}, Ljava/util/HashSet;->size()I
++
++    move-result v5
++
++    invoke-virtual {v8, v5}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
++
++    move-result-object v5
++
++    invoke-virtual {v5}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++
++    move-result-object v5
++
++    invoke-virtual {v7, v5}, Landroidx/preference/Preference;->setSummary(Ljava/lang/CharSequence;)V
++
++    new-instance v5, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;
++
++    invoke-direct {v5, p0, v6}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions$2;-><init>(Lio/mesalabs/unica/usb/Qpr2UsbPermissions;Landroid/hardware/usb/UsbDevice;)V
++
++    invoke-virtual {v7, v5}, Landroidx/preference/Preference;->setOnPreferenceClickListener(Landroidx/preference/Preference$OnPreferenceClickListener;)V
++
++    iget-object v5, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->group:Landroidx/preference/PreferenceGroup;
++
++    invoke-virtual {v5, v7}, Landroidx/preference/PreferenceGroup;->addPreference(Landroidx/preference/Preference;)Z
++
++    goto/16 :goto_2c
++
++    :cond_b8
++    iget-object v2, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->group:Landroidx/preference/PreferenceGroup;
++
++    invoke-interface {v3}, Ljava/util/List;->isEmpty()Z
++
++    move-result v3
++
++    xor-int/2addr v3, v0
++
++    invoke-virtual {v2, v3}, Landroidx/preference/PreferenceGroup;->setVisible(Z)V
++    :try_end_c2
++    .catch Ljava/lang/RuntimeException; {:try_start_16 .. :try_end_c2} :catch_c3
++
++    return-void
++
++    :catch_c3
++    move-exception v2
++
++    const-string v3, "UN1CA-QPR2-USB"
++
++    const-string v4, "USB permission list unavailable"
++
++    invoke-static {v3, v4, v2}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    new-instance v2, Landroidx/preference/Preference;
++
++    iget-object v3, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->context:Landroid/content/Context;
++
++    invoke-direct {v2, v3}, Landroidx/preference/Preference;-><init>(Landroid/content/Context;)V
++
++    const-string v3, "unica_qpr2_usb_unavailable"
++
++    invoke-direct {p0, v3}, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->text(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
++    invoke-virtual {v2, v3}, Landroidx/preference/Preference;->setTitle(Ljava/lang/CharSequence;)V
++
++    invoke-virtual {v2, v1}, Landroidx/preference/Preference;->setSelectable(Z)V
++
++    iget-object v1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->group:Landroidx/preference/PreferenceGroup;
++
++    invoke-virtual {v1}, Landroidx/preference/PreferenceGroup;->removeAll()V
++
++    iget-object v1, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->group:Landroidx/preference/PreferenceGroup;
++
++    invoke-virtual {v1, v2}, Landroidx/preference/PreferenceGroup;->addPreference(Landroidx/preference/Preference;)Z
++
++    iget-object p0, p0, Lio/mesalabs/unica/usb/Qpr2UsbPermissions;->group:Landroidx/preference/PreferenceGroup;
++
++    invoke-virtual {p0, v0}, Landroidx/preference/PreferenceGroup;->setVisible(Z)V
++
++    return-void
++.end method
