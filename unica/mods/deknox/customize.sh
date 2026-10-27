@@ -1,3 +1,111 @@
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    # Keep the SDK37 native runtime; remove Knox entry points in its own Java
+    # code. Run directly under the original module runner's fail-fast shell.
+    SET_PROP_IF_DIFF "vendor" "ro.security.fips.ux" "Disabled"
+    DELETE_FROM_WORK_DIR "system" "system/app/BlockchainBasicKit"
+    DELETE_FROM_WORK_DIR "system" "system/bin/dualdard"
+    DELETE_FROM_WORK_DIR "system" "system/bin/sdp_cryptod"
+    DELETE_FROM_WORK_DIR "system" "system/etc/init/dualdard.rc"
+    DELETE_FROM_WORK_DIR "system" "system/etc/init/kpp.init.rc"
+    DELETE_FROM_WORK_DIR "system" "system/etc/init/kss.init.rc"
+    DELETE_FROM_WORK_DIR "system" "system/etc/init/sdp_cryptod.rc"
+    DELETE_FROM_WORK_DIR "system" "system/etc/permissions/privapp-permissions-com.samsung.android.hdmapp.xml"
+    DELETE_FROM_WORK_DIR "system" "system/etc/permissions/privapp-permissions-com.samsung.android.kgclient.xml"
+    DELETE_FROM_WORK_DIR "system" "system/etc/permissions/privapp-permissions-com.samsung.android.knox.kfbp.xml"
+    DELETE_FROM_WORK_DIR "system" "system/etc/permissions/privapp-permissions-com.samsung.android.knox.knnr.xml"
+    DELETE_FROM_WORK_DIR "system" "system/etc/permissions/privapp-permissions-com.samsung.android.knox.mpos.xml"
+    DELETE_FROM_WORK_DIR "system" "system/etc/permissions/privapp-permissions-com.samsung.android.knox.pushmanager.xml"
+    DELETE_FROM_WORK_DIR "system" "system/etc/permissions/privapp-permissions-com.samsung.android.knox.sandbox.xml"
+    DELETE_FROM_WORK_DIR "system" "system/etc/permissions/privapp-permissions-com.samsung.android.knox.zt.framework.xml"
+    DELETE_FROM_WORK_DIR "system" "system/etc/permissions/signature-permissions-com.samsung.android.kgclient.xml"
+    DELETE_FROM_WORK_DIR "system" "system/etc/sysconfig/preinstalled-packages-com.samsung.android.coldwalletservice.xml"
+    DELETE_FROM_WORK_DIR "system" "system/priv-app/HdmApk"
+    DELETE_FROM_WORK_DIR "system" "system/priv-app/KnoxFrameBufferProvider"
+    DELETE_FROM_WORK_DIR "system" "system/priv-app/KnoxGuard"
+    DELETE_FROM_WORK_DIR "system" "system/priv-app/KnoxMposAgent"
+    DELETE_FROM_WORK_DIR "system" "system/priv-app/KnoxNeuralNetworkRuntime"
+    DELETE_FROM_WORK_DIR "system" "system/priv-app/KnoxPushManager"
+    DELETE_FROM_WORK_DIR "system" "system/priv-app/KnoxSandbox"
+    DELETE_FROM_WORK_DIR "system" "system/priv-app/KnoxZtFramework"
+
+    # SQLiteSdpHelper/SDP flags are gone; the donor has unsupported SDP stubs.
+    LOG "- Knox SDP is already removed in the SDK 37 framework"
+    APPLY_PATCH "system" "system/framework/framework.jar" \
+        "$MODPATH/sdk37/ddar/framework.jar/0001-Nuke-Knox-DualDAR-SDK37.patch"
+    APPLY_PATCH "system" "system/framework/framework.jar" \
+        "$MODPATH/sdk37/ddar/framework.jar/0002-Nuke-MDF-SDK37.patch"
+    APPLY_PATCH "system" "system/framework/services.jar" \
+        "$MODPATH/sdk37/ddar/services.jar/0001-Nuke-Knox-DualDAR-SDK37.patch"
+    APPLY_PATCH "system" "system/priv-app/KnoxCore/KnoxCore.apk" \
+        "$MODPATH/sdk37/ddar/KnoxCore.apk/0001-Nuke-Knox-DualDAR-SDK37.patch"
+    while read -r PARTITION ARCHIVE SMALI_DIR; do
+        APK_NAME="${ARCHIVE##*/}"
+        APPLY_PATCH "$PARTITION" "$ARCHIVE" \
+            "$MODPATH/sdk37/ddar/$APK_NAME/0001-Nuke-Knox-DualDAR-SDK37.patch"
+        APPLY_PATCH "$PARTITION" "$ARCHIVE" \
+            "$MODPATH/sdk37/hdm/$APK_NAME/0001-Nuke-Knox-HDM-SDK37.patch"
+        SMALI_PATCH "$PARTITION" "$ARCHIVE" \
+            "$SMALI_DIR/com/samsung/android/knox/integrity/EnhancedAttestationPolicy.smali" "return" \
+            'isBldpEventSupported()Z' 'false'
+        SMALI_PATCH "$PARTITION" "$ARCHIVE" \
+            "$SMALI_DIR/com/samsung/android/knox/integrity/EnhancedAttestationPolicy.smali" "return" \
+            'isMposSupported()Z' 'false'
+    done <<'EOF'
+system system/app/Traceur/Traceur.apk smali
+system system/framework/knoxsdk.jar smali
+system system/priv-app/DeviceDiagnostics/DeviceDiagnostics.apk smali
+system system/priv-app/ManagedProvisioning/ManagedProvisioning.apk smali
+system system/priv-app/SecSettings/SecSettings.apk smali_classes3
+system system/priv-app/SecSettingsIntelligence/SecSettingsIntelligence.apk smali_classes2
+system_ext priv-app/StorageManager/StorageManager.apk smali
+EOF
+    unset PARTITION ARCHIVE SMALI_DIR APK_NAME
+
+    # product_feature already changed the inlined HDM vendor shipping API.
+    # Specialize only the deleted literal in a private temporary patch.
+    (
+        if ! [[ "$SOURCE_PRODUCT_SHIPPING_API_LEVEL" =~ ^[0-9]+$ ]] || \
+                ! [[ "$TARGET_PRODUCT_SHIPPING_API_LEVEL" =~ ^[0-9]+$ ]]; then
+            ABORT "SDK37 HDM patch requires numeric source/target shipping API levels"
+            return 1
+        fi
+        HDM_TEMPLATE="$MODPATH/sdk37/hdm/services.jar/0001-Nuke-Knox-HDM-SDK37.patch"
+        if [ "$(grep -Fxc -- "-    const-string v0, \"$SOURCE_PRODUCT_SHIPPING_API_LEVEL\"" "$HDM_TEMPLATE")" != 1 ]; then
+            ABORT "SDK37 HDM patch does not match the source shipping API"
+            return 1
+        fi
+        HDM_PATCH="$(mktemp "$APKTOOL_DIR/.deknox-hdm-sdk37.XXXXXX.patch")"
+        trap 'rm -f "$HDM_PATCH"' EXIT
+        sed "s/^-    const-string v0, \"$SOURCE_PRODUCT_SHIPPING_API_LEVEL\"\$/-    const-string v0, \"$TARGET_PRODUCT_SHIPPING_API_LEVEL\"/" \
+            "$HDM_TEMPLATE" > "$HDM_PATCH"
+        APPLY_PATCH "system" "system/framework/services.jar" "$HDM_PATCH"
+    )
+    SMALI_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+        "smali_classes5/com/samsung/android/knox/integrity/EnhancedAttestationPolicy.smali" "return" \
+        'isBldpEventSupported()Z' 'false'
+    SMALI_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+        "smali_classes5/com/samsung/android/knox/integrity/EnhancedAttestationPolicy.smali" "return" \
+        'isMposSupported()Z' 'false'
+    APPLY_PATCH "system" "system/framework/services.jar" \
+        "$MODPATH/sdk37/mpos/services.jar/0001-Nuke-MPOS-SDK37.patch"
+    APPLY_PATCH "system" "system/framework/services.jar" \
+        "$MODPATH/sdk37/knoxguard/services.jar/0001-Disable-KnoxGuard-SDK37.patch"
+    APPLY_PATCH "system" "system/framework/framework.jar" \
+        "$MODPATH/sdk37/kmxai/framework.jar/0001-Nuke-Knox-Matrix-AI-Privacy-SDK37.patch"
+    SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_FRAMEWORK_SUPPORT_BLOCKCHAIN_SERVICE" --delete
+    SMALI_PATCH "system" "system/framework/framework.jar" \
+        "smali_classes6/com/samsung/android/ProductPackagesRune.smali" "replaceall" \
+        "SERVICE_SAMSUNG_BLOCKCHAIN:Z = true" "SERVICE_SAMSUNG_BLOCKCHAIN:Z = false"
+    if [[ "$TARGET_SECURITY_CONFIG_ESE_CHIP_VENDOR" == "none" ]] && [[ "$TARGET_SECURITY_CONFIG_ESE_COS_NAME" == "none" ]]; then
+        APPLY_PATCH "system" "system/framework/services.jar" \
+            "$MODPATH/sdk37/ese+blockchain/services.jar/0001-Nuke-BlockchainTZService-SDK37.patch"
+    else
+        APPLY_PATCH "system" "system/framework/services.jar" \
+            "$MODPATH/sdk37/blockchain/services.jar/0001-Nuke-BlockchainTZService-SDK37.patch"
+    fi
+    return 0
+fi
+
 SET_PROP_IF_DIFF "vendor" "ro.security.fips.ux" "Disabled"
 
 if [[ "$TARGET_OS_SINGLE_SYSTEM_IMAGE" == "qssi" ]]; then
