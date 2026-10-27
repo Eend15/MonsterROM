@@ -1050,6 +1050,17 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 magnifier_zoom
+    MODPATH="$PARADIGM_MODPATH/qpr2/magnifier_zoom"
+    LOG_STEP_IN "- Adding QPR2 magnifier_zoom"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SamsungMagnifier3/SamsungMagnifier3.apk" \
+            "$MODPATH/patches/SamsungMagnifier3.apk/0001-Connect-QPR2-zoom-choices-to-native-camera-levels.patch"
+        APPLY_PATCH "system" "system/priv-app/SamsungMagnifier3/SamsungMagnifier3.apk" \
+            "$MODPATH/patches/SamsungMagnifier3.apk/0099-Identify-QPR2-r14.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

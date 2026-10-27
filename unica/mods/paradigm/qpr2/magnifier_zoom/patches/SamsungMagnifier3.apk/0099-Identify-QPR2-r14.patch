@@ -1,0 +1,16 @@
+Subject: [PATCH] Identify the signed QPR2 r14 app candidate
+
+diff --git a/apktool.yml b/apktool.yml
+--- a/apktool.yml
++++ b/apktool.yml
+@@ -8,8 +8,8 @@
+   minSdkVersion: 36
+   targetSdkVersion: 37
+ versionInfo:
+-  versionCode: 1701300000
+-  versionName: 17.0.13
++  versionCode: 1701300015
++  versionName: 17.0.13-UN1CA.QPR2.r17
+ resourcesInfo:
+   packageId: 127
+ doNotCompress:
