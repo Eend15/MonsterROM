@@ -19,6 +19,12 @@ PROFILE = "pa2qxxx-sdk37"
 PACKAGE = "com.samsung.android.wallpaper.res"
 APK_PATH = Path("system/priv-app/wallpaper-res/wallpaper-res.apk")
 CHUNK_BYTES = 50 * 1024 * 1024
+IDENTITY_PROPERTIES = frozenset({
+    "ro.product.system.model",
+    "ro.build.version.sdk",
+    "ro.build.version.oneui",
+    "ro.build.version.incremental",
+})
 
 
 def need(condition, message):
@@ -149,13 +155,19 @@ def check_update(feed, output):
 
 
 def properties(path):
+    """Read donor identity fields, not unrelated repeated stock properties."""
     regular_file(path)
     result = {}
     for line in path.read_text().splitlines():
         if not line.strip() or line.lstrip().startswith("#") or "=" not in line:
             continue
         key, value = line.split("=", 1)
-        need(key not in result, f"Duplicate firmware property: {key}")
+        if key not in IDENTITY_PROPERTIES:
+            continue
+        # Equal values are unambiguous; never choose first/last among conflicting
+        # identity values. Stock files can repeat unrelated keys like qemu.
+        need(key not in result or result[key] == value,
+             f"Conflicting firmware identity property: {key}")
         result[key] = value
     return result
 
@@ -185,7 +197,9 @@ def export_wallpaper(firmware, output, aapt2, chunk_bytes=CHUNK_BYTES, expected_
     firmware, output = Path(firmware), Path(output)
     previous = read_profile(output)
     need(firmware.name == "SM-S936B_EUX", "Expected the actual SM-S936B/EUX donor")
-    props = properties(firmware / "system/system/build.prop")
+    build_prop = firmware / "system/system/build.prop"
+    props = properties(build_prop)
+    build_prop_sha = sha(build_prop)
     need(props.get("ro.product.system.model") == "SM-S936B", "Firmware model mismatch")
     need(props.get("ro.build.version.sdk") == "37", "Firmware must be SDK37")
     need(props.get("ro.build.version.oneui") == "90000", "Firmware must be One UI 9.0 (90000)")
@@ -249,13 +263,13 @@ def export_wallpaper(firmware, output, aapt2, chunk_bytes=CHUNK_BYTES, expected_
                     joined.update(block)
         need(joined.hexdigest() == source_sha and sha(apk) == source_sha,
              "Wallpaper input changed or split reassembly differs")
-        need(properties(firmware / "system/system/build.prop") == props
+        need(properties(build_prop) == props and sha(build_prop) == build_prop_sha
              and (firmware / ".extracted").read_text().strip() == build,
              "Firmware properties or extraction receipt changed during export")
         receipt = {"schema": 1, "model": "SM-S936B", "csc": "EUX", "firmware": build,
                    "sdk": 37, "oneui": "90000", "package": identity,
                    "apk_sha256": source_sha, "chunk_bytes": chunk_bytes, "parts": parts,
-                   "build_prop_sha256": sha(firmware / "system/system/build.prop"),
+                   "build_prop_sha256": build_prop_sha,
                    "transformed": False, "re_signed": False}
         for name, content in filesystem_metadata().items():
             (staged / name).write_text(content)

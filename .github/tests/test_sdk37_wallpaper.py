@@ -138,12 +138,59 @@ class SDK37WallpaperTests(unittest.TestCase):
                 self.write_firmware(**{key: value})
                 self.reject()
 
-    def test_duplicate_or_missing_firmware_properties_reject(self):
-        self.props.write_text(self.props.read_text() + "ro.build.version.sdk=37\n")
+    def test_conflicting_or_missing_firmware_properties_reject(self):
+        self.props.write_text(self.props.read_text() + "ro.build.version.sdk=36\n")
         self.reject()
         self.write_firmware()
         self.props.write_text(self.props.read_text().replace("ro.build.version.oneui=90000\n", ""))
         self.reject()
+
+    def test_stock_duplicate_non_identity_properties_are_ignored(self):
+        expected = BOT.properties(self.props)
+        for value in ("0", "1"):
+            with self.subTest(repeated_qemu=value):
+                self.write_firmware()
+                self.props.write_text(self.props.read_text() +
+                                      f"ro.kernel.qemu=0\nro.kernel.qemu={value}\n"
+                                      "persist.example.flag=first\npersist.example.flag=second\n")
+                receipt = self.export(expected_firmware=BUILD)
+                self.assertEqual(BOT.properties(self.props), expected)
+                self.assertEqual(receipt["build_prop_sha256"], BOT.sha(self.props))
+
+    def test_identical_identity_duplicates_are_unambiguous(self):
+        expected = BOT.properties(self.props)
+        for key, value in expected.items():
+            with self.subTest(property=key):
+                self.write_firmware()
+                self.props.write_text(self.props.read_text() + f"{key}={value}\n")
+                self.assertEqual(self.export()["firmware"], BUILD)
+                self.assertEqual(BOT.properties(self.props), expected)
+
+    def test_conflicting_identity_values_reject_in_both_orders(self):
+        expected = BOT.properties(self.props)
+        invalid = {"ro.product.system.model": "SM-S942B", "ro.build.version.sdk": "36",
+                   "ro.build.version.oneui": "80500", "ro.build.version.incremental": OLDER.split("/")[0]}
+        self.assertEqual(set(expected), set(invalid))
+        self.export()
+        for key, bad in invalid.items():
+            for first, last in ((expected[key], bad), (bad, expected[key])):
+                with self.subTest(property=key, first=first, last=last):
+                    self.write_firmware(**{key: first})
+                    self.props.write_text(self.props.read_text() + f"{key}={last}\n")
+                    self.reject()
+
+    def test_unrelated_property_change_during_export_is_detected(self):
+        self.props.write_text(self.props.read_text() + "ro.kernel.qemu=0\nro.kernel.qemu=0\n")
+        self.export()
+        original = BOT.package_info
+
+        def changed_property(aapt2, apk):
+            identity = original(aapt2, apk)
+            self.props.write_text(self.props.read_text().replace("ro.kernel.qemu=0", "ro.kernel.qemu=1"))
+            return identity
+
+        with mock.patch.object(BOT, "package_info", side_effect=changed_property):
+            self.reject()
 
     def test_missing_foreign_and_inconsistent_extraction_receipts(self):
         marker = self.firmware / ".extracted"
