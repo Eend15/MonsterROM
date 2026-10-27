@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "model": "SM-S936B",
+  "csc": "EUX",
+  "firmware": "S936BXXSDDZJ1/S936BOXMDDZJ1/S936BXXSDDZJ1",
+  "sdk": 37,
+  "oneui": "90000",
+  "package": {
+    "name": "com.samsung.android.wallpaper.res",
+    "version_code": 37,
+    "version_name": "17",
+    "min_sdk": 37,
+    "target_sdk": 37
+  },
+  "apk_sha256": "f73364c780069aac95568363496d1ad7a23bf3d6dddc950ca62d559d0d191227",
+  "chunk_bytes": 52428800,
+  "parts": [
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.00",
+      "bytes": 52428800,
+      "sha256": "e6c1997baf1c1ee3ef7a0ac58916764e94b68c747d2253eb0046612f24e6fcc6"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.01",
+      "bytes": 52428800,
+      "sha256": "9ce1260722e08d932c7ec565dddb109c5d1f519886a20d3b9a36db3a5b007ea4"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.02",
+      "bytes": 52428800,
+      "sha256": "281588ff28b60c105bac3f70172ffdbc5ddbe960d8d7acf17d175dc28ee61d6b"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.03",
+      "bytes": 52428800,
+      "sha256": "a74ce1990c921ba8e8422cdf73b4ca938f8ce5ffeb4b0f3ee7b472829664061a"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.04",
+      "bytes": 52428800,
+      "sha256": "3f01c7a7cb50da8fb731d9ab83d7c1c8f309ed9d9afba76a07d0c2c0747ee854"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.05",
+      "bytes": 52428800,
+      "sha256": "93f979e9512c27ef740998e45018edf7f87980c2808a8b3aa6b36d744e44b381"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.06",
+      "bytes": 52428800,
+      "sha256": "5fae9a13ec42f71ef83ece7fd9923b94539775ae63c2dbfed0325627e48864b8"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.07",
+      "bytes": 52428800,
+      "sha256": "ff7ae9d2fab3f6b3230e4f0f72e16ffb6f00d920c47e92f08de4dff62b86c012"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.08",
+      "bytes": 52428800,
+      "sha256": "e73fc95d26920aee10d984e08223decd4dc03d6cc72a8f3f5bad3d6026dc1feb"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.09",
+      "bytes": 52428800,
+      "sha256": "ecde08117169145b86893111180226e6607d0f4955b5c9046c2985c268552b7d"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.10",
+      "bytes": 52428800,
+      "sha256": "166643cdc8c4e09568989158e3f3373695ade87437f5e683074f8e73c8ea9c4a"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.11",
+      "bytes": 52428800,
+      "sha256": "8b23754200d22d3f12050dc12778f25e2094811debdb912b0cb833d8a0282c60"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.12",
+      "bytes": 52428800,
+      "sha256": "c62d90386a11d407cef719b78da330915d6b7f62c99049bb461e0bc1afa59d4f"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.13",
+      "bytes": 52428800,
+      "sha256": "25918e8a0494b38cfdc7f5d6d7f998948454546cde1587410608c1e8de48dd95"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.14",
+      "bytes": 52428800,
+      "sha256": "94b374a1c31b37be1f184668c334dc5499a63089359502269b6a867662f0736e"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.15",
+      "bytes": 52428800,
+      "sha256": "9ae8b0e079aa97bf4fe40c7ba18c9f8cb0541bec21b7018e59be33e87f35b21d"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.16",
+      "bytes": 52428800,
+      "sha256": "38b3d5268e226b95cc4e2b62eb1880a81dd1540551090ae09660dd18f529e122"
+    },
+    {
+      "path": "system/priv-app/wallpaper-res/wallpaper-res.apk.17",
+      "bytes": 36338505,
+      "sha256": "0130caae17e11f404b50f31c901310e133badd439c236c5ca283b6d0d3b81815"
+    }
+  ],
+  "build_prop_sha256": "6120a9cefc684a7f6982e66e263d6131f0d351522d81afa1071458b57a1da331",
+  "transformed": false,
+  "re_signed": false
+}
