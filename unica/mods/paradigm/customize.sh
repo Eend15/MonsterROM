@@ -332,6 +332,18 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
 
     unset QPR2_RUNTIME_PREFLIGHT
 
+    # QPR2 camera_extensions
+    MODPATH="$PARADIGM_MODPATH/qpr2/camera_extensions"
+    LOG_STEP_IN "- Adding QPR2 camera_extensions"
+    # Exact SDK-37 backports. The SDK-36 source remains unchanged.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk" \
+            "$MODPATH/patches/CameraExtensionsProxy.apk/0001-Handle-unavailable-QPR2-subject-segmentation-contract.patch"
+        APPLY_PATCH "system" "system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk" \
+            "$MODPATH/patches/CameraExtensionsProxy.apk/0099-Identify-reviewed-QPR2-backport.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

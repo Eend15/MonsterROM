@@ -1,0 +1,301 @@
+Subject: [PATCH] Preserve optional vendor subject dispatch and return the actual QPR2 unavailable contract when no engine exists
+
+diff --git a/smali/com/android/cameraextensions/CameraExtensionsProxyService.smali b/smali/com/android/cameraextensions/CameraExtensionsProxyService.smali
+--- a/smali/com/android/cameraextensions/CameraExtensionsProxyService.smali
++++ b/smali/com/android/cameraextensions/CameraExtensionsProxyService.smali
+@@ -841,23 +841,30 @@
+ 
+     sget-boolean v0, Lcom/android/cameraextensions/CameraExtensionsProxyService;->VENDOR_EXTENSIONS_SUPPORTED:Z
+ 
+     if-eqz v0, :cond_0
+ 
+-    invoke-static {}, Landroidx/camera/extensions/impl/advanced/AdvancedExtenderCreator;->getInstance()Landroidx/camera/extensions/impl/advanced/AdvancedExtenderCreator;
++    invoke-static {p0}, Lio/mesalabs/unica/camera/Qpr2VendorExtender;->create(I)Landroidx/camera/extensions/impl/advanced/AdvancedExtenderImpl;
+ 
+     move-result-object v0
+ 
+-    invoke-virtual {v0, p0}, Landroidx/camera/extensions/impl/advanced/AdvancedExtenderCreator;->createAdvancedExtender(I)Landroidx/camera/extensions/impl/advanced/AdvancedExtenderImpl;
+-
+-    move-result-object v0
+-
+     if-eqz v0, :cond_0
+ 
+     return-object v0
+ 
+     :cond_0
++    const/4 v0, 0x5
++
++    if-ne p0, v0, :unica_unknown_extension
++
++    new-instance p0, Lio/mesalabs/unica/camera/UnavailableSubjectExtender;
++
++    invoke-direct {p0}, Lio/mesalabs/unica/camera/UnavailableSubjectExtender;-><init>()V
++
++    return-object p0
++
++    :unica_unknown_extension
+     new-instance v0, Ljava/lang/IllegalArgumentException;
+ 
+     new-instance v1, Ljava/lang/StringBuilder;
+ 
+     const-string v2, "Unknown extension: "
+diff --git a/smali/io/mesalabs/unica/camera/Qpr2VendorExtender.smali b/smali/io/mesalabs/unica/camera/Qpr2VendorExtender.smali
+new file mode 100644
+--- /dev/null
++++ b/smali/io/mesalabs/unica/camera/Qpr2VendorExtender.smali
+@@ -0,0 +1,130 @@
++.class public final Lio/mesalabs/unica/camera/Qpr2VendorExtender;
++.super Ljava/lang/Object;
++.source "Qpr2VendorExtender.java"
++
++
++# direct methods
++.method private constructor <init>()V
++    .registers 1
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    return-void
++.end method
++
++.method public static create(I)Landroidx/camera/extensions/impl/advanced/AdvancedExtenderImpl;
++    .registers 8
++
++    const/4 v0, 0x0
++
++    :try_start_1
++    const-string v1, "androidx.camera.extensions.impl.advanced.AdvancedExtenderCreator"
++
++    const-class v2, Lio/mesalabs/unica/camera/Qpr2VendorExtender;
++
++    invoke-virtual {v2}, Ljava/lang/Class;->getClassLoader()Ljava/lang/ClassLoader;
++
++    move-result-object v2
++
++    const/4 v3, 0x1
++
++    invoke-static {v1, v3, v2}, Ljava/lang/Class;->forName(Ljava/lang/String;ZLjava/lang/ClassLoader;)Ljava/lang/Class;
++
++    move-result-object v1
++
++    const-string v2, "getInstance"
++
++    const/4 v4, 0x0
++
++    new-array v5, v4, [Ljava/lang/Class;
++
++    invoke-virtual {v1, v2, v5}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
++
++    move-result-object v2
++
++    new-array v5, v4, [Ljava/lang/Object;
++
++    invoke-virtual {v2, v0, v5}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
++
++    move-result-object v2
++
++    const-string v5, "createAdvancedExtender"
++
++    new-array v3, v3, [Ljava/lang/Class;
++
++    sget-object v6, Ljava/lang/Integer;->TYPE:Ljava/lang/Class;
++
++    aput-object v6, v3, v4
++
++    invoke-virtual {v1, v5, v3}, Ljava/lang/Class;->getMethod(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
++
++    move-result-object v1
++
++    invoke-static {p0}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
++
++    move-result-object p0
++
++    filled-new-array {p0}, [Ljava/lang/Object;
++
++    move-result-object p0
++
++    invoke-virtual {v1, v2, p0}, Ljava/lang/reflect/Method;->invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;
++
++    move-result-object p0
++
++    check-cast p0, Landroidx/camera/extensions/impl/advanced/AdvancedExtenderImpl;
++    :try_end_37
++    .catch Ljava/lang/ClassNotFoundException; {:try_start_1 .. :try_end_37} :catch_5c
++    .catch Ljava/lang/NoSuchMethodException; {:try_start_1 .. :try_end_37} :catch_5c
++    .catch Ljava/lang/reflect/InvocationTargetException; {:try_start_1 .. :try_end_37} :catch_41
++    .catch Ljava/lang/IllegalAccessException; {:try_start_1 .. :try_end_37} :catch_38
++
++    return-object p0
++
++    :catch_38
++    move-exception p0
++
++    new-instance v0, Ljava/lang/IllegalStateException;
++
++    const-string v1, "Vendor camera extension is inaccessible"
++
++    invoke-direct {v0, v1, p0}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;Ljava/lang/Throwable;)V
++
++    throw v0
++
++    :catch_41
++    move-exception p0
++
++    invoke-virtual {p0}, Ljava/lang/reflect/InvocationTargetException;->getCause()Ljava/lang/Throwable;
++
++    move-result-object p0
++
++    instance-of v0, p0, Ljava/lang/RuntimeException;
++
++    if-nez v0, :cond_59
++
++    instance-of v0, p0, Ljava/lang/Error;
++
++    if-eqz v0, :cond_51
++
++    check-cast p0, Ljava/lang/Error;
++
++    throw p0
++
++    :cond_51
++    new-instance v0, Ljava/lang/IllegalStateException;
++
++    const-string v1, "Vendor camera extension failed"
++
++    invoke-direct {v0, v1, p0}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;Ljava/lang/Throwable;)V
++
++    throw v0
++
++    :cond_59
++    check-cast p0, Ljava/lang/RuntimeException;
++
++    throw p0
++
++    :catch_5c
++    return-object v0
++.end method
+diff --git a/smali/io/mesalabs/unica/camera/UnavailableSubjectExtender.smali b/smali/io/mesalabs/unica/camera/UnavailableSubjectExtender.smali
+new file mode 100644
+--- /dev/null
++++ b/smali/io/mesalabs/unica/camera/UnavailableSubjectExtender.smali
+@@ -0,0 +1,120 @@
++.class public final Lio/mesalabs/unica/camera/UnavailableSubjectExtender;
++.super Ljava/lang/Object;
++.source "CameraExtensionsProxyService.java"
++
++# interfaces
++.implements Landroidx/camera/extensions/impl/advanced/AdvancedExtenderImpl;
++
++
++# direct methods
++.method public constructor <init>()V
++    .locals 0
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public createSessionProcessor()Landroidx/camera/extensions/impl/advanced/SessionProcessorImpl;
++    .locals 0
++
++    const/4 p0, 0x0
++
++    return-object p0
++.end method
++
++.method public getAvailableCaptureRequestKeys()Ljava/util/List;
++    .locals 0
++
++    sget-object p0, Ljava/util/Collections;->EMPTY_LIST:Ljava/util/List;
++
++    return-object p0
++.end method
++
++.method public getAvailableCaptureResultKeys()Ljava/util/List;
++    .locals 0
++
++    sget-object p0, Ljava/util/Collections;->EMPTY_LIST:Ljava/util/List;
++
++    return-object p0
++.end method
++
++.method public getAvailableCharacteristicsKeyValues()Ljava/util/List;
++    .locals 0
++
++    sget-object p0, Ljava/util/Collections;->EMPTY_LIST:Ljava/util/List;
++
++    return-object p0
++.end method
++
++.method public getEstimatedCaptureLatencyRange(Ljava/lang/String;Landroid/util/Size;I)Landroid/util/Range;
++    .locals 0
++
++    const/4 p0, 0x0
++
++    return-object p0
++.end method
++
++.method public getSupportedCaptureOutputResolutions(Ljava/lang/String;)Ljava/util/Map;
++    .locals 0
++
++    sget-object p0, Ljava/util/Collections;->EMPTY_MAP:Ljava/util/Map;
++
++    return-object p0
++.end method
++
++.method public getSupportedPostviewResolutions(Landroid/util/Size;)Ljava/util/Map;
++    .locals 0
++
++    sget-object p0, Ljava/util/Collections;->EMPTY_MAP:Ljava/util/Map;
++
++    return-object p0
++.end method
++
++.method public getSupportedPreviewOutputResolutions(Ljava/lang/String;)Ljava/util/Map;
++    .locals 0
++
++    sget-object p0, Ljava/util/Collections;->EMPTY_MAP:Ljava/util/Map;
++
++    return-object p0
++.end method
++
++.method public getSupportedYuvAnalysisResolutions(Ljava/lang/String;)Ljava/util/List;
++    .locals 0
++
++    sget-object p0, Ljava/util/Collections;->EMPTY_LIST:Ljava/util/List;
++
++    return-object p0
++.end method
++
++.method public init(Ljava/lang/String;Ljava/util/Map;)V
++    .locals 0
++
++    return-void
++.end method
++
++.method public isCaptureProcessProgressAvailable()Z
++    .locals 0
++
++    const/4 p0, 0x0
++
++    return p0
++.end method
++
++.method public isExtensionAvailable(Ljava/lang/String;Ljava/util/Map;)Z
++    .locals 0
++
++    const/4 p0, 0x0
++
++    return p0
++.end method
++
++.method public isPostviewAvailable()Z
++    .locals 0
++
++    const/4 p0, 0x0
++
++    return p0
++.end method
