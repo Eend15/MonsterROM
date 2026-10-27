@@ -661,6 +661,22 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 recording
+    MODPATH="$PARADIGM_MODPATH/qpr2/recording"
+    LOG_STEP_IN "- Adding QPR2 recording"
+    # Exact SDK-37 backports. The SDK-36 source remains unchanged.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0001-Expose-opt-in-QPR2-recording-microphone-routing.patch"
+        APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+            "$MODPATH/patches/SystemUI.apk/0001-Port-QPR2-recording-microphone-routing.patch"
+        APPLY_PATCH "system" "system/app/SmartCapture/SmartCapture.apk" \
+            "$MODPATH/patches/SmartCapture.apk/0001-Port-QPR2-recording-microphone-routing.patch"
+        APPLY_PATCH "system" "system/app/SmartCapture/SmartCapture.apk" \
+            "$MODPATH/patches/SmartCapture.apk/0099-Identify-reviewed-QPR2-backport.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

@@ -1,0 +1,1314 @@
+Subject: [PATCH] Route actual microphone capture through an opt-in recording-owned Binder token and clean up error/end paths
+
+diff --git a/smali_classes3/com/android/systemui/screenrecord/ScreenMediaRecorder.smali b/smali_classes3/com/android/systemui/screenrecord/ScreenMediaRecorder.smali
+--- a/smali_classes3/com/android/systemui/screenrecord/ScreenMediaRecorder.smali
++++ b/smali_classes3/com/android/systemui/screenrecord/ScreenMediaRecorder.smali
+@@ -2,10 +2,12 @@
+ .super Ljava/lang/Object;
+ .source "qb/115226349 4c90d068a6e0a8bf6cb960c2a4527b11e200a32b28c1d5c525876069e765cced"
+ 
+ 
+ # instance fields
++.field private unicaQpr2Audio:Lio/mesalabs/unica/recording/Qpr2RecordingAudio;
++
+ .field public mAudio:Lcom/android/systemui/screenrecord/ScreenInternalAudioRecorder;
+ 
+ .field public final mAudioSource:Lcom/android/systemui/screenrecord/ScreenRecordingAudioSource;
+ 
+ .field public final mCaptureRegion:Lcom/android/systemui/mediaprojection/MediaProjectionCaptureTarget;
+@@ -194,11 +196,11 @@
+     move-result-object p0
+ 
+     return-object p0
+ .end method
+ 
+-.method public final end(I)V
++.method private unicaQpr2Original_end(I)V
+     .locals 6
+ 
+     iget-object v0, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->mIsStarted:Ljava/util/concurrent/atomic/AtomicBoolean;
+ 
+     const/4 v1, 0x1
+@@ -317,11 +319,11 @@
+     invoke-static {v3, p0}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
+ 
+     return-void
+ .end method
+ 
+-.method public final release()V
++.method private unicaQpr2Original_release()V
+     .locals 1
+ 
+     iget-object v0, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->mTempVideoFile:Ljava/io/File;
+ 
+     if-eqz v0, :cond_0
+@@ -511,11 +513,11 @@
+     invoke-virtual {p0}, Ljava/io/File;->delete()Z
+ 
+     return-object v0
+ .end method
+ 
+-.method public final start()V
++.method private unicaQpr2Original_start()V
+     .locals 23
+ 
+     move-object/from16 v0, p0
+ 
+     const-string v1, "ScreenMediaRecorder"
+@@ -1138,10 +1140,12 @@
+     invoke-direct {v4, v1, v5, v10}, Lcom/android/systemui/screenrecord/ScreenInternalAudioRecorder;-><init>(Ljava/lang/String;Landroid/media/projection/MediaProjection;Z)V
+ 
+     iput-object v4, v0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->mAudio:Lcom/android/systemui/screenrecord/ScreenInternalAudioRecorder;
+ 
+     :cond_c
++    invoke-direct {v0}, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2AcquireAudio()V
++
+     iget-object v1, v0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->mMediaRecorder:Landroid/media/MediaRecorder;
+ 
+     invoke-virtual {v1}, Landroid/media/MediaRecorder;->start()V
+ 
+     invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
+@@ -1284,5 +1288,157 @@
+     :try_end_1
+     .catchall {:try_start_1 .. :try_end_1} :catchall_0
+ 
+     throw v0
+ .end method
++
++.method public final start()V
++    .locals 3
++
++    iget-object v0, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2Audio:Lio/mesalabs/unica/recording/Qpr2RecordingAudio;
++
++    :unica_call_start
++    invoke-direct {p0}, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2Original_start()V
++    :unica_call_end
++    .catchall {:unica_call_start .. :unica_call_end} :unica_call_failed
++
++    return-void
++
++    :unica_call_failed
++    move-exception v1
++
++    iget-object v2, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2Audio:Lio/mesalabs/unica/recording/Qpr2RecordingAudio;
++
++    if-eq v0, v2, :unica_rethrow
++
++    invoke-direct {p0}, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2ReleaseAudio()V
++
++    :unica_rethrow
++    throw v1
++.end method
++
++.method public final end(I)V
++    .locals 1
++
++    :unica_call_start
++    invoke-direct {p0, p1}, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2Original_end(I)V
++    :unica_call_end
++    .catchall {:unica_call_start .. :unica_call_end} :unica_call_failed
++
++    invoke-direct {p0}, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2ReleaseAudio()V
++
++    return-void
++
++    :unica_call_failed
++    move-exception v0
++
++    invoke-direct {p0}, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2ReleaseAudio()V
++
++    throw v0
++.end method
++
++.method public final release()V
++    .locals 1
++
++    :unica_call_start
++    invoke-direct {p0}, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2Original_release()V
++    :unica_call_end
++    .catchall {:unica_call_start .. :unica_call_end} :unica_call_failed
++
++    invoke-direct {p0}, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2ReleaseAudio()V
++
++    return-void
++
++    :unica_call_failed
++    move-exception v0
++
++    invoke-direct {p0}, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2ReleaseAudio()V
++
++    throw v0
++.end method
++
++.method private unicaQpr2AcquireAudio()V
++    .locals 4
++
++    invoke-direct {p0}, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2ReleaseAudio()V
++
++    iget-object v0, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2Audio:Lio/mesalabs/unica/recording/Qpr2RecordingAudio;
++
++    if-eqz v0, :unica_previous_closed
++
++    new-instance v0, Ljava/lang/IllegalStateException;
++
++    const-string v1, "Previous Bluetooth recording route has not closed"
++
++    invoke-direct {v0, v1}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
++
++    throw v0
++
++    :unica_previous_closed
++
++    iget-object v0, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->mAudioSource:Lcom/android/systemui/screenrecord/ScreenRecordingAudioSource;
++
++    sget-object v1, Lcom/android/systemui/screenrecord/ScreenRecordingAudioSource;->MIC:Lcom/android/systemui/screenrecord/ScreenRecordingAudioSource;
++
++    if-eq v0, v1, :unica_mic_only
++
++    sget-object v1, Lcom/android/systemui/screenrecord/ScreenRecordingAudioSource;->MIC_AND_INTERNAL:Lcom/android/systemui/screenrecord/ScreenRecordingAudioSource;
++
++    if-ne v0, v1, :unica_done
++
++    iget-object v2, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->mAudio:Lcom/android/systemui/screenrecord/ScreenInternalAudioRecorder;
++
++    if-eqz v2, :unica_done
++
++    iget-object v2, v2, Lcom/android/systemui/screenrecord/ScreenInternalAudioRecorder;->mAudioRecordMic:Landroid/media/AudioRecord;
++
++    if-eqz v2, :unica_done
++
++    iget-object v0, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->mContext:Landroid/content/Context;
++
++    new-instance v1, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;
++
++    invoke-direct {v1, v0}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;-><init>(Landroid/content/Context;)V
++
++    iput-object v1, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2Audio:Lio/mesalabs/unica/recording/Qpr2RecordingAudio;
++
++    invoke-virtual {v1, v2}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->route(Landroid/media/AudioRecord;)Z
++
++    return-void
++
++    :unica_mic_only
++    iget-object v0, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->mContext:Landroid/content/Context;
++
++    new-instance v1, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;
++
++    invoke-direct {v1, v0}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;-><init>(Landroid/content/Context;)V
++
++    iput-object v1, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2Audio:Lio/mesalabs/unica/recording/Qpr2RecordingAudio;
++
++    iget-object v2, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->mMediaRecorder:Landroid/media/MediaRecorder;
++
++    invoke-virtual {v1, v2}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->route(Landroid/media/MediaRecorder;)Z
++
++    :unica_done
++    return-void
++.end method
++
++.method private unicaQpr2ReleaseAudio()V
++    .locals 2
++
++    iget-object v0, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2Audio:Lio/mesalabs/unica/recording/Qpr2RecordingAudio;
++
++    if-eqz v0, :unica_done
++
++    invoke-virtual {v0}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->close()Z
++
++    move-result v1
++
++    if-eqz v1, :unica_done
++
++    const/4 v0, 0x0
++
++    iput-object v0, p0, Lcom/android/systemui/screenrecord/ScreenMediaRecorder;->unicaQpr2Audio:Lio/mesalabs/unica/recording/Qpr2RecordingAudio;
++
++    :unica_done
++    return-void
++.end method
+diff --git a/smali_classes4/io/mesalabs/unica/recording/Qpr2RecordingAudio.smali b/smali_classes4/io/mesalabs/unica/recording/Qpr2RecordingAudio.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/recording/Qpr2RecordingAudio.smali
+@@ -0,0 +1,1081 @@
++.class public final Lio/mesalabs/unica/recording/Qpr2RecordingAudio;
++.super Ljava/lang/Object;
++.source "Qpr2RecordingAudio.java"
++
++
++# static fields
++.field public static final KEY:Ljava/lang/String; = "unica_qpr2_recording_bluetooth_mic"
++
++
++# instance fields
++.field private acquired:Z
++
++.field private audioRecord:Landroid/media/AudioRecord;
++
++.field private closed:Z
++
++.field private final context:Landroid/content/Context;
++
++.field private mediaRecorder:Landroid/media/MediaRecorder;
++
++.field private owner:Landroid/media/IAudioService;
++
++.field private previousInput:Landroid/media/AudioDeviceInfo;
++
++.field private routeToken:Landroid/os/IBinder;
++
++.field private selectedInput:Landroid/media/AudioDeviceInfo;
++
++
++# direct methods
++.method public constructor <init>(Landroid/content/Context;)V
++    .registers 2
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    iput-object p1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->context:Landroid/content/Context;
++
++    return-void
++.end method
++
++.method private static choose(Landroid/media/AudioManager;)Landroid/media/AudioDeviceInfo;
++    .registers 8
++
++    new-instance v0, Ljava/util/ArrayList;
++
++    invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
++
++    new-instance v1, Ljava/util/ArrayList;
++
++    invoke-direct {v1}, Ljava/util/ArrayList;-><init>()V
++
++    invoke-virtual {p0}, Landroid/media/AudioManager;->getAvailableCommunicationDevices()Ljava/util/List;
++
++    move-result-object v2
++
++    invoke-interface {v2}, Ljava/util/List;->iterator()Ljava/util/Iterator;
++
++    move-result-object v2
++
++    :cond_12
++    :goto_12
++    invoke-interface {v2}, Ljava/util/Iterator;->hasNext()Z
++
++    move-result v3
++
++    if-eqz v3, :cond_37
++
++    invoke-interface {v2}, Ljava/util/Iterator;->next()Ljava/lang/Object;
++
++    move-result-object v3
++
++    check-cast v3, Landroid/media/AudioDeviceInfo;
++
++    invoke-static {v3}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->identity(Landroid/media/AudioDeviceInfo;)Ljava/lang/String;
++
++    move-result-object v4
++
++    if-eqz v4, :cond_12
++
++    invoke-virtual {v1, v4}, Ljava/util/ArrayList;->contains(Ljava/lang/Object;)Z
++
++    move-result v5
++
++    if-nez v5, :cond_12
++
++    invoke-static {p0, v3}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->findInput(Landroid/media/AudioManager;Landroid/media/AudioDeviceInfo;)Landroid/media/AudioDeviceInfo;
++
++    move-result-object v5
++
++    if-eqz v5, :cond_12
++
++    invoke-virtual {v0, v3}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
++
++    invoke-virtual {v1, v4}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
++
++    goto :goto_12
++
++    :cond_37
++    invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
++
++    move-result-object v1
++
++    const/4 v2, 0x1
++
++    :try_start_3c
++    invoke-virtual {p0, v2}, Landroid/media/AudioManager;->getPreferredDevicesForCapturePreset(I)Ljava/util/List;
++
++    move-result-object v1
++    :try_end_40
++    .catch Ljava/lang/SecurityException; {:try_start_3c .. :try_end_40} :catch_40
++
++    :catch_40
++    invoke-interface {v1}, Ljava/util/List;->iterator()Ljava/util/Iterator;
++
++    move-result-object v1
++
++    :cond_44
++    invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
++
++    move-result v3
++
++    if-eqz v3, :cond_79
++
++    invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
++
++    move-result-object v3
++
++    check-cast v3, Landroid/media/AudioDeviceAttributes;
++
++    invoke-virtual {v3}, Landroid/media/AudioDeviceAttributes;->getType()I
++
++    move-result v4
++
++    invoke-virtual {v3}, Landroid/media/AudioDeviceAttributes;->getAddress()Ljava/lang/String;
++
++    move-result-object v3
++
++    invoke-static {v4, v3}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->identity(ILjava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
++    if-eqz v3, :cond_44
++
++    invoke-virtual {v0}, Ljava/util/ArrayList;->iterator()Ljava/util/Iterator;
++
++    move-result-object v4
++
++    :cond_62
++    invoke-interface {v4}, Ljava/util/Iterator;->hasNext()Z
++
++    move-result v5
++
++    if-eqz v5, :cond_44
++
++    invoke-interface {v4}, Ljava/util/Iterator;->next()Ljava/lang/Object;
++
++    move-result-object v5
++
++    check-cast v5, Landroid/media/AudioDeviceInfo;
++
++    invoke-static {v5}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->identity(Landroid/media/AudioDeviceInfo;)Ljava/lang/String;
++
++    move-result-object v6
++
++    invoke-virtual {v3, v6}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v6
++
++    if-eqz v6, :cond_62
++
++    return-object v5
++
++    :cond_79
++    invoke-virtual {p0}, Landroid/media/AudioManager;->getCommunicationDevice()Landroid/media/AudioDeviceInfo;
++
++    move-result-object p0
++
++    invoke-static {p0}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->identity(Landroid/media/AudioDeviceInfo;)Ljava/lang/String;
++
++    move-result-object p0
++
++    if-eqz p0, :cond_9e
++
++    invoke-virtual {v0}, Ljava/util/ArrayList;->iterator()Ljava/util/Iterator;
++
++    move-result-object v1
++
++    :cond_87
++    invoke-interface {v1}, Ljava/util/Iterator;->hasNext()Z
++
++    move-result v3
++
++    if-eqz v3, :cond_9e
++
++    invoke-interface {v1}, Ljava/util/Iterator;->next()Ljava/lang/Object;
++
++    move-result-object v3
++
++    check-cast v3, Landroid/media/AudioDeviceInfo;
++
++    invoke-static {v3}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->identity(Landroid/media/AudioDeviceInfo;)Ljava/lang/String;
++
++    move-result-object v4
++
++    invoke-virtual {p0, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v4
++
++    if-eqz v4, :cond_87
++
++    return-object v3
++
++    :cond_9e
++    invoke-virtual {v0}, Ljava/util/ArrayList;->size()I
++
++    move-result p0
++
++    if-ne p0, v2, :cond_ac
++
++    const/4 p0, 0x0
++
++    invoke-virtual {v0, p0}, Ljava/util/ArrayList;->get(I)Ljava/lang/Object;
++
++    move-result-object p0
++
++    check-cast p0, Landroid/media/AudioDeviceInfo;
++
++    goto :goto_ad
++
++    :cond_ac
++    const/4 p0, 0x0
++
++    :goto_ad
++    return-object p0
++.end method
++
++.method private static findInput(Landroid/media/AudioManager;Landroid/media/AudioDeviceInfo;)Landroid/media/AudioDeviceInfo;
++    .registers 7
++
++    invoke-static {p1}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->identity(Landroid/media/AudioDeviceInfo;)Ljava/lang/String;
++
++    move-result-object p1
++
++    const/4 v0, 0x0
++
++    if-nez p1, :cond_8
++
++    return-object v0
++
++    :cond_8
++    sget v1, Landroid/media/AudioManager;->GET_DEVICES_INPUTS:I
++
++    invoke-virtual {p0, v1}, Landroid/media/AudioManager;->getDevices(I)[Landroid/media/AudioDeviceInfo;
++
++    move-result-object p0
++
++    array-length v1, p0
++
++    const/4 v2, 0x0
++
++    :goto_10
++    if-ge v2, v1, :cond_22
++
++    aget-object v3, p0, v2
++
++    invoke-static {v3}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->identity(Landroid/media/AudioDeviceInfo;)Ljava/lang/String;
++
++    move-result-object v4
++
++    invoke-virtual {p1, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v4
++
++    if-eqz v4, :cond_1f
++
++    return-object v3
++
++    :cond_1f
++    add-int/lit8 v2, v2, 0x1
++
++    goto :goto_10
++
++    :cond_22
++    return-object v0
++.end method
++
++.method private static identity(ILjava/lang/String;)Ljava/lang/String;
++    .registers 4
++
++    const/4 v0, 0x7
++
++    const/4 v1, 0x0
++
++    if-eq p0, v0, :cond_8
++
++    const/16 v0, 0x1a
++
++    if-ne p0, v0, :cond_a
++
++    :cond_8
++    if-nez p1, :cond_b
++
++    :cond_a
++    return-object v1
++
++    :cond_b
++    invoke-virtual {p1}, Ljava/lang/String;->trim()Ljava/lang/String;
++
++    move-result-object p1
++
++    invoke-virtual {p1}, Ljava/lang/String;->isEmpty()Z
++
++    move-result v0
++
++    if-nez v0, :cond_43
++
++    const-string v0, "00:00:00:00:00:00"
++
++    invoke-virtual {p1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v0
++
++    if-nez v0, :cond_43
++
++    const-string v0, "02:00:00:00:00:00"
++
++    invoke-virtual {p1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v0
++
++    if-nez v0, :cond_43
++
++    new-instance v0, Ljava/lang/StringBuilder;
++
++    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
++
++    invoke-virtual {v0, p0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
++
++    move-result-object p0
++
++    const-string v0, ":"
++
++    invoke-virtual {p0, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object p0
++
++    sget-object v0, Ljava/util/Locale;->ROOT:Ljava/util/Locale;
++
++    invoke-virtual {p1, v0}, Ljava/lang/String;->toUpperCase(Ljava/util/Locale;)Ljava/lang/String;
++
++    move-result-object p1
++
++    invoke-virtual {p0, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
++
++    move-result-object p0
++
++    invoke-virtual {p0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++
++    move-result-object p0
++
++    return-object p0
++
++    :cond_43
++    return-object v1
++.end method
++
++.method private static identity(Landroid/media/AudioDeviceInfo;)Ljava/lang/String;
++    .registers 3
++
++    if-eqz p0, :cond_1e
++
++    invoke-virtual {p0}, Landroid/media/AudioDeviceInfo;->getType()I
++
++    move-result v0
++
++    const/4 v1, 0x7
++
++    if-eq v0, v1, :cond_11
++
++    invoke-virtual {p0}, Landroid/media/AudioDeviceInfo;->getType()I
++
++    move-result v0
++
++    const/16 v1, 0x1a
++
++    if-ne v0, v1, :cond_1e
++
++    :cond_11
++    invoke-virtual {p0}, Landroid/media/AudioDeviceInfo;->getType()I
++
++    move-result v0
++
++    invoke-virtual {p0}, Landroid/media/AudioDeviceInfo;->getAddress()Ljava/lang/String;
++
++    move-result-object p0
++
++    invoke-static {v0, p0}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->identity(ILjava/lang/String;)Ljava/lang/String;
++
++    move-result-object p0
++
++    return-object p0
++
++    :cond_1e
++    const/4 p0, 0x0
++
++    return-object p0
++.end method
++
++.method private open()Z
++    .registers 7
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->closed:Z
++
++    if-nez v0, :cond_ad
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->acquired:Z
++
++    if-nez v0, :cond_a5
++
++    const/4 v0, 0x0
++
++    :try_start_9
++    iget-object v1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->context:Landroid/content/Context;
++
++    invoke-virtual {v1}, Landroid/content/Context;->getUserId()I
++
++    move-result v1
++
++    invoke-static {}, Landroid/os/UserHandle;->myUserId()I
++
++    move-result v2
++
++    if-ne v1, v2, :cond_89
++
++    iget-object v1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->context:Landroid/content/Context;
++
++    invoke-virtual {v1}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v1
++
++    const-string v2, "unica_qpr2_recording_bluetooth_mic"
++
++    iget-object v3, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->context:Landroid/content/Context;
++
++    invoke-virtual {v3}, Landroid/content/Context;->getUserId()I
++
++    move-result v3
++
++    invoke-static {v1, v2, v0, v3}, Landroid/provider/Settings$Secure;->getIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)I
++
++    move-result v1
++
++    const/4 v2, 0x1
++
++    if-ne v1, v2, :cond_89
++
++    iget-object v1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->context:Landroid/content/Context;
++
++    const-class v3, Landroid/media/AudioManager;
++
++    invoke-virtual {v1, v3}, Landroid/content/Context;->getSystemService(Ljava/lang/Class;)Ljava/lang/Object;
++
++    move-result-object v1
++
++    check-cast v1, Landroid/media/AudioManager;
++
++    if-eqz v1, :cond_89
++
++    invoke-virtual {v1}, Landroid/media/AudioManager;->getMode()I
++
++    move-result v3
++
++    sget v4, Landroid/media/AudioManager;->MODE_NORMAL:I
++
++    if-ne v3, v4, :cond_89
++
++    invoke-static {v1}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->choose(Landroid/media/AudioManager;)Landroid/media/AudioDeviceInfo;
++
++    move-result-object v3
++
++    if-nez v3, :cond_45
++
++    return v0
++
++    :cond_45
++    invoke-static {v1, v3}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->findInput(Landroid/media/AudioManager;Landroid/media/AudioDeviceInfo;)Landroid/media/AudioDeviceInfo;
++
++    move-result-object v1
++
++    iput-object v1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->selectedInput:Landroid/media/AudioDeviceInfo;
++
++    if-nez v1, :cond_4e
++
++    return v0
++
++    :cond_4e
++    sget-object v1, Landroid/content/Context;->AUDIO_SERVICE:Ljava/lang/String;
++
++    invoke-static {v1}, Landroid/os/ServiceManager;->getService(Ljava/lang/String;)Landroid/os/IBinder;
++
++    move-result-object v1
++
++    invoke-static {v1}, Landroid/media/IAudioService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/media/IAudioService;
++
++    move-result-object v1
++
++    iput-object v1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->owner:Landroid/media/IAudioService;
++
++    if-nez v1, :cond_5d
++
++    return v0
++
++    :cond_5d
++    new-instance v1, Landroid/os/Binder;
++
++    invoke-direct {v1}, Landroid/os/Binder;-><init>()V
++
++    iput-object v1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->routeToken:Landroid/os/IBinder;
++
++    iput-boolean v2, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->acquired:Z
++
++    iget-object v4, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->owner:Landroid/media/IAudioService;
++
++    new-instance v5, Landroid/media/AudioDeviceAttributes;
++
++    invoke-direct {v5, v3}, Landroid/media/AudioDeviceAttributes;-><init>(Landroid/media/AudioDeviceInfo;)V
++
++    iget-object v3, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->context:Landroid/content/Context;
++
++    invoke-virtual {v3}, Landroid/content/Context;->getAttributionSource()Landroid/content/AttributionSource;
++
++    move-result-object v3
++
++    invoke-interface {v4, v1, v5, v3}, Landroid/media/IAudioService;->setCommunicationDevice(Landroid/os/IBinder;Landroid/media/AudioDeviceAttributes;Landroid/content/AttributionSource;)Z
++
++    move-result v1
++
++    if-nez v1, :cond_88
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->close()Z
++
++    move-result v1
++
++    if-eqz v1, :cond_80
++
++    return v0
++
++    :cond_80
++    new-instance v1, Ljava/lang/IllegalStateException;
++
++    const-string v2, "Bluetooth route rejection cleanup failed"
++
++    invoke-direct {v1, v2}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
++
++    throw v1
++    :try_end_88
++    .catch Landroid/os/RemoteException; {:try_start_9 .. :try_end_88} :catch_8a
++    .catch Ljava/lang/RuntimeException; {:try_start_9 .. :try_end_88} :catch_8a
++
++    :cond_88
++    return v2
++
++    :cond_89
++    return v0
++
++    :catch_8a
++    move-exception v1
++
++    const-string v2, "UN1CA-QPR2-Recording"
++
++    const-string v3, "Bluetooth capture route unavailable"
++
++    invoke-static {v2, v3, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    iget-boolean v2, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->acquired:Z
++
++    if-eqz v2, :cond_a4
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->close()Z
++
++    move-result p0
++
++    if-nez p0, :cond_a4
++
++    new-instance p0, Ljava/lang/IllegalStateException;
++
++    const-string v0, "Bluetooth route rollback failed"
++
++    invoke-direct {p0, v0, v1}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;Ljava/lang/Throwable;)V
++
++    throw p0
++
++    :cond_a4
++    return v0
++
++    :cond_a5
++    new-instance p0, Ljava/lang/IllegalStateException;
++
++    const-string v0, "Recording audio route already acquired"
++
++    invoke-direct {p0, v0}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
++
++    throw p0
++
++    :cond_ad
++    new-instance p0, Ljava/lang/IllegalStateException;
++
++    const-string v0, "Recording audio route already closed"
++
++    invoke-direct {p0, v0}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
++
++    throw p0
++.end method
++
++
++# virtual methods
++.method public declared-synchronized close()Z
++    .registers 7
++
++    monitor-enter p0
++
++    :try_start_1
++    iget-boolean v0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->closed:Z
++    :try_end_3
++    .catchall {:try_start_1 .. :try_end_3} :catchall_69
++
++    const/4 v1, 0x1
++
++    if-eqz v0, :cond_8
++
++    monitor-exit p0
++
++    return v1
++
++    :cond_8
++    :try_start_8
++    iget-object v0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->audioRecord:Landroid/media/AudioRecord;
++
++    if-eqz v0, :cond_1b
++
++    invoke-virtual {v0}, Landroid/media/AudioRecord;->getPreferredDevice()Landroid/media/AudioDeviceInfo;
++
++    move-result-object v0
++
++    iget-object v2, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->selectedInput:Landroid/media/AudioDeviceInfo;
++
++    if-ne v0, v2, :cond_1b
++
++    iget-object v0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->audioRecord:Landroid/media/AudioRecord;
++
++    iget-object v2, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->previousInput:Landroid/media/AudioDeviceInfo;
++
++    invoke-virtual {v0, v2}, Landroid/media/AudioRecord;->setPreferredDevice(Landroid/media/AudioDeviceInfo;)Z
++
++    :cond_1b
++    iget-object v0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->mediaRecorder:Landroid/media/MediaRecorder;
++
++    if-eqz v0, :cond_37
++
++    invoke-virtual {v0}, Landroid/media/MediaRecorder;->getPreferredDevice()Landroid/media/AudioDeviceInfo;
++
++    move-result-object v0
++
++    iget-object v2, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->selectedInput:Landroid/media/AudioDeviceInfo;
++
++    if-ne v0, v2, :cond_37
++
++    iget-object v0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->mediaRecorder:Landroid/media/MediaRecorder;
++
++    iget-object v2, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->previousInput:Landroid/media/AudioDeviceInfo;
++
++    invoke-virtual {v0, v2}, Landroid/media/MediaRecorder;->setPreferredDevice(Landroid/media/AudioDeviceInfo;)Z
++    :try_end_2e
++    .catch Ljava/lang/RuntimeException; {:try_start_8 .. :try_end_2e} :catch_2f
++    .catchall {:try_start_8 .. :try_end_2e} :catchall_69
++
++    goto :goto_37
++
++    :catch_2f
++    move-exception v0
++
++    :try_start_30
++    const-string v2, "UN1CA-QPR2-Recording"
++
++    const-string v3, "Recorder already stopped; releasing route"
++
++    invoke-static {v2, v3, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    :cond_37
++    :goto_37
++    iget-boolean v0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->acquired:Z
++    :try_end_39
++    .catchall {:try_start_30 .. :try_end_39} :catchall_69
++
++    const/4 v2, 0x0
++
++    const/4 v3, 0x0
++
++    if-eqz v0, :cond_59
++
++    :try_start_3d
++    iget-object v0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->owner:Landroid/media/IAudioService;
++
++    iget-object v4, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->routeToken:Landroid/os/IBinder;
++
++    iget-object v5, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->context:Landroid/content/Context;
++
++    invoke-virtual {v5}, Landroid/content/Context;->getAttributionSource()Landroid/content/AttributionSource;
++
++    move-result-object v5
++
++    invoke-interface {v0, v4, v3, v5}, Landroid/media/IAudioService;->setCommunicationDevice(Landroid/os/IBinder;Landroid/media/AudioDeviceAttributes;Landroid/content/AttributionSource;)Z
++
++    move-result v0
++    :try_end_4b
++    .catch Landroid/os/RemoteException; {:try_start_3d .. :try_end_4b} :catch_4f
++    .catch Ljava/lang/RuntimeException; {:try_start_3d .. :try_end_4b} :catch_4f
++    .catchall {:try_start_3d .. :try_end_4b} :catchall_69
++
++    if-nez v0, :cond_59
++
++    monitor-exit p0
++
++    return v2
++
++    :catch_4f
++    move-exception v0
++
++    :try_start_50
++    const-string v1, "UN1CA-QPR2-Recording"
++
++    const-string v3, "Bluetooth route release rejected; retaining owner"
++
++    invoke-static {v1, v3, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++    :try_end_57
++    .catchall {:try_start_50 .. :try_end_57} :catchall_69
++
++    monitor-exit p0
++
++    return v2
++
++    :cond_59
++    :try_start_59
++    iput-boolean v2, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->acquired:Z
++
++    iput-boolean v1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->closed:Z
++
++    iput-object v3, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->audioRecord:Landroid/media/AudioRecord;
++
++    iput-object v3, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->mediaRecorder:Landroid/media/MediaRecorder;
++
++    iput-object v3, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->owner:Landroid/media/IAudioService;
++
++    iput-object v3, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->routeToken:Landroid/os/IBinder;
++    :try_end_65
++    .catchall {:try_start_59 .. :try_end_65} :catchall_69
++
++    monitor-exit p0
++
++    return v1
++
++    :goto_67
++    :try_start_67
++    monitor-exit p0
++    :try_end_68
++    .catchall {:try_start_67 .. :try_end_68} :catchall_69
++
++    throw v0
++
++    :catchall_69
++    move-exception v0
++
++    goto :goto_67
++.end method
++
++.method public declared-synchronized route(Landroid/media/AudioRecord;)Z
++    .registers 6
++
++    monitor-enter p0
++
++    const/4 v0, 0x0
++
++    if-nez p1, :cond_6
++
++    monitor-exit p0
++
++    return v0
++
++    :cond_6
++    :try_start_6
++    invoke-virtual {p1}, Landroid/media/AudioRecord;->getAudioSource()I
++
++    move-result v1
++    :try_end_a
++    .catchall {:try_start_6 .. :try_end_a} :catchall_49
++
++    const/4 v2, 0x1
++
++    if-eq v1, v2, :cond_15
++
++    const/4 v3, 0x6
++
++    if-eq v1, v3, :cond_15
++
++    const/4 v3, 0x7
++
++    if-eq v1, v3, :cond_15
++
++    monitor-exit p0
++
++    return v0
++
++    :cond_15
++    :try_start_15
++    invoke-direct {p0}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->open()Z
++
++    move-result v1
++    :try_end_19
++    .catchall {:try_start_15 .. :try_end_19} :catchall_49
++
++    if-nez v1, :cond_1d
++
++    monitor-exit p0
++
++    return v0
++
++    :cond_1d
++    :try_start_1d
++    iput-object p1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->audioRecord:Landroid/media/AudioRecord;
++    :try_end_1f
++    .catchall {:try_start_1d .. :try_end_1f} :catchall_49
++
++    :try_start_1f
++    invoke-virtual {p1}, Landroid/media/AudioRecord;->getPreferredDevice()Landroid/media/AudioDeviceInfo;
++
++    move-result-object v1
++
++    iput-object v1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->previousInput:Landroid/media/AudioDeviceInfo;
++
++    iget-object v1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->selectedInput:Landroid/media/AudioDeviceInfo;
++
++    invoke-virtual {p1, v1}, Landroid/media/AudioRecord;->setPreferredDevice(Landroid/media/AudioDeviceInfo;)Z
++
++    move-result p1
++    :try_end_2b
++    .catch Ljava/lang/RuntimeException; {:try_start_1f .. :try_end_2b} :catch_2f
++    .catchall {:try_start_1f .. :try_end_2b} :catchall_49
++
++    if-eqz p1, :cond_37
++
++    monitor-exit p0
++
++    return v2
++
++    :catch_2f
++    move-exception p1
++
++    :try_start_30
++    const-string v1, "UN1CA-QPR2-Recording"
++
++    const-string v2, "Microphone device request rejected"
++
++    invoke-static {v1, v2, p1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    :cond_37
++    invoke-virtual {p0}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->close()Z
++
++    move-result p1
++    :try_end_3b
++    .catchall {:try_start_30 .. :try_end_3b} :catchall_49
++
++    if-eqz p1, :cond_3f
++
++    monitor-exit p0
++
++    return v0
++
++    :cond_3f
++    :try_start_3f
++    new-instance p1, Ljava/lang/IllegalStateException;
++
++    const-string v0, "Bluetooth route rollback failed"
++
++    invoke-direct {p1, v0}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
++
++    throw p1
++
++    :goto_47
++    monitor-exit p0
++    :try_end_48
++    .catchall {:try_start_3f .. :try_end_48} :catchall_49
++
++    throw p1
++
++    :catchall_49
++    move-exception p1
++
++    goto :goto_47
++.end method
++
++.method public declared-synchronized route(Landroid/media/MediaRecorder;)Z
++    .registers 5
++
++    monitor-enter p0
++
++    const/4 v0, 0x0
++
++    if-eqz p1, :cond_39
++
++    :try_start_4
++    invoke-direct {p0}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->open()Z
++
++    move-result v1
++
++    if-eqz v1, :cond_39
++
++    iput-object p1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->mediaRecorder:Landroid/media/MediaRecorder;
++    :try_end_c
++    .catchall {:try_start_4 .. :try_end_c} :catchall_37
++
++    :try_start_c
++    invoke-virtual {p1}, Landroid/media/MediaRecorder;->getPreferredDevice()Landroid/media/AudioDeviceInfo;
++
++    move-result-object v1
++
++    iput-object v1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->previousInput:Landroid/media/AudioDeviceInfo;
++
++    iget-object v1, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->selectedInput:Landroid/media/AudioDeviceInfo;
++
++    invoke-virtual {p1, v1}, Landroid/media/MediaRecorder;->setPreferredDevice(Landroid/media/AudioDeviceInfo;)Z
++
++    move-result p1
++    :try_end_18
++    .catch Ljava/lang/RuntimeException; {:try_start_c .. :try_end_18} :catch_1d
++    .catchall {:try_start_c .. :try_end_18} :catchall_37
++
++    if-eqz p1, :cond_25
++
++    monitor-exit p0
++
++    const/4 p0, 0x1
++
++    return p0
++
++    :catch_1d
++    move-exception p1
++
++    :try_start_1e
++    const-string v1, "UN1CA-QPR2-Recording"
++
++    const-string v2, "MediaRecorder microphone request rejected"
++
++    invoke-static {v1, v2, p1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    :cond_25
++    invoke-virtual {p0}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->close()Z
++
++    move-result p1
++    :try_end_29
++    .catchall {:try_start_1e .. :try_end_29} :catchall_37
++
++    if-eqz p1, :cond_2d
++
++    monitor-exit p0
++
++    return v0
++
++    :cond_2d
++    :try_start_2d
++    new-instance p1, Ljava/lang/IllegalStateException;
++
++    const-string v0, "Bluetooth route rollback failed"
++
++    invoke-direct {p1, v0}, Ljava/lang/IllegalStateException;-><init>(Ljava/lang/String;)V
++
++    throw p1
++
++    :goto_35
++    monitor-exit p0
++    :try_end_36
++    .catchall {:try_start_2d .. :try_end_36} :catchall_37
++
++    throw p1
++
++    :catchall_37
++    move-exception p1
++
++    goto :goto_35
++
++    :cond_39
++    monitor-exit p0
++
++    return v0
++.end method
++
++.method public declared-synchronized route([Landroid/media/AudioRecord;)Z
++    .registers 9
++
++    monitor-enter p0
++
++    const/4 v0, 0x0
++
++    if-nez p1, :cond_6
++
++    monitor-exit p0
++
++    return v0
++
++    :cond_6
++    :try_start_6
++    array-length v1, p1
++
++    const/4 v2, 0x0
++
++    move v3, v0
++
++    :goto_9
++    if-ge v3, v1, :cond_24
++
++    aget-object v4, p1, v3
++
++    if-eqz v4, :cond_21
++
++    invoke-virtual {v4}, Landroid/media/AudioRecord;->getAudioSource()I
++
++    move-result v5
++    :try_end_13
++    .catchall {:try_start_6 .. :try_end_13} :catchall_2c
++
++    const/4 v6, 0x1
++
++    if-eq v5, v6, :cond_1c
++
++    const/4 v6, 0x6
++
++    if-eq v5, v6, :cond_1c
++
++    const/4 v6, 0x7
++
++    if-ne v5, v6, :cond_21
++
++    :cond_1c
++    if-eqz v2, :cond_20
++
++    monitor-exit p0
++
++    return v0
++
++    :cond_20
++    move-object v2, v4
++
++    :cond_21
++    add-int/lit8 v3, v3, 0x1
++
++    goto :goto_9
++
++    :cond_24
++    :try_start_24
++    invoke-virtual {p0, v2}, Lio/mesalabs/unica/recording/Qpr2RecordingAudio;->route(Landroid/media/AudioRecord;)Z
++
++    move-result p1
++    :try_end_28
++    .catchall {:try_start_24 .. :try_end_28} :catchall_2c
++
++    monitor-exit p0
++
++    return p1
++
++    :goto_2a
++    :try_start_2a
++    monitor-exit p0
++    :try_end_2b
++    .catchall {:try_start_2a .. :try_end_2b} :catchall_2c
++
++    throw p1
++
++    :catchall_2c
++    move-exception p1
++
++    goto :goto_2a
++.end method
