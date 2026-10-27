@@ -206,6 +206,13 @@ for SETTINGS_ARCHIVE in "system/framework/framework.jar" "system/framework/servi
     APPLY_SMALI_PATCHES "$MODPATH/$SETTINGS_PATCH_ABI/smali" "$SETTINGS_ARCHIVE"
 done
 
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    (
+        MODPATH="$MODPATH/sdk37/safety_center"
+        source "$MODPATH/customize.sh"
+    ) || return 1
+fi
+
 unset SETTINGS_PATCH_ABI SETTINGS_ARCHIVE SETTINGS_PATCH
 
 LOG_STEP_OUT

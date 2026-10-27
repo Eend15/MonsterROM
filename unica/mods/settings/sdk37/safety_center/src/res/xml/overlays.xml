@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<overlay>
+    <item target="raw/safety_center_config" value="@raw/unica_safety_center_config" />
+</overlay>
