@@ -769,6 +769,41 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 camera_metadata
+    MODPATH="$PARADIGM_MODPATH/qpr2/camera_metadata"
+    LOG_STEP_IN "- Adding QPR2 camera_metadata"
+    # Experimental native provider, never enabled implicitly by the APK backports.
+    if [ "${UN1CA_QPR2_CAMERA_METADATA:-false}" = "true" ]; then
+        [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ] || {
+            ABORT "QPR2 camera metadata needs the reviewed Samsung SDK-37 cohort"
+            return 1
+        }
+        [ "$(sha256sum "$WORK_DIR/system/system/lib64/libc++.so" | cut -d ' ' -f 1)" = \
+            "cb118e98c74d3454858921123b9b51ba13df9cad7dfa141dd892c453661a4d78" ] || {
+            ABORT "QPR2 camera metadata needs the reviewed retained Samsung libc++"
+            return 1
+        }
+        PARADIGM_VERIFY_RUNTIME || {
+            ABORT "QPR2 camera_metadata needs the reviewed unchanged Samsung ARM64 runtime"
+            return 1
+        }
+        QPR2_METADATA_SHA="$(sha256sum "$WORK_DIR/system/system/lib64/libcamera_metadata.so" | cut -d ' ' -f 1)"
+        case "$QPR2_METADATA_SHA" in
+            597e6fd78acacb8306dff02dfd6a7e4b35d1982f7b8d9e2f1c84f852eb15e73a|6f9903343859e8af58f2661db15baed9e1053286fbe19e244954661d821724f6) ;;
+            *) ABORT "Unreviewed existing camera metadata provider"; return 1 ;;
+        esac
+        [ "$(sha256sum "$MODPATH/files/system/system/lib64/libcamera_metadata.so" | cut -d ' ' -f 1)" = \
+            "6f9903343859e8af58f2661db15baed9e1053286fbe19e244954661d821724f6" ] || {
+            ABORT "QPR2 camera metadata payload checksum mismatch"
+            return 1
+        }
+        ADD_TO_WORK_DIR "$MODPATH/files" "system" "system/lib64/libcamera_metadata.so" \
+            0 0 644 "u:object_r:system_lib_file:s0"
+        SET_PROP "system" "ro.unica.qpr2.camera_metadata" "schema-37.2-experimental"
+        unset QPR2_METADATA_SHA
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
