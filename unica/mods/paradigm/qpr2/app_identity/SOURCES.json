@@ -1,0 +1,59 @@
+{
+  "inputs": {
+    "source": "/mnt/g/crb_327_Patched/crb_327/Projects/android17QPR2gsi/ROM/system/system/framework/framework.jar",
+    "source_sha256": "ce41964c9cad9c6da21f3d80aa9f66d72d27105f128719c303a1b1ab85624ec2",
+    "current": "/home/jonathan/UN1CA/out/target/t2s/work_dir/system/system/framework/framework.jar",
+    "current_sha256": "9c9c953e2c1f1fe68f438d2ab80a6c9dfff36f9e286cf87846aabd02a46054ba",
+    "composed_input": "/home/jonathan/UN1CA/out/oneui95/qpr2-numeric-collections-20261026/framework-QPR2-collections-dimensions-numeric.jar",
+    "composed_input_sha256": "ac137aa90fb964783217804de9adef0ef31c60ecc4f253645d925277631035cd"
+  },
+  "source_build": "CP41.260831.007.A3",
+  "classes": [
+    {
+      "owner": "Landroid/os/Process;",
+      "relative": "android/os/Process.smali",
+      "target": "smali_classes3/android/os/Process.smali",
+      "DEX": "classes3.dex",
+      "original_methods": 97,
+      "retained_field_sha256": "b70d43a1fbba231a154ef01943a44791405c3f6f87ba955ef4c0c2a971bca8ef",
+      "added_methods": {
+        "areUidsForSameApplication(II)Z": "973a031c746638f2161ec5d165580a3a186a2df3f2ace13bda8eb19f97b9b847"
+      }
+    },
+    {
+      "owner": "Landroid/util/PackageUtils;",
+      "relative": "android/util/PackageUtils.smali",
+      "target": "smali_classes4/android/util/PackageUtils.smali",
+      "DEX": "classes4.dex",
+      "original_methods": 12,
+      "retained_field_sha256": "ba467a01013fdf53b1f2e5c7ca94400c4e948dea951b607f57cd3be47e89cbc1",
+      "added_methods": {
+        "toHexString([B)Ljava/lang/String;": "e2b85e1e1427e54effa6f3c0dc7b8637b74e0d9e65af2d960d4216c5bd7cdd58",
+        "computeSignaturesSha256DigestsBytes([Landroid/content/pm/Signature;)[[B": "cbea1fdf848475502b313c55a8889e4c557271ed293e5a26d7d52d9d288e062c"
+      }
+    }
+  ],
+  "retained_dependencies": {
+    "android/os/Process.smali": {
+      "isPrivateComputeCoreUid(I)Z": "147ea5bc3f1b8fd294ea33bafc6a840d3eb94b3f0867f2d058ff1c1edb0608ac",
+      "getAppUidForPrivateComputeCoreUid(I)I": "228b5958338d60af9db19914282ce42446adf597ad0736da1099180d030f36b9",
+      "<clinit>()V": "084f5685a448b7a98db892b60e598b1a14eaa323af796fc922cd01b559755313"
+    },
+    "android/os/UserHandle.smali": {
+      "getAppId(I)I": "5f92b77cbf710a195cff591b3d2b110032684b511b547064620866d679fa2fae"
+    },
+    "android/util/PackageUtils.smali": {
+      "computeSha256DigestBytes([B)[B": "2e97e2abc6b6881da484c36cf6a42b5699e9ca81dad210d934eb061e2fd21127"
+    },
+    "android/content/pm/Signature.smali": {
+      "<init>([B)V": "84e6e55acfb5937840a211f73387fee36bff457babfc398db4b51e7f2d44fe14",
+      "toByteArray()[B": "0f891f598f1189e6cbcb905866f10b6c2e57a8607950fbfff6a4893b75dab6d5"
+    }
+  },
+  "new_public_QPR2_method": "android.os.Process.areUidsForSameApplication",
+  "new_internal_helpers": 2,
+  "original_Samsung_UID_constants_and_native_methods_retained": true,
+  "original_Samsung_PCC_mapping_visibility_retained": true,
+  "signature_verification_policy_changed": false,
+  "source_bodies_copied_exactly": true
+}
