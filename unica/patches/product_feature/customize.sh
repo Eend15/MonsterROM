@@ -148,11 +148,20 @@ if [[ "$SOURCE_PRODUCT_SHIPPING_API_LEVEL" != "$TARGET_PRODUCT_SHIPPING_API_LEVE
         "isSupported(Landroid/content/Context;)Z" \
         "$SOURCE_PRODUCT_SHIPPING_API_LEVEL" \
         "$TARGET_PRODUCT_SHIPPING_API_LEVEL"
+    PRODUCT_HDM_VENDOR_SMALI="smali/com/android/server/enterprise/hdm/HdmVendorController.smali"
+    PRODUCT_HDM_VENDOR_METHOD="<init>()V"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        # R8 inlined this initialization; the vendor capability decision and
+        # real service lookup remain intact in the owning constructor.
+        PRODUCT_HDM_VENDOR_SMALI="smali/com/android/server/enterprise/EnterpriseDeviceManagerServiceImpl.smali"
+        PRODUCT_HDM_VENDOR_METHOD="<init>(Landroid/content/Context;)V"
+    fi
     SMALI_PATCH "system" "system/framework/services.jar" \
-        "smali/com/android/server/enterprise/hdm/HdmVendorController.smali" "replace" \
-        "<init>()V" \
+        "$PRODUCT_HDM_VENDOR_SMALI" "replace" \
+        "$PRODUCT_HDM_VENDOR_METHOD" \
         "$SOURCE_PRODUCT_SHIPPING_API_LEVEL" \
         "$TARGET_PRODUCT_SHIPPING_API_LEVEL"
+    unset PRODUCT_HDM_VENDOR_SMALI PRODUCT_HDM_VENDOR_METHOD
     SMALI_PATCH "system" "system/framework/services.jar" \
         "smali/com/android/server/knox/dar/ddar/ta/TAProxy.smali" "replace" \
         "updateServiceHolder(Z)V" \
