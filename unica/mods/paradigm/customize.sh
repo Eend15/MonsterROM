@@ -885,6 +885,19 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 accessibility_controls
+    MODPATH="$PARADIGM_MODPATH/qpr2/accessibility_controls"
+    LOG_STEP_IN "- Adding QPR2 accessibility_controls"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0001-Expose-per-user-QPR2-interface-contrast.patch"
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0002-Expose-the-real-window-magnifier-diagonal-control.patch"
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0099-Identify-the-QPR2-controls-build.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

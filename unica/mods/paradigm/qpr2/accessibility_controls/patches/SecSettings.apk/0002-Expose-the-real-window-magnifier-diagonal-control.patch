@@ -1,0 +1,248 @@
+Subject: [PATCH] Expose QPR2 diagonal panning using the existing Samsung SystemUI reader
+
+diff --git a/res/values-nl/unica_qpr2_magnification.xml b/res/values-nl/unica_qpr2_magnification.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values-nl/unica_qpr2_magnification.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <string name="unica_qpr2_diagonal_title">Diagonaal verschuiven toestaan</string>
++    <string name="unica_qpr2_diagonal_summary">Verplaats het vergrootglas ook diagonaal, naast horizontaal en verticaal.</string>
++</resources>
+diff --git a/res/values/unica_qpr2_magnification.xml b/res/values/unica_qpr2_magnification.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values/unica_qpr2_magnification.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <string name="unica_qpr2_diagonal_title">Allow diagonal panning</string>
++    <string name="unica_qpr2_diagonal_summary">Move the magnification window diagonally, as well as horizontally and vertically.</string>
++</resources>
+diff --git a/res/xml/magnification.xml b/res/xml/magnification.xml
+--- a/res/xml/magnification.xml
++++ b/res/xml/magnification.xml
+@@ -19,4 +19,5 @@
+     <SwitchPreference android:title="@string/sec_accessibility_magnification_cursor_following_title" android:key="accessibility_magnification_cursor_following_mode" settings:controller="com.samsung.android.settings.accessibility.vision.controllers.SecCursorFollowingModeSwitchPreferenceController" />
+     <SeslPreferenceCaption android:title="@string/sec_accessibility_magnification_move_screen_summary" android:key="accessibility_magnification_description_preference" settings:controller="com.samsung.android.settings.accessibility.vision.controllers.MagnificationDescriptionPreferenceController" settings:searchable="false" />
+     <com.samsung.android.settings.accessibility.base.widget.DescriptionPreference android:key="description_text_preference" settings:searchable="false" settings:showTopPadding="true" />
++    <SwitchPreference android:persistent="false" android:title="@string/unica_qpr2_diagonal_title" android:key="unica_qpr2_diagonal" android:summary="@string/unica_qpr2_diagonal_summary" settings:controller="io.mesalabs.unica.settings.Qpr2MagnificationPanningController" />
+ </PreferenceScreen>
+diff --git a/smali_classes4/io/mesalabs/unica/settings/Qpr2MagnificationPanningController.smali b/smali_classes4/io/mesalabs/unica/settings/Qpr2MagnificationPanningController.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/settings/Qpr2MagnificationPanningController.smali
+@@ -0,0 +1,212 @@
++.class public final Lio/mesalabs/unica/settings/Qpr2MagnificationPanningController;
++.super Lcom/android/settings/core/TogglePreferenceController;
++.source "Qpr2MagnificationPanningController.java"
++
++
++# static fields
++.field private static final SETTING:Ljava/lang/String; = "accessibility_allow_diagonal_scrolling"
++
++
++# direct methods
++.method public constructor <init>(Landroid/content/Context;Ljava/lang/String;)V
++    .locals 0
++
++    invoke-direct {p0, p1, p2}, Lcom/android/settings/core/TogglePreferenceController;-><init>(Landroid/content/Context;Ljava/lang/String;)V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public getAvailabilityStatus()I
++    .locals 2
++
++    iget-object v0, p0, Lio/mesalabs/unica/settings/Qpr2MagnificationPanningController;->mContext:Landroid/content/Context;
++
++    invoke-static {v0}, Lcom/android/settings/accessibility/extensions/ContextExtKt;->isInSetupWizard(Landroid/content/Context;)Z
++
++    move-result v0
++
++    if-nez v0, :cond_2a
++
++    iget-object v0, p0, Lio/mesalabs/unica/settings/Qpr2MagnificationPanningController;->mContext:Landroid/content/Context;
++
++    invoke-static {v0}, Lcom/android/settings/accessibility/extensions/ContextExtKt;->isWindowMagnificationSupported(Landroid/content/Context;)Z
++
++    move-result v0
++
++    if-eqz v0, :cond_2a
++
++    iget-object v0, p0, Lio/mesalabs/unica/settings/Qpr2MagnificationPanningController;->mContext:Landroid/content/Context;
++
++    const-string v1, "android.permission.WRITE_SECURE_SETTINGS"
++
++    invoke-virtual {v0, v1}, Landroid/content/Context;->checkSelfPermission(Ljava/lang/String;)I
++
++    move-result v0
++
++    sget v1, Landroid/content/pm/PackageManager;->PERMISSION_GRANTED:I
++
++    if-ne v0, v1, :cond_2a
++
++    iget-object p0, p0, Lio/mesalabs/unica/settings/Qpr2MagnificationPanningController;->mContext:Landroid/content/Context;
++
++    invoke-virtual {p0}, Landroid/content/Context;->getUserId()I
++
++    move-result p0
++
++    invoke-static {}, Landroid/app/ActivityManager;->getCurrentUser()I
++
++    move-result v0
++
++    if-ne p0, v0, :cond_2a
++
++    const/4 p0, 0x0
++
++    return p0
++
++    :cond_2a
++    const/4 p0, 0x3
++
++    return p0
++.end method
++
++.method public getSliceHighlightMenuRes()I
++    .locals 0
++
++    const/4 p0, 0x0
++
++    return p0
++.end method
++
++.method public isChecked()Z
++    .locals 3
++
++    iget-object v0, p0, Lio/mesalabs/unica/settings/Qpr2MagnificationPanningController;->mContext:Landroid/content/Context;
++
++    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v0
++
++    iget-object p0, p0, Lio/mesalabs/unica/settings/Qpr2MagnificationPanningController;->mContext:Landroid/content/Context;
++
++    invoke-virtual {p0}, Landroid/content/Context;->getUserId()I
++
++    move-result p0
++
++    const-string v1, "accessibility_allow_diagonal_scrolling"
++
++    const/4 v2, 0x1
++
++    invoke-static {v0, v1, v2, p0}, Landroid/provider/Settings$Secure;->getIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)I
++
++    move-result p0
++
++    if-eqz p0, :cond_16
++
++    return v2
++
++    :cond_16
++    const/4 p0, 0x0
++
++    return p0
++.end method
++
++.method public isSliceable()Z
++    .locals 0
++
++    const/4 p0, 0x0
++
++    return p0
++.end method
++
++.method public setChecked(Z)Z
++    .locals 3
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/settings/Qpr2MagnificationPanningController;->getAvailabilityStatus()I
++
++    move-result v0
++
++    const/4 v1, 0x0
++
++    if-nez v0, :cond_2c
++
++    iget-object v0, p0, Lio/mesalabs/unica/settings/Qpr2MagnificationPanningController;->mContext:Landroid/content/Context;
++
++    invoke-static {v0}, Lcom/android/settings/accessibility/MagnificationCapabilities;->getCapabilities(Landroid/content/Context;)I
++
++    move-result v0
++
++    and-int/lit8 v0, v0, 0x2
++
++    if-eqz v0, :cond_2c
++
++    :try_start_11
++    iget-object v0, p0, Lio/mesalabs/unica/settings/Qpr2MagnificationPanningController;->mContext:Landroid/content/Context;
++
++    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v0
++
++    const-string v2, "accessibility_allow_diagonal_scrolling"
++
++    iget-object p0, p0, Lio/mesalabs/unica/settings/Qpr2MagnificationPanningController;->mContext:Landroid/content/Context;
++
++    invoke-virtual {p0}, Landroid/content/Context;->getUserId()I
++
++    move-result p0
++
++    invoke-static {v0, v2, p1, p0}, Landroid/provider/Settings$Secure;->putIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)Z
++
++    move-result p0
++    :try_end_23
++    .catch Ljava/lang/RuntimeException; {:try_start_11 .. :try_end_23} :catch_24
++
++    return p0
++
++    :catch_24
++    move-exception p0
++
++    const-string p1, "UN1CA-Magnification"
++
++    const-string v0, "Magnification change denied"
++
++    invoke-static {p1, v0, p0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    :cond_2c
++    return v1
++.end method
++
++.method public updateState(Landroidx/preference/Preference;)V
++    .locals 1
++
++    invoke-super {p0, p1}, Lcom/android/settings/core/TogglePreferenceController;->updateState(Landroidx/preference/Preference;)V
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/settings/Qpr2MagnificationPanningController;->getAvailabilityStatus()I
++
++    move-result v0
++
++    if-nez v0, :cond_15
++
++    iget-object p0, p0, Lio/mesalabs/unica/settings/Qpr2MagnificationPanningController;->mContext:Landroid/content/Context;
++
++    invoke-static {p0}, Lcom/android/settings/accessibility/MagnificationCapabilities;->getCapabilities(Landroid/content/Context;)I
++
++    move-result p0
++
++    and-int/lit8 p0, p0, 0x2
++
++    if-eqz p0, :cond_15
++
++    const/4 p0, 0x1
++
++    goto :goto_16
++
++    :cond_15
++    const/4 p0, 0x0
++
++    :goto_16
++    invoke-virtual {p1, p0}, Landroidx/preference/Preference;->setEnabled(Z)V
++
++    return-void
++.end method
