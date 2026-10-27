@@ -1105,8 +1105,21 @@ if $SOURCE_WLAN_SUPPORT_80211AX; then
             fi
         else
             if ! $TARGET_WLAN_SUPPORT_80211AX_6GHZ; then
-                # TODO handle this condition
-                LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_80211AX_6GHZ" "TARGET_WLAN_SUPPORT_80211AX_6GHZ"
+                if [[ "$SOURCE_PLATFORM_SDK_VERSION" -ge "37" ]]; then
+                    APPLY_PATCH "system" "system/framework/semwifi-service.jar" \
+                        "$MODPATH/wifi/80211ax_6ghz/${PRODUCT_PATCH_ABI}semwifi-service.jar/0001-Disable-80211AX_6GHZ-support.patch"
+                    APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+                        "$MODPATH/wifi/80211ax_6ghz/${PRODUCT_PATCH_ABI}SecSettings.apk/0001-Disable-80211AX_6GHZ-support.patch"
+                    APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+                        "$MODPATH/wifi/80211ax_6ghz/${PRODUCT_PATCH_ABI}SystemUI.apk/0001-Disable-80211AX_6GHZ-support.patch"
+                    if [ -f "$WORK_DIR/product/overlay/SoftapOverlay/SoftapOverlay.apk" ]; then
+                        DECODE_APK "product" "overlay/SoftapOverlay/SoftapOverlay.apk"
+                        EVAL "sed -i '/name=\"config_wifi6ghzSupport\"/s/>true</>false</' \"$APKTOOL_DIR/product/overlay/SoftapOverlay/SoftapOverlay.apk/res/values/bools.xml\""
+                    fi
+                else
+                    # TODO handle this condition
+                    LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_80211AX_6GHZ" "TARGET_WLAN_SUPPORT_80211AX_6GHZ"
+                fi
             fi
         fi
     else
