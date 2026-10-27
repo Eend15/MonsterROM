@@ -110,6 +110,11 @@ PRODUCT_ENABLE_OPTICAL()
     SET_METADATA "system" "system/lib64/libunica_optical37.so" 0 0 644 "u:object_r:system_lib_file:s0" || return 1
 }
 
+PRODUCT_PATCH_ABI=""
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    PRODUCT_PATCH_ABI="sdk37/"
+fi
+
 # [
 GET_FINGERPRINT_SENSOR_TYPE()
 {
@@ -212,7 +217,7 @@ fi
 if $SOURCE_AUDIO_SUPPORT_ACH_RINGTONE; then
     if ! $TARGET_AUDIO_SUPPORT_ACH_RINGTONE; then
         APPLY_PATCH "system" "system/framework/framework.jar" \
-            "$MODPATH/audio/ach/framework.jar/0001-Disable-ACH-ringtone-support.patch"
+            "$MODPATH/audio/ach/${PRODUCT_PATCH_ABI}framework.jar/0001-Disable-ACH-ringtone-support.patch"
     fi
 else
     if $TARGET_AUDIO_SUPPORT_ACH_RINGTONE; then
