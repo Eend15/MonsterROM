@@ -1,5 +1,18 @@
 out/
 
+# Local credentials and signing identities (tracked public test keys stay tracked).
+.env
+.env.*
+security/*.pk8
+security/*_platform.x509.pem
+security/*_ota.x509.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+__pycache__/
+*.pyc
+
 # Cert
 security/unica_ota.x509.pem
 security/unica_ota.pk8
