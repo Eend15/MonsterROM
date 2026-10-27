@@ -874,6 +874,17 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 gamecontrollers
+    MODPATH="$PARADIGM_MODPATH/qpr2/gamecontrollers"
+    LOG_STEP_IN "- Adding QPR2 gamecontrollers"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0000-Preserve-existing-UN1CA-resource-IDs.patch"
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0001-Add-per-user-QPR2-gamecontroller-remapping.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
