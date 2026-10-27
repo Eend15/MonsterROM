@@ -1,0 +1,43 @@
+Subject: [PATCH] Reject missing or closed HardwareBuffers and unregistered webcam services before JNI
+
+diff --git a/smali/com/android/deviceaswebcam/WebcamController.smali b/smali/com/android/deviceaswebcam/WebcamController.smali
+--- a/smali/com/android/deviceaswebcam/WebcamController.smali
++++ b/smali/com/android/deviceaswebcam/WebcamController.smali
+@@ -39,11 +39,21 @@
+ .end method
+ 
+ .method public final queueImageToHost(Landroid/hardware/HardwareBuffer;JZ)Z
+     .locals 1
+ 
++    if-eqz p1, :unica_qpr2_frame_rejected
++
++    invoke-virtual {p1}, Landroid/hardware/HardwareBuffer;->isClosed()Z
++
++    move-result v0
++
++    if-nez v0, :unica_qpr2_frame_rejected
++
+     iget-object p0, p0, Lcom/android/deviceaswebcam/WebcamController;->mServiceRef:Ljava/lang/ref/WeakReference;
++
++    if-eqz p0, :unica_qpr2_frame_rejected
+ 
+     invoke-virtual {p0}, Ljava/lang/ref/WeakReference;->get()Ljava/lang/Object;
+ 
+     move-result-object p0
+ 
+@@ -82,10 +92,15 @@
+ 
+     return p0
+ 
+     :cond_2
+     return v0
++
++    :unica_qpr2_frame_rejected
++    const/4 v0, 0x0
++
++    return v0
+ .end method
+ 
+ .method final registerServiceInstance(Lcom/android/deviceaswebcam/DeviceAsWebcamFgService;)V
+     .locals 1
+ 
