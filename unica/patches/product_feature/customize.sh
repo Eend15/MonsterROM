@@ -1483,8 +1483,17 @@ if ! $SOURCE_WLAN_SUPPORT_MOBILEAP_WIFI_CONCURRENCY; then
     fi
 else
     if ! $TARGET_WLAN_SUPPORT_MOBILEAP_WIFI_CONCURRENCY; then
-        # TODO handle this condition
-        LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_MOBILEAP_WIFI_CONCURRENCY" "TARGET_WLAN_SUPPORT_MOBILEAP_WIFI_CONCURRENCY"
+        if [ "$SOURCE_PLATFORM_SDK_VERSION" = "37" ]; then
+            APPLY_PATCH "system" "system/framework/semwifi-service.jar" \
+                "$MODPATH/wifi/wifisharing/sdk37/semwifi-service.jar/0001-Disable-MOBILEAP_WIFI_CONCURRENCY-support.patch"
+            SMALI_PATCH "system" "system/framework/semwifi-service.jar" \
+                "smali/com/samsung/android/server/wifi/ap/SemSoftApConfiguration.smali" "replaceall" \
+                "SPF_Concurrency=true" \
+                "SPF_Concurrency=false"
+        else
+            # TODO handle this condition
+            LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_MOBILEAP_WIFI_CONCURRENCY" "TARGET_WLAN_SUPPORT_MOBILEAP_WIFI_CONCURRENCY"
+        fi
     fi
 fi
 
