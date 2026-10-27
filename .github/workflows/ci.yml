@@ -48,7 +48,7 @@ jobs:
           CODE=0
           while IFS= read -r f; do
             shellcheck -e SC1090,SC1091 -s bash "$f" || CODE=1
-          done < <(find platform scripts target unica -name "*.sh" -not -name "*ssi.sh" -not -name "config.sh" -not -name "sff.sh")
+          done < <(find .github platform scripts target unica -name "*.sh" -not -name "*ssi.sh" -not -name "config.sh" -not -name "sff.sh")
           exit $CODE
 
   build:

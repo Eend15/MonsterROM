@@ -1,0 +1,35 @@
+name: Check blob-runner filesystems
+
+on:
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: Hosted runner to qualify for native F2FS extraction
+        type: choice
+        default: ubuntu-24.04
+        options:
+          - ubuntu-24.04
+          - ubuntu-26.04
+
+permissions:
+  contents: read
+
+jobs:
+  f2fs:
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 15
+    steps:
+      - name: Checkout filesystem check only
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github
+
+      - name: Install probe formatter
+        run: |
+          uname -r
+          cat /etc/os-release
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends f2fs-tools
+
+      - name: Verify native F2FS driver and read-only mount
+        run: bash .github/prepare_f2fs.sh
