@@ -1,0 +1,4 @@
+id=floppy
+name=Preserve source-built Floppy kernel and Mali r54
+author=UN1CA
+description=Stages the verified existing Floppy/r54 build and matching modules; never substitutes stock boot images.
