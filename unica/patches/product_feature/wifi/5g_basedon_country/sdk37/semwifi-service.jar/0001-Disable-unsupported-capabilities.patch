@@ -1,0 +1,27 @@
+From a7978d67ef33505994a80003a32e89d0e9b45bb2 Mon Sep 17 00:00:00 2001
+From: ditternation <ditternation@outlook.com>
+Date: Wed, 30 Sep 2026 17:27:38 +0200
+Subject: [PATCH] Match hotspot capabilities to target
+
+---
+ .../samsung/android/server/wifi/ap/SemWifiApServiceImpl.smali | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/smali/com/samsung/android/server/wifi/ap/SemWifiApServiceImpl.smali b/smali/com/samsung/android/server/wifi/ap/SemWifiApServiceImpl.smali
+index b2225a2..d8e0b14 100644
+--- a/smali/com/samsung/android/server/wifi/ap/SemWifiApServiceImpl.smali
++++ b/smali/com/samsung/android/server/wifi/ap/SemWifiApServiceImpl.smali
+@@ -13946,9 +13946,7 @@
+ 
+     :cond_2
+     :goto_0
+-    invoke-virtual {p0}, Lcom/samsung/android/server/wifi/ap/SemWifiApServiceImpl;->isRegionFor5GCountry()Z
+-
+-    move-result v1
++    const/4 v1, 0x0
+     :try_end_0
+     .catchall {:try_start_0 .. :try_end_0} :catchall_0
+ 
+-- 
+2.53.0
+
