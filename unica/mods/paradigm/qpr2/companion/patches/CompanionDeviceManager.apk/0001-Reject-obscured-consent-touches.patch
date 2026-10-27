@@ -1,0 +1,104 @@
+Subject: [PATCH] Port QPR2 SecureButton to the existing consent layouts
+
+diff --git a/res/layout/activity_confirmation.xml b/res/layout/activity_confirmation.xml
+--- a/res/layout/activity_confirmation.xml
++++ b/res/layout/activity_confirmation.xml
+@@ -20,11 +20,11 @@
+                 </androidx.constraintlayout.widget.ConstraintLayout>
+             </RelativeLayout>
+             <LinearLayout android:gravity="center" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16.0dp" android:importantForAccessibility="no">
+                 <Button android:id="@id/btn_negative" android:text="@string/consent_no" android:layout_weight="1.0" style="@style/CommonDialog_PopupButton" />
+                 <View android:layout_gravity="center" android:id="@id/btn_divider" android:background="@color/dialog_button_divider_color" android:layout_width="1.0dp" android:layout_height="16.0dp" />
+-                <Button android:id="@id/btn_positive" android:text="@string/consent_yes" android:layout_weight="1.0" style="@style/CommonDialog_PopupButton" />
++                <com.android.companiondevicemanager.SecureButton android:id="@id/btn_positive" android:text="@string/consent_yes" android:layout_weight="1.0" style="@style/CommonDialog_PopupButton" />
+             </LinearLayout>
+             <LinearLayout android:gravity="end|bottom" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16.0dp" android:layout_marginEnd="16.0dp">
+                 <LinearLayout android:gravity="center" android:id="@id/negative_multiple_devices_layout" android:padding="0.0dp" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="48.0dp">
+                     <Button android:textColor="?android:textColorPrimary" android:id="@id/btn_negative_multiple_devices" android:visibility="gone" android:clickable="false" android:duplicateParentState="true" android:text="@string/consent_cancel" style="@style/NegativeButtonMultipleDevices" />
+                 </LinearLayout>
+diff --git a/res/layout/data_transfer_confirmation.xml b/res/layout/data_transfer_confirmation.xml
+--- a/res/layout/data_transfer_confirmation.xml
++++ b/res/layout/data_transfer_confirmation.xml
+@@ -7,11 +7,11 @@
+             <LinearLayout style="@style/Description">
+                 <TextView android:id="@id/title" style="@style/DescriptionTitle" />
+                 <TextView android:id="@id/summary" style="@style/DescriptionSummary" />
+             </LinearLayout>
+             <LinearLayout android:gravity="center" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12.0dp" android:layout_marginBottom="18.0dp">
+-                <Button android:id="@id/btn_positive" android:text="@string/consent_yes" style="@style/PositiveButton" />
++                <com.android.companiondevicemanager.SecureButton android:id="@id/btn_positive" android:text="@string/consent_yes" style="@style/PositiveButton" />
+                 <Button android:id="@id/btn_negative" android:text="@string/consent_no" style="@style/NegativeButton" />
+             </LinearLayout>
+         </LinearLayout>
+     </LinearLayout>
+ </ScrollView>
+diff --git a/res/layout/helper_confirmation.xml b/res/layout/helper_confirmation.xml
+--- a/res/layout/helper_confirmation.xml
++++ b/res/layout/helper_confirmation.xml
+@@ -5,10 +5,10 @@
+         <LinearLayout android:theme="@style/ChooserActivity" android:id="@id/helper_confirmation" android:padding="12.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/ContainerLayout">
+             <ImageView android:gravity="center" android:id="@id/app_icon" android:layout_width="match_parent" android:layout_height="32.0dp" android:layout_marginTop="12.0dp" android:layout_marginBottom="12.0dp" />
+             <TextView android:textSize="22.0sp" android:textColor="?android:textColorPrimary" android:gravity="center" android:id="@id/helper_title" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/TextAppearance" />
+             <TextView android:textSize="14.0sp" android:textColor="?android:textColorSecondary" android:gravity="center" android:id="@id/helper_summary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12.0dp" android:layout_marginBottom="32.0dp" android:layout_marginStart="24.0dp" android:layout_marginEnd="24.0dp" style="@style/TextAppearance" />
+             <LinearLayout android:gravity="end" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginEnd="12.0dp">
+-                <Button android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium" android:id="@id/btn_back" android:text="@string/consent_back" style="@style/VendorHelperBackButton" />
++                <com.android.companiondevicemanager.SecureButton android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium" android:id="@id/btn_back" android:text="@string/consent_back" style="@style/VendorHelperBackButton" />
+             </LinearLayout>
+         </LinearLayout>
+     </LinearLayout>
+ </ScrollView>
+diff --git a/smali_classes2/com/android/companiondevicemanager/SecureButton.smali b/smali_classes2/com/android/companiondevicemanager/SecureButton.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes2/com/android/companiondevicemanager/SecureButton.smali
+@@ -0,0 +1,50 @@
++.class public Lcom/android/companiondevicemanager/SecureButton;
++.super Landroid/widget/Button;
++.source "go/retraceme 216b57ad0438dafc0638d40aa1e0e7c5b8d77839cbe962a9454e29abe11a1184"
++
++
++# direct methods
++.method public constructor <init>(Landroid/content/Context;)V
++    .locals 0
++
++    invoke-direct {p0, p1}, Landroid/widget/Button;-><init>(Landroid/content/Context;)V
++
++    return-void
++.end method
++
++.method public constructor <init>(Landroid/content/Context;Landroid/util/AttributeSet;)V
++    .locals 0
++
++    invoke-direct {p0, p1, p2}, Landroid/widget/Button;-><init>(Landroid/content/Context;Landroid/util/AttributeSet;)V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public final onFilterTouchEventForSecurity(Landroid/view/MotionEvent;)Z
++    .locals 1
++
++    invoke-virtual {p1}, Landroid/view/MotionEvent;->getFlags()I
++
++    move-result v0
++
++    and-int/lit8 v0, v0, 0x3
++
++    if-nez v0, :cond_0
++
++    invoke-super {p0, p1}, Landroid/widget/Button;->onFilterTouchEventForSecurity(Landroid/view/MotionEvent;)Z
++
++    move-result p0
++
++    if-eqz p0, :cond_0
++
++    const/4 p0, 0x1
++
++    return p0
++
++    :cond_0
++    const/4 p0, 0x0
++
++    return p0
++.end method
