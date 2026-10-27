@@ -10,6 +10,10 @@
 *.so binary
 *.jar binary
 *.pk8 binary
+*.der binary
+*.avbpubkey binary
+*.tflite binary
+*.caffemodel binary
 *.ogg binary
 *.ico binary
 *.jpg binary
@@ -22,6 +26,7 @@ prebuilts/bootable/deprecated-ota/updater binary
 prebuilts/*/*/*/** binary
 unica/mods/paradigm/system/** binary
 unica/mods/prophide/system/bin/rezetprop binary
+unica/mods/prophide/sdk37/system/bin/prophide_stage binary
 
 # Device-specific prebuilt blobs
 target/a52sxq/patches/wpss/vendor/firmware/** binary
