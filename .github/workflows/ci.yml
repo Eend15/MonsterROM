@@ -40,6 +40,9 @@ jobs:
       - name: Check shell syntax, ordinary patches and JSON
         run: python3 .github/check_source.py
 
+      - name: Run host-only profile and scratch regressions
+        run: python3 -B -m unittest discover -s .github/tests -v
+
       - name: Run shellcheck
         run: |
           CODE=0

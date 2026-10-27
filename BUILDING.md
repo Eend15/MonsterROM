@@ -130,7 +130,12 @@ python3 .github/check_source.py
 
 Pushes and pull requests run source/ordinary-patch/JSON checks, 27 shipped-payload
 checksum checks and the existing ShellCheck policy without firmware or private
-keys. Binary model/runtime files are exempt from Git text normalization so that
+keys. Host-only regression tests also check invalid/partial QPR2 profiles,
+complete provider lists and the Bluetooth scratch-directory selection. Run them
+with `python3 -B -m unittest discover -s .github/tests -v`; firmware mutation
+helpers are replaced by test doubles, not executed on a staged ROM.
+
+Binary model/runtime files are exempt from Git text normalization so that
 their checked bytes survive a fresh clone. A full ROM build is a
 separate **manual** workflow on a trusted `monsterrom`-labelled self-hosted Linux
 runner with the prerequisites already provisioned. It is never run for an
