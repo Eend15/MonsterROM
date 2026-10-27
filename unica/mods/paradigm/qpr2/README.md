@@ -24,6 +24,11 @@ finite source set is in `prebuilts/qpr2`. Payload/container signing identities,
 retained-runtime contracts and source/current hashes are checked before copying.
 `UN1CA_QPR2_MAINLINE=false` or `UN1CA_QPR2_CPU_LEAVES=false` disables the respective
 optional component set. This is not a replacement of all APEX or native libraries.
+Profile values and the exact finite mainline/runtime/CPU-provider lists are
+validated before any Paradigm writes. An empty, truncated or duplicated list is
+an error, not permission to stage a partial cohort. Changing a reviewed list
+requires updating and requalifying its source contract; do not refresh hashes
+just to bypass a mismatch.
 
 The compiled Samsung framework base is still 37.0. The user-selected build
 branding reports CP4A.261005.017.S942BXXU5CZJJ, SDK-full 37.2 and One UI 90500;

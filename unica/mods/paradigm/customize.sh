@@ -1,6 +1,60 @@
 # shellcheck disable=SC2034
 SKIPUNZIP=1
 
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    # Validate the entire profile before changing properties, assets or APKs.
+    # Metadata and Path conversion must be selected as one native/Java cohort.
+    # Selecting it does not establish a working live Camera2 extension or ISP.
+    : "${UN1CA_QPR2_CAMERA_METADATA:=true}"
+    : "${UN1CA_QPR2_CAMERA_PATH:=true}"
+    : "${UN1CA_QPR2_SUBJECT_CPU_PREVIEW:=true}"
+    : "${UN1CA_QPR2_MAINLINE:=true}"
+    : "${UN1CA_QPR2_SWCODEC:=false}"
+    : "${UN1CA_QPR2_RUNTIME_COHORT:=off}"
+    : "${UN1CA_QPR2_CPU_LEAVES:=true}"
+    : "${UN1CA_QPR2_GSI_DIR:=$SRC_DIR/prebuilts/qpr2}"
+
+    for QPR2_OPTION in UN1CA_QPR2_CAMERA_METADATA UN1CA_QPR2_CAMERA_PATH UN1CA_QPR2_SUBJECT_CPU_PREVIEW UN1CA_QPR2_CPU_LEAVES UN1CA_QPR2_MAINLINE UN1CA_QPR2_SWCODEC; do
+        case "${!QPR2_OPTION:-false}" in
+            true|false) ;;
+            *) ABORT "$QPR2_OPTION must be true or false"; return 1 ;;
+        esac
+    done
+    unset QPR2_OPTION
+    case "$UN1CA_QPR2_RUNTIME_COHORT" in
+        off|trial-r15) ;;
+        *) ABORT "UN1CA_QPR2_RUNTIME_COHORT must be off or trial-r15"; return 1 ;;
+    esac
+    if [ "$UN1CA_QPR2_CAMERA_METADATA" != "$UN1CA_QPR2_CAMERA_PATH" ]; then
+        ABORT "Enable or disable QPR2 camera metadata and Path conversion together"
+        return 1
+    fi
+
+    # The loops below must describe the complete reviewed sets, not a truncated
+    # or duplicated subset that can silently skip providers and report success.
+    if [ "$UN1CA_QPR2_MAINLINE" = true ]; then
+        [ "$(sha256sum "$MODPATH/qpr2/mainline/modules.sha256" | cut -d ' ' -f 1)" = \
+            "c983aecfbb5ac11d4d30fe7c59596b6ce2888a845ef786906e744b14474868e1" ] || {
+            ABORT "Incomplete or unreviewed QPR2 contract: qpr2/mainline/modules.sha256"
+            return 1
+        }
+    fi
+    if [ "$UN1CA_QPR2_RUNTIME_COHORT" = trial-r15 ]; then
+        [ "$(sha256sum "$MODPATH/qpr2/runtime_cohort/components.sha256" | cut -d ' ' -f 1)" = \
+            "d07dc6ed2542d1dce8b611fc96d7eb912ff91a3992f71154748b0c21cfd407a9" ] || {
+            ABORT "Incomplete or unreviewed QPR2 contract: qpr2/runtime_cohort/components.sha256"
+            return 1
+        }
+    fi
+    if [ "$UN1CA_QPR2_CPU_LEAVES" = true ]; then
+        [ "$(sha256sum "$MODPATH/qpr2/cpu_leaves/libraries.sha256" | cut -d ' ' -f 1)" = \
+            "c6f814b192170a6d2c05796ab0fe8396428b080268b94b876bf1719a72102f58" ] || {
+            ABORT "Incomplete or unreviewed QPR2 contract: qpr2/cpu_leaves/libraries.sha256"
+            return 1
+        }
+    fi
+fi
+
 if [ ! "$(GET_PROP "system" "ro.unica.codename")" ]; then
     LOG "- Patching /system/system/etc/selinux/plat_property_contexts"
     EVAL "echo \"ro.unica.codename u:object_r:build_prop:s0 exact string\" >> \"$WORK_DIR/system/system/etc/selinux/plat_property_contexts\""
@@ -119,35 +173,6 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
         "$PARADIGM_MODPATH/qpr2/insets_lifecycle/framework.jar/0001-Port-QPR2-window-insets-animation-observers.patch"
     APPLY_PATCH "system" "system/framework/framework.jar" \
         "$PARADIGM_MODPATH/qpr2/signed_package/framework.jar/0001-Port-QPR2-SignedPackage-certificate-history.patch"
-
-    # This is an isolated ROM build, not a claim that a live Camera2 extension or
-    # the Samsung ISP has been validated. Both schema and Path must be included
-    # together. Each part still checks the exact reviewed donor/native cohort.
-    : "${UN1CA_QPR2_CAMERA_METADATA:=true}"
-    : "${UN1CA_QPR2_CAMERA_PATH:=true}"
-    : "${UN1CA_QPR2_SUBJECT_CPU_PREVIEW:=true}"
-    : "${UN1CA_QPR2_MAINLINE:=true}"
-    : "${UN1CA_QPR2_SWCODEC:=false}"
-    : "${UN1CA_QPR2_RUNTIME_COHORT:=off}"
-    : "${UN1CA_QPR2_CPU_LEAVES:=true}"
-    : "${UN1CA_QPR2_GSI_DIR:=$SRC_DIR/prebuilts/qpr2}"
-
-    # Reject mistyped/partial profiles before changing any APK or native provider.
-    for QPR2_OPTION in UN1CA_QPR2_CAMERA_METADATA UN1CA_QPR2_CAMERA_PATH UN1CA_QPR2_SUBJECT_CPU_PREVIEW UN1CA_QPR2_CPU_LEAVES UN1CA_QPR2_MAINLINE UN1CA_QPR2_SWCODEC; do
-        case "${!QPR2_OPTION:-false}" in
-            true|false) ;;
-            *) ABORT "$QPR2_OPTION must be true or false"; return 1 ;;
-        esac
-    done
-    unset QPR2_OPTION
-    case "$UN1CA_QPR2_RUNTIME_COHORT" in
-        off|trial-r15) ;;
-        *) ABORT "UN1CA_QPR2_RUNTIME_COHORT must be off or trial-r15"; return 1 ;;
-    esac
-    if [ "$UN1CA_QPR2_CAMERA_METADATA" != "$UN1CA_QPR2_CAMERA_PATH" ]; then
-        ABORT "Enable or disable QPR2 camera metadata and Path conversion together"
-        return 1
-    fi
 
     # QPR2 mainline
     MODPATH="$PARADIGM_MODPATH/qpr2/mainline"
