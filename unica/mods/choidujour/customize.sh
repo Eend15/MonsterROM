@@ -14,40 +14,28 @@ EVAL "cd \"$SRC_DIR\"; zip -q \"$WORK_DIR/system/system/etc/security/otacerts.zi
 
 DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk"
 
-APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-    "$MODPATH/suggestions/SecSettings.apk/0001-Launch-UN1CA-Updates-from-suggestions.patch"
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+        "$MODPATH/sdk37/SecSettings.apk/0001-Launch-UN1CA-Updates-from-suggestions.patch"
 
-# Disable stock OTA references
-SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-    "smali_classes3/com/samsung/android/settings/softwareupdate/SoftwareUpdateUtils.smali" "return" \
-    "isOTAUpgradeAllowed(Landroid/content/Context;)Z" "false"
+    # Android 17 removed SoftwareUpdateUtils.isOTAUpgradeAllowed. Hide the
+    # stock FOTA entry points without hiding GPSU/Mainline or our updater.
+    SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+        "smali_classes3/com/samsung/android/settings/privacy/SecurityDashboardUtils.smali" "return" \
+        'isSecurityUpdateSupported(Landroid/content/Context;)Z' 'false'
+    SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+        "smali_classes3/com/samsung/android/settings/homepage/TopLevelSoftwareUpdatePreferenceController.smali" "return" \
+        'getAvailabilityStatus()I' '3'
+else
+    APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+        "$MODPATH/suggestions/SecSettings.apk/0001-Launch-UN1CA-Updates-from-suggestions.patch"
 
-# Dynamically patch SecSettings
-# - Add missing/non-xml files in place
-# - Patch existing files
-#   - Use the first line of the file to tell sed how to apply the rest of the content
-#   - Exception made for files under *res/values* where the "resources" tag gets nuked
-while IFS= read -r f; do
-    f="${f//$MODPATH\/SecSettings.apk\//}"
+    # Disable stock OTA references
+    SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+        "smali_classes3/com/samsung/android/settings/softwareupdate/SoftwareUpdateUtils.smali" "return" \
+        'isOTAUpgradeAllowed(Landroid/content/Context;)Z' 'false'
+fi
 
-    if [ ! -f "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$f" ] || \
-            [[ "$f" != *".xml" ]]; then
-        LOG "- Adding \"$f\" to /system/system/priv-app/SecSettings.apk"
-        EVAL "mkdir -p \"$(dirname "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$f")\""
-        EVAL "cp -a \"$MODPATH/SecSettings.apk/${f//\$/\\$}\" \"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/${f//\$/\\$}\""
-    else
-        LOG "- Patching \"$f\" in /system/system/priv-app/SecSettings.apk"
-        if [[ "$f" == *"res/values"* ]]; then
-            PATCH_INST="/<\/resources>/i"
-            CONTENT="$(sed -e "/?xml/d" -e "/resources>/d" "$MODPATH/SecSettings.apk/$f")"
-        else
-            PATCH_INST="$(head -n 1 "$MODPATH/SecSettings.apk/$f")"
-            CONTENT="$(tail -n +2 "$MODPATH/SecSettings.apk/$f")"
-        fi
-        CONTENT="$(sed -e "s/\"/\\\\\"/g" -e "s/\\$/\\\\$/g" -e "s/ /\\\ /g" -e "s/\\\\n/\\\\\\\\\n/g" <<< "$CONTENT")"
-        CONTENT="$(sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g' <<< "$CONTENT")"
-        EVAL "sed -i \"$PATCH_INST $CONTENT\" \"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk/$f\""
-    fi
-done < <(find "$MODPATH/SecSettings.apk" -type f)
-
-unset PATCH_INST CONTENT
+# ChoiDujour's Settings payload uses the same bounded literal injector as the
+# Settings module (including its first-line homepage insertion directive).
+EVAL "bash \"$SRC_DIR/unica/mods/settings/customize.sh\" --inject \"$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk\" \"$MODPATH/SecSettings.apk\""

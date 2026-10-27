@@ -94,31 +94,15 @@
 .method public getSummary()Ljava/lang/CharSequence;
     .locals 3
 
-    new-instance v0, Ljava/util/ArrayList;
+    iget-object v0, p0, Lcom/android/settingslib/core/AbstractPreferenceController;->mContext:Landroid/content/Context;
 
-    invoke-direct {v0}, Ljava/util/ArrayList;-><init>()V
+    new-instance v1, Lcom/samsung/android/settings/homepage/TopLevelSoftwareUpdatePreferenceController;
 
-    iget-object v1, p0, Lcom/android/settingslib/core/AbstractPreferenceController;->mContext:Landroid/content/Context;
+    const-string v2, "top_level_software_update"
 
-    const v2, 0x7f142505
+    invoke-direct {v1, v0, v2}, Lcom/samsung/android/settings/homepage/TopLevelSoftwareUpdatePreferenceController;-><init>(Landroid/content/Context;Ljava/lang/String;)V
 
-    invoke-virtual {v1, v2}, Landroid/content/Context;->getString(I)Ljava/lang/String;
-
-    move-result-object v1
-
-    invoke-virtual {v0, v1}, Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z
-
-    invoke-virtual {v0}, Ljava/util/ArrayList;->size()I
-
-    move-result v1
-
-    iget-object p0, p0, Lcom/android/settingslib/core/AbstractPreferenceController;->mContext:Landroid/content/Context;
-
-    invoke-static {p0}, Lcom/android/settings/Utils;->getTopLevelSummarySeparator(Landroid/content/Context;)Ljava/lang/String;
-
-    move-result-object p0
-
-    invoke-static {p0, v0, v1}, Lcom/android/settings/Utils;->buildSummaryString(Ljava/lang/String;Ljava/util/List;I)Ljava/lang/String;
+    invoke-virtual {v1}, Lcom/samsung/android/settings/homepage/TopLevelSoftwareUpdatePreferenceController;->getSummary()Ljava/lang/CharSequence;
 
     move-result-object p0
 
