@@ -1,0 +1,107 @@
+{
+  "inputs": {
+    "source": "/mnt/g/crb_327_Patched/crb_327/Projects/android17QPR2gsi/ROM/system/system/framework/framework.jar",
+    "source_sha256": "ce41964c9cad9c6da21f3d80aa9f66d72d27105f128719c303a1b1ab85624ec2",
+    "current": "/home/jonathan/UN1CA/out/target/t2s/work_dir/system/system/framework/framework.jar",
+    "current_sha256": "9c9c953e2c1f1fe68f438d2ab80a6c9dfff36f9e286cf87846aabd02a46054ba"
+  },
+  "methods": [
+    {
+      "owner": "Landroid/util/SparseArray;",
+      "signature": "compute(ILandroid/util/function/IntObjFunction;)Ljava/lang/Object;",
+      "gsi_method_sha256": "0ecd31a2588700b449770c48e0c117a2f04c17f583aa174c8d5a133b0fe15d12",
+      "original_methods_unchanged": 28,
+      "original_field_layout_matches": true,
+      "retained_fields": [
+        ".field private greylist-max-o mGarbage:Z",
+        ".field private greylist-max-p mKeys:[I",
+        ".field private greylist-max-p mSize:I",
+        ".field private greylist-max-p mValues:[Ljava/lang/Object;",
+        ".field private static final greylist-max-o DELETED:Ljava/lang/Object;"
+      ],
+      "retained_required_methods": [
+        "gc()V"
+      ]
+    },
+    {
+      "owner": "Landroid/util/LongSparseArray;",
+      "signature": "compute(JLandroid/util/function/LongObjFunction;)Ljava/lang/Object;",
+      "gsi_method_sha256": "766d59fc9910c899b49a9294180659ded70d19337503bb89c63ffa66933f6d95",
+      "original_methods_unchanged": 31,
+      "original_field_layout_matches": true,
+      "retained_fields": [
+        ".field private greylist-max-o mGarbage:Z",
+        ".field private greylist-max-o mKeys:[J",
+        ".field private greylist-max-o mSize:I",
+        ".field private greylist-max-o mValues:[Ljava/lang/Object;",
+        ".field private static final greylist-max-o DELETED:Ljava/lang/Object;"
+      ],
+      "retained_required_methods": [
+        "gc()V"
+      ]
+    },
+    {
+      "owner": "Landroid/util/SparseIntArray;",
+      "signature": "compute(ILjava/util/function/IntBinaryOperator;)I",
+      "gsi_method_sha256": "c2b721bbc4d508201f06dd9e4978b1dba788f9a01fbd8b34e1295e6439c5ac6a",
+      "original_methods_unchanged": 19,
+      "original_field_layout_matches": true,
+      "retained_fields": [
+        ".field private greylist-max-p mKeys:[I",
+        ".field private greylist-max-p mSize:I",
+        ".field private greylist-max-p mValues:[I"
+      ],
+      "retained_required_methods": [
+        "indexOfKey(I)I"
+      ]
+    },
+    {
+      "owner": "Landroid/util/SparseLongArray;",
+      "signature": "compute(ILjava/util/function/LongBinaryOperator;)J",
+      "gsi_method_sha256": "0f4e4808c744488d5835ad7627446a92668b5cc625e47ec7caabf9e2c7446c87",
+      "original_methods_unchanged": 20,
+      "original_field_layout_matches": true,
+      "retained_fields": [
+        ".field private greylist-max-o mKeys:[I",
+        ".field private greylist-max-o mSize:I",
+        ".field private greylist-max-o mValues:[J"
+      ],
+      "retained_required_methods": [
+        "indexOfKey(I)I"
+      ]
+    },
+    {
+      "owner": "Landroid/util/SparseBooleanArray;",
+      "signature": "compute(ILjava/util/function/IntBinaryOperator;)Z",
+      "gsi_method_sha256": "f464477adc8c9c0f31a1485a2bac556d896fd7b6ca24c294a840fa10d6fe991e",
+      "original_methods_unchanged": 21,
+      "original_field_layout_matches": true,
+      "retained_fields": [
+        ".field private greylist-max-p mKeys:[I",
+        ".field private greylist-max-p mSize:I",
+        ".field private greylist-max-p mValues:[Z"
+      ],
+      "retained_required_methods": [
+        "indexOfKey(I)I"
+      ]
+    }
+  ],
+  "new_interfaces": [
+    "function/IntObjFunction",
+    "function/LongObjFunction"
+  ],
+  "source_methods_copied_exactly": true,
+  "replaced_existing_methods": false,
+  "retained_dependencies": {
+    "android/util/ContainerHelpers.smali": [
+      "binarySearch([III)I",
+      "binarySearch([JIJ)I"
+    ],
+    "com/android/internal/util/GrowingArrayUtils.smali": [
+      "insert([IIII)[I",
+      "insert([JIIJ)[J",
+      "insert([ZIIZ)[Z",
+      "insert([Ljava/lang/Object;IILjava/lang/Object;)[Ljava/lang/Object;"
+    ]
+  }
+}

@@ -1,0 +1,596 @@
+From: UN1CA contributors
+Subject: [PATCH] Backport QPR2 sparse collection compute APIs to Samsung SDK 37
+
+diff --git a/smali_classes4/android/util/SparseArray.smali b/smali_classes4/android/util/SparseArray.smali
+--- a/smali_classes4/android/util/SparseArray.smali
++++ b/smali_classes4/android/util/SparseArray.smali
+@@ -1091,3 +1091,147 @@
+ 
+     return-object p0
+ .end method
++
++.method public whitelist compute(ILandroid/util/function/IntObjFunction;)Ljava/lang/Object;
++    .locals 6
++    .annotation system Ldalvik/annotation/Signature;
++        value = {
++            "(I",
++            "Landroid/util/function/IntObjFunction<",
++            "-TE;+TE;>;)TE;"
++        }
++    .end annotation
++
++    iget-object v0, p0, Landroid/util/SparseArray;->mKeys:[I
++
++    iget v1, p0, Landroid/util/SparseArray;->mSize:I
++
++    invoke-static {v0, v1, p1}, Landroid/util/ContainerHelpers;->binarySearch([III)I
++
++    move-result v0
++
++    const/4 v1, 0x1
++
++    const/4 v2, 0x0
++
++    if-ltz v0, :cond_2
++
++    iget-object v3, p0, Landroid/util/SparseArray;->mValues:[Ljava/lang/Object;
++
++    aget-object v3, v3, v0
++
++    sget-object v4, Landroid/util/SparseArray;->DELETED:Ljava/lang/Object;
++
++    if-ne v3, v4, :cond_0
++
++    goto :goto_0
++
++    :cond_0
++    move-object v2, v3
++
++    :goto_0
++    invoke-interface {p2, p1, v2}, Landroid/util/function/IntObjFunction;->apply(ILjava/lang/Object;)Ljava/lang/Object;
++
++    move-result-object p1
++
++    iget-object p2, p0, Landroid/util/SparseArray;->mValues:[Ljava/lang/Object;
++
++    if-nez p1, :cond_1
++
++    aput-object v4, p2, v0
++
++    iput-boolean v1, p0, Landroid/util/SparseArray;->mGarbage:Z
++
++    return-object p1
++
++    :cond_1
++    aput-object p1, p2, v0
++
++    return-object p1
++
++    :cond_2
++    invoke-interface {p2, p1, v2}, Landroid/util/function/IntObjFunction;->apply(ILjava/lang/Object;)Ljava/lang/Object;
++
++    move-result-object p2
++
++    if-nez p2, :cond_3
++
++    return-object v2
++
++    :cond_3
++    not-int v0, v0
++
++    iget v2, p0, Landroid/util/SparseArray;->mSize:I
++
++    if-ge v0, v2, :cond_4
++
++    iget-object v3, p0, Landroid/util/SparseArray;->mValues:[Ljava/lang/Object;
++
++    aget-object v4, v3, v0
++
++    sget-object v5, Landroid/util/SparseArray;->DELETED:Ljava/lang/Object;
++
++    if-ne v4, v5, :cond_4
++
++    iget-object p0, p0, Landroid/util/SparseArray;->mKeys:[I
++
++    aput p1, p0, v0
++
++    aput-object p2, v3, v0
++
++    return-object p2
++
++    :cond_4
++    iget-boolean v3, p0, Landroid/util/SparseArray;->mGarbage:Z
++
++    if-eqz v3, :cond_5
++
++    iget-object v3, p0, Landroid/util/SparseArray;->mKeys:[I
++
++    array-length v3, v3
++
++    if-lt v2, v3, :cond_5
++
++    invoke-direct {p0}, Landroid/util/SparseArray;->gc()V
++
++    iget v3, p0, Landroid/util/SparseArray;->mSize:I
++
++    if-ge v3, v2, :cond_5
++
++    iget-object v0, p0, Landroid/util/SparseArray;->mKeys:[I
++
++    invoke-static {v0, v3, p1}, Landroid/util/ContainerHelpers;->binarySearch([III)I
++
++    move-result v0
++
++    not-int v0, v0
++
++    :cond_5
++    iget-object v2, p0, Landroid/util/SparseArray;->mKeys:[I
++
++    iget v3, p0, Landroid/util/SparseArray;->mSize:I
++
++    invoke-static {v2, v3, v0, p1}, Lcom/android/internal/util/GrowingArrayUtils;->insert([IIII)[I
++
++    move-result-object p1
++
++    iput-object p1, p0, Landroid/util/SparseArray;->mKeys:[I
++
++    iget-object p1, p0, Landroid/util/SparseArray;->mValues:[Ljava/lang/Object;
++
++    iget v2, p0, Landroid/util/SparseArray;->mSize:I
++
++    invoke-static {p1, v2, v0, p2}, Lcom/android/internal/util/GrowingArrayUtils;->insert([Ljava/lang/Object;IILjava/lang/Object;)[Ljava/lang/Object;
++
++    move-result-object p1
++
++    iput-object p1, p0, Landroid/util/SparseArray;->mValues:[Ljava/lang/Object;
++
++    iget p1, p0, Landroid/util/SparseArray;->mSize:I
++
++    add-int/2addr p1, v1
++
++    iput p1, p0, Landroid/util/SparseArray;->mSize:I
++
++    return-object p2
++.end method
+diff --git a/smali_classes4/android/util/LongSparseArray.smali b/smali_classes4/android/util/LongSparseArray.smali
+--- a/smali_classes4/android/util/LongSparseArray.smali
++++ b/smali_classes4/android/util/LongSparseArray.smali
+@@ -1050,3 +1050,147 @@
+ 
+     return-object p0
+ .end method
++
++.method public whitelist compute(JLandroid/util/function/LongObjFunction;)Ljava/lang/Object;
++    .locals 6
++    .annotation system Ldalvik/annotation/Signature;
++        value = {
++            "(J",
++            "Landroid/util/function/LongObjFunction<",
++            "-TE;+TE;>;)TE;"
++        }
++    .end annotation
++
++    iget-object v0, p0, Landroid/util/LongSparseArray;->mKeys:[J
++
++    iget v1, p0, Landroid/util/LongSparseArray;->mSize:I
++
++    invoke-static {v0, v1, p1, p2}, Landroid/util/ContainerHelpers;->binarySearch([JIJ)I
++
++    move-result v0
++
++    const/4 v1, 0x1
++
++    const/4 v2, 0x0
++
++    if-ltz v0, :cond_2
++
++    iget-object v3, p0, Landroid/util/LongSparseArray;->mValues:[Ljava/lang/Object;
++
++    aget-object v3, v3, v0
++
++    sget-object v4, Landroid/util/LongSparseArray;->DELETED:Ljava/lang/Object;
++
++    if-ne v3, v4, :cond_0
++
++    goto :goto_0
++
++    :cond_0
++    move-object v2, v3
++
++    :goto_0
++    invoke-interface {p3, p1, p2, v2}, Landroid/util/function/LongObjFunction;->apply(JLjava/lang/Object;)Ljava/lang/Object;
++
++    move-result-object p1
++
++    iget-object p2, p0, Landroid/util/LongSparseArray;->mValues:[Ljava/lang/Object;
++
++    if-nez p1, :cond_1
++
++    aput-object v4, p2, v0
++
++    iput-boolean v1, p0, Landroid/util/LongSparseArray;->mGarbage:Z
++
++    return-object p1
++
++    :cond_1
++    aput-object p1, p2, v0
++
++    return-object p1
++
++    :cond_2
++    invoke-interface {p3, p1, p2, v2}, Landroid/util/function/LongObjFunction;->apply(JLjava/lang/Object;)Ljava/lang/Object;
++
++    move-result-object p3
++
++    if-nez p3, :cond_3
++
++    return-object v2
++
++    :cond_3
++    not-int v0, v0
++
++    iget v2, p0, Landroid/util/LongSparseArray;->mSize:I
++
++    if-ge v0, v2, :cond_4
++
++    iget-object v3, p0, Landroid/util/LongSparseArray;->mValues:[Ljava/lang/Object;
++
++    aget-object v4, v3, v0
++
++    sget-object v5, Landroid/util/LongSparseArray;->DELETED:Ljava/lang/Object;
++
++    if-ne v4, v5, :cond_4
++
++    iget-object p0, p0, Landroid/util/LongSparseArray;->mKeys:[J
++
++    aput-wide p1, p0, v0
++
++    aput-object p3, v3, v0
++
++    return-object p3
++
++    :cond_4
++    iget-boolean v3, p0, Landroid/util/LongSparseArray;->mGarbage:Z
++
++    if-eqz v3, :cond_5
++
++    iget-object v3, p0, Landroid/util/LongSparseArray;->mKeys:[J
++
++    array-length v3, v3
++
++    if-lt v2, v3, :cond_5
++
++    invoke-direct {p0}, Landroid/util/LongSparseArray;->gc()V
++
++    iget v3, p0, Landroid/util/LongSparseArray;->mSize:I
++
++    if-ge v3, v2, :cond_5
++
++    iget-object v0, p0, Landroid/util/LongSparseArray;->mKeys:[J
++
++    invoke-static {v0, v3, p1, p2}, Landroid/util/ContainerHelpers;->binarySearch([JIJ)I
++
++    move-result v0
++
++    not-int v0, v0
++
++    :cond_5
++    iget-object v2, p0, Landroid/util/LongSparseArray;->mKeys:[J
++
++    iget v3, p0, Landroid/util/LongSparseArray;->mSize:I
++
++    invoke-static {v2, v3, v0, p1, p2}, Lcom/android/internal/util/GrowingArrayUtils;->insert([JIIJ)[J
++
++    move-result-object p1
++
++    iput-object p1, p0, Landroid/util/LongSparseArray;->mKeys:[J
++
++    iget-object p1, p0, Landroid/util/LongSparseArray;->mValues:[Ljava/lang/Object;
++
++    iget p2, p0, Landroid/util/LongSparseArray;->mSize:I
++
++    invoke-static {p1, p2, v0, p3}, Lcom/android/internal/util/GrowingArrayUtils;->insert([Ljava/lang/Object;IILjava/lang/Object;)[Ljava/lang/Object;
++
++    move-result-object p1
++
++    iput-object p1, p0, Landroid/util/LongSparseArray;->mValues:[Ljava/lang/Object;
++
++    iget p1, p0, Landroid/util/LongSparseArray;->mSize:I
++
++    add-int/2addr p1, v1
++
++    iput p1, p0, Landroid/util/LongSparseArray;->mSize:I
++
++    return-object p3
++.end method
+diff --git a/smali_classes4/android/util/SparseIntArray.smali b/smali_classes4/android/util/SparseIntArray.smali
+--- a/smali_classes4/android/util/SparseIntArray.smali
++++ b/smali_classes4/android/util/SparseIntArray.smali
+@@ -554,3 +554,64 @@
+ 
+     return p0
+ .end method
++
++.method public whitelist compute(ILjava/util/function/IntBinaryOperator;)I
++    .locals 3
++
++    invoke-virtual {p0, p1}, Landroid/util/SparseIntArray;->indexOfKey(I)I
++
++    move-result v0
++
++    if-ltz v0, :cond_0
++
++    iget-object v1, p0, Landroid/util/SparseIntArray;->mValues:[I
++
++    aget v1, v1, v0
++
++    invoke-interface {p2, p1, v1}, Ljava/util/function/IntBinaryOperator;->applyAsInt(II)I
++
++    move-result p1
++
++    iget-object p0, p0, Landroid/util/SparseIntArray;->mValues:[I
++
++    aput p1, p0, v0
++
++    return p1
++
++    :cond_0
++    not-int v0, v0
++
++    const/4 v1, 0x0
++
++    invoke-interface {p2, p1, v1}, Ljava/util/function/IntBinaryOperator;->applyAsInt(II)I
++
++    move-result p2
++
++    iget-object v1, p0, Landroid/util/SparseIntArray;->mKeys:[I
++
++    iget v2, p0, Landroid/util/SparseIntArray;->mSize:I
++
++    invoke-static {v1, v2, v0, p1}, Lcom/android/internal/util/GrowingArrayUtils;->insert([IIII)[I
++
++    move-result-object p1
++
++    iput-object p1, p0, Landroid/util/SparseIntArray;->mKeys:[I
++
++    iget-object p1, p0, Landroid/util/SparseIntArray;->mValues:[I
++
++    iget v1, p0, Landroid/util/SparseIntArray;->mSize:I
++
++    invoke-static {p1, v1, v0, p2}, Lcom/android/internal/util/GrowingArrayUtils;->insert([IIII)[I
++
++    move-result-object p1
++
++    iput-object p1, p0, Landroid/util/SparseIntArray;->mValues:[I
++
++    iget p1, p0, Landroid/util/SparseIntArray;->mSize:I
++
++    add-int/lit8 p1, p1, 0x1
++
++    iput p1, p0, Landroid/util/SparseIntArray;->mSize:I
++
++    return p2
++.end method
+diff --git a/smali_classes4/android/util/SparseLongArray.smali b/smali_classes4/android/util/SparseLongArray.smali
+--- a/smali_classes4/android/util/SparseLongArray.smali
++++ b/smali_classes4/android/util/SparseLongArray.smali
+@@ -622,3 +622,68 @@
+ 
+     return-wide p0
+ .end method
++
++.method public whitelist compute(ILjava/util/function/LongBinaryOperator;)J
++    .locals 5
++
++    invoke-virtual {p0, p1}, Landroid/util/SparseLongArray;->indexOfKey(I)I
++
++    move-result v0
++
++    if-ltz v0, :cond_0
++
++    int-to-long v1, p1
++
++    iget-object p1, p0, Landroid/util/SparseLongArray;->mValues:[J
++
++    aget-wide v3, p1, v0
++
++    invoke-interface {p2, v1, v2, v3, v4}, Ljava/util/function/LongBinaryOperator;->applyAsLong(JJ)J
++
++    move-result-wide p1
++
++    iget-object p0, p0, Landroid/util/SparseLongArray;->mValues:[J
++
++    aput-wide p1, p0, v0
++
++    return-wide p1
++
++    :cond_0
++    not-int v0, v0
++
++    int-to-long v1, p1
++
++    const-wide/16 v3, 0x0
++
++    invoke-interface {p2, v1, v2, v3, v4}, Ljava/util/function/LongBinaryOperator;->applyAsLong(JJ)J
++
++    move-result-wide v1
++
++    iget-object p2, p0, Landroid/util/SparseLongArray;->mKeys:[I
++
++    iget v3, p0, Landroid/util/SparseLongArray;->mSize:I
++
++    invoke-static {p2, v3, v0, p1}, Lcom/android/internal/util/GrowingArrayUtils;->insert([IIII)[I
++
++    move-result-object p1
++
++    iput-object p1, p0, Landroid/util/SparseLongArray;->mKeys:[I
++
++    iget-object p1, p0, Landroid/util/SparseLongArray;->mValues:[J
++
++    iget p2, p0, Landroid/util/SparseLongArray;->mSize:I
++
++    invoke-static {p1, p2, v0, v1, v2}, Lcom/android/internal/util/GrowingArrayUtils;->insert([JIIJ)[J
++
++    move-result-object p1
++
++    iput-object p1, p0, Landroid/util/SparseLongArray;->mValues:[J
++
++    iget p1, p0, Landroid/util/SparseLongArray;->mSize:I
++
++    add-int/lit8 p1, p1, 0x1
++
++    iput p1, p0, Landroid/util/SparseLongArray;->mSize:I
++
++    return-wide v1
++.end method
+diff --git a/smali_classes4/android/util/SparseBooleanArray.smali b/smali_classes4/android/util/SparseBooleanArray.smali
+--- a/smali_classes4/android/util/SparseBooleanArray.smali
++++ b/smali_classes4/android/util/SparseBooleanArray.smali
+@@ -675,3 +675,79 @@
+ 
+     return p0
+ .end method
++
++.method public whitelist compute(ILjava/util/function/IntBinaryOperator;)Z
++    .locals 4
++
++    invoke-virtual {p0, p1}, Landroid/util/SparseBooleanArray;->indexOfKey(I)I
++
++    move-result v0
++
++    const/4 v1, 0x1
++
++    const/4 v2, 0x0
++
++    if-ltz v0, :cond_1
++
++    iget-object v3, p0, Landroid/util/SparseBooleanArray;->mValues:[Z
++
++    aget-boolean v3, v3, v0
++
++    invoke-interface {p2, p1, v3}, Ljava/util/function/IntBinaryOperator;->applyAsInt(II)I
++
++    move-result p1
++
++    if-eqz p1, :cond_0
++
++    goto :goto_0
++
++    :cond_0
++    move v1, v2
++
++    :goto_0
++    iget-object p0, p0, Landroid/util/SparseBooleanArray;->mValues:[Z
++
++    aput-boolean v1, p0, v0
++
++    return v1
++
++    :cond_1
++    not-int v0, v0
++
++    invoke-interface {p2, p1, v2}, Ljava/util/function/IntBinaryOperator;->applyAsInt(II)I
++
++    move-result p2
++
++    if-eqz p2, :cond_2
++
++    move v2, v1
++
++    :cond_2
++    iget-object p2, p0, Landroid/util/SparseBooleanArray;->mKeys:[I
++
++    iget v3, p0, Landroid/util/SparseBooleanArray;->mSize:I
++
++    invoke-static {p2, v3, v0, p1}, Lcom/android/internal/util/GrowingArrayUtils;->insert([IIII)[I
++
++    move-result-object p1
++
++    iput-object p1, p0, Landroid/util/SparseBooleanArray;->mKeys:[I
++
++    iget-object p1, p0, Landroid/util/SparseBooleanArray;->mValues:[Z
++
++    iget p2, p0, Landroid/util/SparseBooleanArray;->mSize:I
++
++    invoke-static {p1, p2, v0, v2}, Lcom/android/internal/util/GrowingArrayUtils;->insert([ZIIZ)[Z
++
++    move-result-object p1
++
++    iput-object p1, p0, Landroid/util/SparseBooleanArray;->mValues:[Z
++
++    iget p1, p0, Landroid/util/SparseBooleanArray;->mSize:I
++
++    add-int/2addr p1, v1
++
++    iput p1, p0, Landroid/util/SparseBooleanArray;->mSize:I
++
++    return v2
++.end method
+diff --git a/smali_classes4/android/util/function/IntObjFunction.smali b/smali_classes4/android/util/function/IntObjFunction.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/android/util/function/IntObjFunction.smali
+@@ -0,0 +1,29 @@
++.class public interface abstract Landroid/util/function/IntObjFunction;
++.super Ljava/lang/Object;
++.source "IntObjFunction.java"
++
++
++# annotations
++.annotation system Ldalvik/annotation/Signature;
++    value = {
++        "<T:",
++        "Ljava/lang/Object;",
++        "R:",
++        "Ljava/lang/Object;",
++        ">",
++        "Ljava/lang/Object;"
++    }
++.end annotation
++
++.annotation runtime Ljava/lang/FunctionalInterface;
++.end annotation
++
++
++# virtual methods
++.method public abstract whitelist apply(ILjava/lang/Object;)Ljava/lang/Object;
++    .annotation system Ldalvik/annotation/Signature;
++        value = {
++            "(ITT;)TR;"
++        }
++    .end annotation
++.end method
+diff --git a/smali_classes4/android/util/function/LongObjFunction.smali b/smali_classes4/android/util/function/LongObjFunction.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/android/util/function/LongObjFunction.smali
+@@ -0,0 +1,29 @@
++.class public interface abstract Landroid/util/function/LongObjFunction;
++.super Ljava/lang/Object;
++.source "LongObjFunction.java"
++
++
++# annotations
++.annotation system Ldalvik/annotation/Signature;
++    value = {
++        "<T:",
++        "Ljava/lang/Object;",
++        "R:",
++        "Ljava/lang/Object;",
++        ">",
++        "Ljava/lang/Object;"
++    }
++.end annotation
++
++.annotation runtime Ljava/lang/FunctionalInterface;
++.end annotation
++
++
++# virtual methods
++.method public abstract whitelist apply(JLjava/lang/Object;)Ljava/lang/Object;
++    .annotation system Ldalvik/annotation/Signature;
++        value = {
++            "(JTT;)TR;"
++        }
++    .end annotation
++.end method
