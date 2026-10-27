@@ -169,6 +169,13 @@ jobs:
           fi
           echo "PDA_BUILD=$(cut -d / -f 1 "prebuilts/samsung/$DEVICE/.current")" >> "$GITHUB_ENV"
 
+      # The shallow checkout's base can advance during firmware extraction.
+      # Negotiate shared objects rather than resending a multi-GiB base pack
+      # when publishing a new profile branch. This does not change blob bytes.
+      - name: Negotiate blob publication
+        if: steps.sdk37.outputs.update != 'false'
+        run: git config --local push.negotiate true
+
       - name: Create Pull Request
         if: steps.sdk37.outputs.update != 'false'
         uses: peter-evans/create-pull-request@v8
