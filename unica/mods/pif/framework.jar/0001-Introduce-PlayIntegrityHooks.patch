@@ -1,32 +1,5 @@
-From 9a14f31f0781ea99aa447b01c20bd309e9a07bc8 Mon Sep 17 00:00:00 2001
-From: Salvo Giangreco <giangrecosalvo9@gmail.com>
-Date: Mon, 6 Oct 2025 15:14:36 +0200
-Subject: [PATCH] Introduce PlayIntegrityHooks
+Subject: [PATCH] Introduce shared PlayIntegrityHooks implementation
 
-UN1CA: this patch is not complete! Please check unica/mods/pif/customize.sh for more info.
----
- .../keystore2/AndroidKeyStoreSpi.smali        |    2 +
- ...grityHooks$$ExternalSyntheticLambda0.smali |   30 +
- .../mesalabs/unica/PlayIntegrityHooks$1.smali |   79 ++
- .../mesalabs/unica/PlayIntegrityHooks.smali   | 1032 +++++++++++++++++
- 4 files changed, 1143 insertions(+)
- create mode 100644 smali_classes6/io/mesalabs/unica/PlayIntegrityHooks$$ExternalSyntheticLambda0.smali
- create mode 100644 smali_classes6/io/mesalabs/unica/PlayIntegrityHooks$1.smali
- create mode 100644 smali_classes6/io/mesalabs/unica/PlayIntegrityHooks.smali
-
-diff --git a/smali_classes3/android/security/keystore2/AndroidKeyStoreSpi.smali b/smali_classes3/android/security/keystore2/AndroidKeyStoreSpi.smali
-index c724b464..0579bc5c 100644
---- a/smali_classes3/android/security/keystore2/AndroidKeyStoreSpi.smali
-+++ b/smali_classes3/android/security/keystore2/AndroidKeyStoreSpi.smali
-@@ -3223,6 +3223,8 @@
- .method public whitelist test-api engineGetCertificateChain(Ljava/lang/String;)[Ljava/security/cert/Certificate;
-     .locals 4
- 
-+    invoke-static {}, Lio/mesalabs/unica/PlayIntegrityHooks;->onEngineGetCertificateChain()V
-+
-     invoke-direct {p0, p1}, Landroid/security/keystore2/AndroidKeyStoreSpi;->getKeyMetadata(Ljava/lang/String;)Landroid/system/keystore2/KeyEntryResponse;
- 
-     move-result-object p0
 diff --git a/smali_classes6/io/mesalabs/unica/PlayIntegrityHooks$$ExternalSyntheticLambda0.smali b/smali_classes6/io/mesalabs/unica/PlayIntegrityHooks$$ExternalSyntheticLambda0.smali
 new file mode 100644
 index 00000000..807bf498
