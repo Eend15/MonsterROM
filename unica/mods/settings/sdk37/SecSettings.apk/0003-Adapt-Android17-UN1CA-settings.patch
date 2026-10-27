@@ -1,0 +1,100 @@
+Subject: [PATCH] Adapt UN1CA Settings to the Android 17 interfaces
+
+Display the real hardware model and full micro version without parsing
+a three-part string as a Double. Leave OTA and GPSU selection separate.
+Match both owned file pickers to the current R8 Intent/result constructor.
+Keep all platform permission and lifecycle checks.
+
+diff --git a/smali_classes3/com/samsung/android/settings/deviceinfo/softwareinfo/OneUIVersionPreferenceController.smali b/smali_classes3/com/samsung/android/settings/deviceinfo/softwareinfo/OneUIVersionPreferenceController.smali
+--- a/smali_classes3/com/samsung/android/settings/deviceinfo/softwareinfo/OneUIVersionPreferenceController.smali
++++ b/smali_classes3/com/samsung/android/settings/deviceinfo/softwareinfo/OneUIVersionPreferenceController.smali
+@@ -72,11 +72,7 @@
+ 
+     move-result-object p0
+ 
+-    invoke-static {p0}, Ljava/lang/Double;->parseDouble(Ljava/lang/String;)D
+-
+-    move-result-wide v0
+-
+-    goto :goto_1
++    return-object p0
+ 
+     :cond_1
+     :goto_0
+@@ -297,13 +293,11 @@
+ .end method
+ 
+ .method public isDeviceWithMicroVersion()Z
+-    .locals 0
+-
+-    invoke-static {}, Lcom/android/settings/Utils;->isTablet()Z
+-
+-    move-result p0
+-
+-    return p0
++    .locals 1
++
++    const/4 v0, 0x1
++
++    return v0
+ .end method
+ 
+ .method public bridge synthetic isPublicSlice()Z
+diff --git a/smali_classes3/com/samsung/android/settings/deviceinfo/aboutphone/ModelNameGetter.smali b/smali_classes3/com/samsung/android/settings/deviceinfo/aboutphone/ModelNameGetter.smali
+--- a/smali_classes3/com/samsung/android/settings/deviceinfo/aboutphone/ModelNameGetter.smali
++++ b/smali_classes3/com/samsung/android/settings/deviceinfo/aboutphone/ModelNameGetter.smali
+@@ -48,7 +48,7 @@
+ 
+     invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
+ 
+-    const-string v2, "ro.product.model"
++    const-string v2, "ro.boot.em.model"
+ 
+     invoke-static {v2}, Landroid/os/SystemProperties;->get(Ljava/lang/String;)Ljava/lang/String;
+ 
+diff --git a/smali_classes4/io/mesalabs/unica/settings/keybox/KeyboxLoadPreferenceController.smali b/smali_classes4/io/mesalabs/unica/settings/keybox/KeyboxLoadPreferenceController.smali
+--- a/smali_classes4/io/mesalabs/unica/settings/keybox/KeyboxLoadPreferenceController.smali
++++ b/smali_classes4/io/mesalabs/unica/settings/keybox/KeyboxLoadPreferenceController.smali
+@@ -13,7 +13,7 @@
+ 
+ # direct methods
+ .method public constructor <init>(Landroid/content/Context;Ljava/lang/String;Landroidx/fragment/app/Fragment;)V
+-    .locals 0
++    .locals 1
+ 
+     invoke-direct {p0, p1, p2}, Lcom/android/settings/core/BasePreferenceController;-><init>(Landroid/content/Context;Ljava/lang/String;)V
+ 
+@@ -23,7 +23,9 @@
+ 
+     new-instance p1, Landroidx/activity/result/contract/ActivityResultContracts$StartActivityForResult;
+ 
+-    invoke-direct {p1}, Landroidx/activity/result/contract/ActivityResultContracts$StartActivityForResult;-><init>()V
++    const/4 v0, 0x0
++
++    invoke-direct {p1, v0}, Landroidx/activity/result/contract/ActivityResultContracts$StartActivityForResult;-><init>(I)V
+ 
+     new-instance p2, Lio/mesalabs/unica/settings/keybox/KeyboxLoadPreferenceController$$ExternalSyntheticLambda0;
+ 
+diff --git a/smali_classes4/io/mesalabs/unica/settings/pif/PIFCustomPreferenceController.smali b/smali_classes4/io/mesalabs/unica/settings/pif/PIFCustomPreferenceController.smali
+--- a/smali_classes4/io/mesalabs/unica/settings/pif/PIFCustomPreferenceController.smali
++++ b/smali_classes4/io/mesalabs/unica/settings/pif/PIFCustomPreferenceController.smali
+@@ -13,7 +13,7 @@
+ 
+ # direct methods
+ .method public constructor <init>(Landroid/content/Context;Ljava/lang/String;Landroidx/fragment/app/Fragment;)V
+-    .locals 0
++    .locals 1
+ 
+     invoke-direct {p0, p1, p2}, Lcom/android/settings/core/BasePreferenceController;-><init>(Landroid/content/Context;Ljava/lang/String;)V
+ 
+@@ -23,7 +23,9 @@
+ 
+     new-instance p1, Landroidx/activity/result/contract/ActivityResultContracts$StartActivityForResult;
+ 
+-    invoke-direct {p1}, Landroidx/activity/result/contract/ActivityResultContracts$StartActivityForResult;-><init>()V
++    const/4 v0, 0x0
++
++    invoke-direct {p1, v0}, Landroidx/activity/result/contract/ActivityResultContracts$StartActivityForResult;-><init>(I)V
+ 
+     new-instance p2, Lio/mesalabs/unica/settings/pif/PIFCustomPreferenceController$$ExternalSyntheticLambda0;
+
