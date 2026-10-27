@@ -1,0 +1,67 @@
+Subject: [PATCH] Keep the glass visible with thin native tracks and ring thumbs while retaining controller drawables
+
+diff --git a/res/drawable/sec_brightness_progress_gradient_drawable.xml b/res/drawable/sec_brightness_progress_gradient_drawable.xml
+--- a/res/drawable/sec_brightness_progress_gradient_drawable.xml
++++ b/res/drawable/sec_brightness_progress_gradient_drawable.xml
+@@ -1,14 +1,14 @@
+ <?xml version="1.0" encoding="utf-8"?>
+ <layer-list
+   xmlns:android="http://schemas.android.com/apk/res/android">
+-    <item android:gravity="fill_horizontal|center" android:id="@android:id/background">
++    <item android:gravity="fill_horizontal|center" android:id="@android:id/background" android:height="12.0dp">
+         <shape android:shape="rectangle">
+-            <solid android:color="@color/tw_progress_color_control_normal" />
++            <solid android:color="@color/unica_glass_track" />
+             <corners android:radius="@dimen/sec_brightness_slider_corner_radius" />
+             <stroke android:width="@dimen/sec_brightness_slider_background_stroke_width" android:color="@color/sec_brightness_slider_background_stroke_color" />
+         </shape>
+     </item>
+-    <item android:gravity="fill_horizontal|center" android:id="@android:id/progress">
++    <item android:gravity="fill_horizontal|center" android:id="@android:id/progress" android:height="12.0dp">
+         <transition>
+             <item>
+                 <scale android:scaleWidth="100%">
+diff --git a/res/drawable/unica_glass_slider_thumb.xml b/res/drawable/unica_glass_slider_thumb.xml
+new file mode 100644
+--- /dev/null
++++ b/res/drawable/unica_glass_slider_thumb.xml
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="utf-8"?>
++<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
++    <size android:width="24.0dp" android:height="24.0dp" />
++    <solid android:color="@color/unica_glass_thumb_center" />
++    <stroke android:width="2.0dp" android:color="@color/tw_progress_color_control_activated_end" />
++</shape>
+diff --git a/res/layout/sec_quick_settings_brightness_dialog.xml b/res/layout/sec_quick_settings_brightness_dialog.xml
+--- a/res/layout/sec_quick_settings_brightness_dialog.xml
++++ b/res/layout/sec_quick_settings_brightness_dialog.xml
+@@ -4,7 +4,7 @@
+     <LinearLayout android:orientation="horizontal" android:id="@id/brightness_bar_container" android:tag="expand_anim" android:clipChildren="false" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="match_parent" style="@style/RecoilSmallAnimator">
+         <io.mesalabs.unica.glass.GlassRelativeLayout android:id="@id/slider_container" android:background="@drawable/unica_glass_capsule" android:foreground="@drawable/unica_glass_rim" android:tag="open_anim" android:layout_width="match_parent" android:layout_height="match_parent" android:paddingStart="@dimen/qs_header_bar_side_padding" android:paddingEnd="@dimen/qs_header_bar_side_padding">
+             <com.android.systemui.qs.bar.BrightnessVolumeRoundedView android:layout_width="match_parent" android:layout_height="match_parent">
+-                <com.android.systemui.settings.brightness.ToggleSeekBar android:id="@id/slider" android:background="@null" android:layout_width="match_parent" android:layout_height="match_parent" android:progressDrawable="@drawable/sec_brightness_progress_gradient_drawable" android:thumb="@null" android:layout_centerVertical="true" android:layout_alignParentStart="true" android:layout_alignParentEnd="true" android:splitTrack="false" />
++                <com.android.systemui.settings.brightness.ToggleSeekBar android:id="@id/slider" android:background="@null" android:layout_width="match_parent" android:layout_height="match_parent" android:progressDrawable="@drawable/sec_brightness_progress_gradient_drawable" android:thumb="@drawable/unica_glass_slider_thumb" android:paddingStart="44.0dp" android:paddingEnd="40.0dp" android:layout_centerVertical="true" android:layout_alignParentStart="true" android:layout_alignParentEnd="true" android:splitTrack="false" />
+             </com.android.systemui.qs.bar.BrightnessVolumeRoundedView>
+             <com.airbnb.lottie.LottieAnimationView android:id="@id/brightness_icon" android:layout_width="@dimen/sec_brightness_icon_width" android:layout_height="@dimen/sec_brightness_icon_height" android:layout_centerVertical="true" android:contentDescription="@null" android:layout_marginStart="@dimen/brightness_icons_margin" android:layout_alignParentStart="true" />
+             <include layout="@layout/sec_qs_button_brightness_detail" />
+diff --git a/res/layout/sec_volume_bar.xml b/res/layout/sec_volume_bar.xml
+--- a/res/layout/sec_volume_bar.xml
++++ b/res/layout/sec_volume_bar.xml
+@@ -3,7 +3,7 @@
+   xmlns:android="http://schemas.android.com/apk/res/android">
+     <io.mesalabs.unica.glass.GlassRelativeLayout android:id="@id/slider_container" android:background="@drawable/unica_glass_capsule" android:foreground="@drawable/unica_glass_rim" android:tag="open_anim" android:layout_width="match_parent" android:layout_height="match_parent" android:paddingStart="@dimen/qs_header_bar_side_padding" android:paddingEnd="@dimen/qs_header_bar_side_padding">
+         <com.android.systemui.qs.bar.BrightnessVolumeRoundedView android:layout_width="match_parent" android:layout_height="match_parent">
+-            <com.android.systemui.qs.bar.VolumeToggleSeekBar android:id="@id/slider" android:background="@null" android:layout_width="match_parent" android:layout_height="match_parent" android:progressDrawable="@drawable/sec_brightness_progress_gradient_drawable" android:thumb="@drawable/sec_qs_slider_thumb" android:layout_centerVertical="true" android:layout_alignParentStart="true" android:layout_alignParentEnd="true" android:splitTrack="false" />
++            <com.android.systemui.qs.bar.VolumeToggleSeekBar android:id="@id/slider" android:background="@null" android:layout_width="match_parent" android:layout_height="match_parent" android:progressDrawable="@drawable/sec_brightness_progress_gradient_drawable" android:thumb="@drawable/unica_glass_slider_thumb" android:paddingStart="44.0dp" android:paddingEnd="40.0dp" android:layout_centerVertical="true" android:layout_alignParentStart="true" android:layout_alignParentEnd="true" android:splitTrack="false" />
+         </com.android.systemui.qs.bar.BrightnessVolumeRoundedView>
+         <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true">
+             <com.android.systemui.volume.view.icon.QPVolumeIcon android:layout_gravity="center_horizontal" android:id="@id/qs_volume_button" android:layout_width="32.0dp" android:layout_height="32.0dp" android:layout_centerVertical="true" android:contentDescription="@null" android:layout_marginStart="6.0dp" android:layout_alignParentStart="true" />
+diff --git a/res/values/public.xml b/res/values/public.xml
+--- a/res/values/public.xml
++++ b/res/values/public.xml
+@@ -37407,4 +37407,5 @@
+     <public type="color" name="unica_glass_track" id="0x7e060f52" />
+     <public type="drawable" name="unica_glass_capsule" id="0x7e081702" />
+     <public type="drawable" name="unica_glass_rim" id="0x7e081703" />
++    <public type="drawable" name="unica_glass_slider_thumb" id="0x7e081704" />
+ </resources>
