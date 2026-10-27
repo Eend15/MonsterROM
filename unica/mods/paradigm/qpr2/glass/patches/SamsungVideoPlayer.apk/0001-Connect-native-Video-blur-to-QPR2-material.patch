@@ -1,0 +1,3494 @@
+Subject: [PATCH] Connect successful native Video Player blur controls to shared QPR2 material
+
+diff --git a/res/values/public.xml b/res/values/public.xml
+--- a/res/values/public.xml
++++ b/res/values/public.xml
+@@ -9112,4 +9112,15 @@
+     <public type="xml" name="m3_button_group_child_size_change" id="0x7f160002" />
+     <public type="xml" name="metadata_colorpalette" id="0x7f160006" />
+     <public type="xml" name="settings_preference" id="0x7f160007" />
++    <public type="drawable" name="unica_inline_gap_7f080044" id="0x7f080044" />
++    <public type="drawable" name="unica_inline_gap_7f080045" id="0x7f080045" />
++    <public type="drawable" name="unica_inline_gap_7f080046" id="0x7f080046" />
++    <public type="drawable" name="unica_inline_gap_7f080047" id="0x7f080047" />
++    <public type="drawable" name="unica_inline_gap_7f080048" id="0x7f080048" />
++    <public type="drawable" name="unica_inline_gap_7f080049" id="0x7f080049" />
++    <public type="drawable" name="unica_inline_gap_7f08007f" id="0x7f08007f" />
++    <public type="drawable" name="unica_inline_gap_7f080080" id="0x7f080080" />
++    <public type="drawable" name="unica_inline_gap_7f080081" id="0x7f080081" />
++    <public type="drawable" name="unica_inline_gap_7f080082" id="0x7f080082" />
++    <public type="id" name="unica_glass_surface" id="0x7f0a0517" />
+ </resources>
+diff --git a/res/values/unica_glass_surface.xml b/res/values/unica_glass_surface.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values/unica_glass_surface.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources><item type="id" name="unica_glass_surface" /></resources>
+diff --git a/res/values/unica_inline_gaps.xml b/res/values/unica_inline_gaps.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values/unica_inline_gaps.xml
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <item type="drawable" name="unica_inline_gap_7f080044">@android:color/transparent</item>
++    <item type="drawable" name="unica_inline_gap_7f080045">@android:color/transparent</item>
++    <item type="drawable" name="unica_inline_gap_7f080046">@android:color/transparent</item>
++    <item type="drawable" name="unica_inline_gap_7f080047">@android:color/transparent</item>
++    <item type="drawable" name="unica_inline_gap_7f080048">@android:color/transparent</item>
++    <item type="drawable" name="unica_inline_gap_7f080049">@android:color/transparent</item>
++    <item type="drawable" name="unica_inline_gap_7f08007f">@android:color/transparent</item>
++    <item type="drawable" name="unica_inline_gap_7f080080">@android:color/transparent</item>
++    <item type="drawable" name="unica_inline_gap_7f080081">@android:color/transparent</item>
++    <item type="drawable" name="unica_inline_gap_7f080082">@android:color/transparent</item>
++</resources>
+diff --git a/smali/lb/e.smali b/smali/lb/e.smali
+--- a/smali/lb/e.smali
++++ b/smali/lb/e.smali
+@@ -6,6 +6,8 @@
+ # direct methods
+ .method public static a(Landroid/view/View;F)V
+     .locals 3
++
++    invoke-static {p0}, Lio/mesalabs/unica/glass/GlassSurface;->clear(Landroid/view/View;)V
+ 
+     sget-boolean v0, Lh8/c;->o:Z
+ 
+@@ -65,6 +67,8 @@
+ 
+     invoke-virtual {p0, p1}, Landroid/view/View;->semSetBlurInfo(Landroid/view/SemBlurInfo;)V
+ 
++    invoke-static {p0}, Lio/mesalabs/unica/glass/GlassSurface;->applied(Landroid/view/View;)V
++
+     return-void
+ 
+     :cond_0
+diff --git a/smali_classes2/io/mesalabs/unica/glass/GlassBackdrop$1.smali b/smali_classes2/io/mesalabs/unica/glass/GlassBackdrop$1.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes2/io/mesalabs/unica/glass/GlassBackdrop$1.smali
+@@ -0,0 +1,53 @@
++.class Lio/mesalabs/unica/glass/GlassBackdrop$1;
++.super Landroid/database/ContentObserver;
++.source "GlassBackdrop.java"
++
++
++# annotations
++.annotation system Ldalvik/annotation/EnclosingClass;
++    value = Lio/mesalabs/unica/glass/GlassBackdrop;
++.end annotation
++
++.annotation system Ldalvik/annotation/InnerClass;
++    accessFlags = 0x0
++    name = null
++.end annotation
++
++
++# instance fields
++.field final synthetic this$0:Lio/mesalabs/unica/glass/GlassBackdrop;
++
++
++# direct methods
++.method constructor <init>(Lio/mesalabs/unica/glass/GlassBackdrop;Landroid/os/Handler;)V
++    .locals 0
++    .annotation system Ldalvik/annotation/MethodParameters;
++        accessFlags = {
++            0x8010,
++            0x0
++        }
++        names = {
++            null,
++            null
++        }
++    .end annotation
++
++    iput-object p1, p0, Lio/mesalabs/unica/glass/GlassBackdrop$1;->this$0:Lio/mesalabs/unica/glass/GlassBackdrop;
++
++    invoke-direct {p0, p2}, Landroid/database/ContentObserver;-><init>(Landroid/os/Handler;)V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public onChange(Z)V
++    .locals 0
++
++    iget-object p0, p0, Lio/mesalabs/unica/glass/GlassBackdrop$1;->this$0:Lio/mesalabs/unica/glass/GlassBackdrop;
++
++    # invokes: Lio/mesalabs/unica/glass/GlassBackdrop;->update()V
++    invoke-static {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->access$000(Lio/mesalabs/unica/glass/GlassBackdrop;)V
++
++    return-void
++.end method
+diff --git a/smali_classes2/io/mesalabs/unica/glass/GlassBackdrop$2.smali b/smali_classes2/io/mesalabs/unica/glass/GlassBackdrop$2.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes2/io/mesalabs/unica/glass/GlassBackdrop$2.smali
+@@ -0,0 +1,51 @@
++.class Lio/mesalabs/unica/glass/GlassBackdrop$2;
++.super Landroid/content/BroadcastReceiver;
++.source "GlassBackdrop.java"
++
++
++# annotations
++.annotation system Ldalvik/annotation/EnclosingClass;
++    value = Lio/mesalabs/unica/glass/GlassBackdrop;
++.end annotation
++
++.annotation system Ldalvik/annotation/InnerClass;
++    accessFlags = 0x0
++    name = null
++.end annotation
++
++
++# instance fields
++.field final synthetic this$0:Lio/mesalabs/unica/glass/GlassBackdrop;
++
++
++# direct methods
++.method constructor <init>(Lio/mesalabs/unica/glass/GlassBackdrop;)V
++    .locals 0
++    .annotation system Ldalvik/annotation/MethodParameters;
++        accessFlags = {
++            0x8010
++        }
++        names = {
++            null
++        }
++    .end annotation
++
++    iput-object p1, p0, Lio/mesalabs/unica/glass/GlassBackdrop$2;->this$0:Lio/mesalabs/unica/glass/GlassBackdrop;
++
++    invoke-direct {p0}, Landroid/content/BroadcastReceiver;-><init>()V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public onReceive(Landroid/content/Context;Landroid/content/Intent;)V
++    .locals 0
++
++    iget-object p0, p0, Lio/mesalabs/unica/glass/GlassBackdrop$2;->this$0:Lio/mesalabs/unica/glass/GlassBackdrop;
++
++    # invokes: Lio/mesalabs/unica/glass/GlassBackdrop;->update()V
++    invoke-static {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->access$000(Lio/mesalabs/unica/glass/GlassBackdrop;)V
++
++    return-void
++.end method
+diff --git a/smali_classes2/io/mesalabs/unica/glass/GlassBackdrop.smali b/smali_classes2/io/mesalabs/unica/glass/GlassBackdrop.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes2/io/mesalabs/unica/glass/GlassBackdrop.smali
+@@ -0,0 +1,1317 @@
++.class public final Lio/mesalabs/unica/glass/GlassBackdrop;
++.super Ljava/lang/Object;
++.source "GlassBackdrop.java"
++
++# interfaces
++.implements Landroid/view/View$OnAttachStateChangeListener;
++.implements Landroid/view/View$OnLayoutChangeListener;
++.implements Landroid/app/UiModeManager$ContrastChangeListener;
++
++
++# static fields
++.field private static final PROGRAM:Ljava/lang/String; = "uniform shader backdrop; uniform float2 size; uniform float density; uniform float contrast;\nhalf4 main(float2 xy) {\n float2 halfSize=max(size*0.5,float2(0.5)); float2 p=xy-halfSize;\n float radius=min(halfSize.x,halfSize.y); float2 axis=max(halfSize-float2(radius),float2(0.0));\n float2 nearest=clamp(p,-axis,axis); float2 radial=p-nearest;\n float distance=length(radial); float2 normal=radial/max(distance,0.001);\n float sdf=distance-radius; float mask=1.0-smoothstep(-0.7,0.7,sdf);\n float band=1.0-smoothstep(0.0,max(6.0*density,1.0),abs(sdf));\n float strength=1.0-clamp(contrast,0.0,1.0); float bend=band*band*1.25*density*strength; float2 warped=xy-normal*bend;\n half4 base=backdrop.eval(xy); half4 lens=backdrop.eval(warped);\n half4 red=backdrop.eval(warped-normal*0.04*density*band*strength);\n half4 blue=backdrop.eval(warped+normal*0.04*density*band*strength);\n half alpha=lens.a; half3 rgb=clamp(half3(red.r,lens.g,blue.b),half3(0.0),half3(alpha));\n return mix(base,half4(rgb,alpha),half(mask)); }"
++
++.field private static unavailable:Z
++
++
++# instance fields
++.field private applied:Z
++
++.field private clipChanged:Z
++
++.field private contrast:F
++
++.field private contrastListening:Z
++
++.field private depthChanged:Z
++
++.field private disposed:Z
++
++.field private effect:Landroid/graphics/RenderEffect;
++
++.field private height:I
++
++.field private materialElevation:F
++
++.field private final needsBlur:Z
++
++.field private final observer:Landroid/database/ContentObserver;
++
++.field private observing:Z
++
++.field private final originalAmbientShadow:I
++
++.field private final originalClipToOutline:Z
++
++.field private final originalElevation:F
++
++.field private final originalSpotShadow:I
++
++.field private final owner:Landroid/graphics/drawable/Drawable;
++
++.field private final powerReceiver:Landroid/content/BroadcastReceiver;
++
++.field private receiving:Z
++
++.field private final shader:Landroid/graphics/RuntimeShader;
++
++.field private uiMode:Landroid/app/UiModeManager;
++
++.field private final view:Landroid/view/View;
++
++.field private width:I
++
++
++# direct methods
++.method private constructor <init>(Landroid/view/View;Landroid/graphics/drawable/Drawable;Z)V
++    .locals 3
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    const/high16 v0, -0x40800000    # -1.0f
++
++    iput v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->contrast:F
++
++    const/4 v0, -0x1
++
++    iput v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->width:I
++
++    iput v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->height:I
++
++    new-instance v0, Lio/mesalabs/unica/glass/GlassBackdrop$1;
++
++    new-instance v1, Landroid/os/Handler;
++
++    invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
++
++    move-result-object v2
++
++    invoke-direct {v1, v2}, Landroid/os/Handler;-><init>(Landroid/os/Looper;)V
++
++    invoke-direct {v0, p0, v1}, Lio/mesalabs/unica/glass/GlassBackdrop$1;-><init>(Lio/mesalabs/unica/glass/GlassBackdrop;Landroid/os/Handler;)V
++
++    iput-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->observer:Landroid/database/ContentObserver;
++
++    new-instance v0, Lio/mesalabs/unica/glass/GlassBackdrop$2;
++
++    invoke-direct {v0, p0}, Lio/mesalabs/unica/glass/GlassBackdrop$2;-><init>(Lio/mesalabs/unica/glass/GlassBackdrop;)V
++
++    iput-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->powerReceiver:Landroid/content/BroadcastReceiver;
++
++    iput-object p1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    iput-object p2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->owner:Landroid/graphics/drawable/Drawable;
++
++    iput-boolean p3, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->needsBlur:Z
++
++    invoke-virtual {p1}, Landroid/view/View;->getClipToOutline()Z
++
++    move-result p2
++
++    iput-boolean p2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->originalClipToOutline:Z
++
++    invoke-virtual {p1}, Landroid/view/View;->getElevation()F
++
++    move-result p2
++
++    iput p2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->originalElevation:F
++
++    invoke-virtual {p1}, Landroid/view/View;->getOutlineAmbientShadowColor()I
++
++    move-result p2
++
++    iput p2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->originalAmbientShadow:I
++
++    invoke-virtual {p1}, Landroid/view/View;->getOutlineSpotShadowColor()I
++
++    move-result p2
++
++    iput p2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->originalSpotShadow:I
++
++    new-instance p2, Landroid/graphics/RuntimeShader;
++
++    const-string p3, "uniform shader backdrop; uniform float2 size; uniform float density; uniform float contrast;\nhalf4 main(float2 xy) {\n float2 halfSize=max(size*0.5,float2(0.5)); float2 p=xy-halfSize;\n float radius=min(halfSize.x,halfSize.y); float2 axis=max(halfSize-float2(radius),float2(0.0));\n float2 nearest=clamp(p,-axis,axis); float2 radial=p-nearest;\n float distance=length(radial); float2 normal=radial/max(distance,0.001);\n float sdf=distance-radius; float mask=1.0-smoothstep(-0.7,0.7,sdf);\n float band=1.0-smoothstep(0.0,max(6.0*density,1.0),abs(sdf));\n float strength=1.0-clamp(contrast,0.0,1.0); float bend=band*band*1.25*density*strength; float2 warped=xy-normal*bend;\n half4 base=backdrop.eval(xy); half4 lens=backdrop.eval(warped);\n half4 red=backdrop.eval(warped-normal*0.04*density*band*strength);\n half4 blue=backdrop.eval(warped+normal*0.04*density*band*strength);\n half alpha=lens.a; half3 rgb=clamp(half3(red.r,lens.g,blue.b),half3(0.0),half3(alpha));\n return mix(base,half4(rgb,alpha),half(mask)); }"
++
++    invoke-direct {p2, p3}, Landroid/graphics/RuntimeShader;-><init>(Ljava/lang/String;)V
++
++    iput-object p2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->shader:Landroid/graphics/RuntimeShader;
++
++    invoke-virtual {p1}, Landroid/view/View;->getResources()Landroid/content/res/Resources;
++
++    move-result-object p0
++
++    invoke-virtual {p0}, Landroid/content/res/Resources;->getDisplayMetrics()Landroid/util/DisplayMetrics;
++
++    move-result-object p0
++
++    iget p0, p0, Landroid/util/DisplayMetrics;->density:F
++
++    const/high16 p1, 0x3f000000    # 0.5f
++
++    invoke-static {p1, p0}, Ljava/lang/Math;->max(FF)F
++
++    move-result p0
++
++    const-string p1, "density"
++
++    invoke-virtual {p2, p1, p0}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;F)V
++
++    return-void
++.end method
++
++.method static synthetic access$000(Lio/mesalabs/unica/glass/GlassBackdrop;)V
++    .locals 0
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->update()V
++
++    return-void
++.end method
++
++.method private allowed()Z
++    .locals 6
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    const-class v1, Landroid/os/PowerManager;
++
++    invoke-virtual {v0, v1}, Landroid/content/Context;->getSystemService(Ljava/lang/Class;)Ljava/lang/Object;
++
++    move-result-object v0
++
++    check-cast v0, Landroid/os/PowerManager;
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v1}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v1
++
++    invoke-virtual {v1}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v1
++
++    const-string v2, "current_sec_active_themepackage"
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->policyUser()I
++
++    move-result v3
++
++    invoke-static {v1, v2, v3}, Landroid/provider/Settings$System;->getStringForUser(Landroid/content/ContentResolver;Ljava/lang/String;I)Ljava/lang/String;
++
++    move-result-object v1
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v2}, Landroid/view/View;->isAttachedToWindow()Z
++
++    move-result v2
++
++    const/4 v3, 0x0
++
++    if-eqz v2, :cond_7f
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v2}, Landroid/view/View;->isHardwareAccelerated()Z
++
++    move-result v2
++
++    if-eqz v2, :cond_7f
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v2}, Landroid/view/View;->getBackground()Landroid/graphics/drawable/Drawable;
++
++    move-result-object v2
++
++    iget-object v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->owner:Landroid/graphics/drawable/Drawable;
++
++    if-ne v2, v4, :cond_7f
++
++    if-eqz v0, :cond_45
++
++    invoke-virtual {v0}, Landroid/os/PowerManager;->isPowerSaveMode()Z
++
++    move-result v0
++
++    if-nez v0, :cond_7f
++
++    :cond_45
++    const-string v0, "sesl.debug.blurcompat.blur_force_off"
++
++    invoke-static {v0, v3}, Landroid/os/SystemProperties;->getInt(Ljava/lang/String;I)I
++
++    move-result v0
++
++    const/4 v2, 0x1
++
++    if-eq v0, v2, :cond_7f
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v0
++
++    const-string v4, "accessibility_reduce_transparency"
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->policyUser()I
++
++    move-result v5
++
++    invoke-static {v0, v4, v3, v5}, Landroid/provider/Settings$System;->getIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)I
++
++    move-result v0
++
++    if-nez v0, :cond_7f
++
++    iget-object p0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {p0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object p0
++
++    invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object p0
++
++    const-string v0, "disable_window_blurs"
++
++    invoke-static {p0, v0, v3}, Landroid/provider/Settings$Global;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
++
++    move-result p0
++
++    if-nez p0, :cond_7f
++
++    if-eqz v1, :cond_7e
++
++    invoke-virtual {v1}, Ljava/lang/String;->isEmpty()Z
++
++    move-result p0
++
++    if-eqz p0, :cond_7f
++
++    :cond_7e
++    return v2
++
++    :cond_7f
++    return v3
++.end method
++
++.method private clear()V
++    .locals 4
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->applied:Z
++
++    const-string v1, "UN1CA-Backdrop"
++
++    if-eqz v0, :cond_13
++
++    :try_start_6
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    const/4 v2, 0x0
++
++    invoke-virtual {v0, v2}, Landroid/view/View;->setBackdropRenderEffect(Landroid/graphics/RenderEffect;)V
++    :try_end_c
++    .catch Ljava/lang/RuntimeException; {:try_start_6 .. :try_end_c} :catch_d
++    .catch Ljava/lang/LinkageError; {:try_start_6 .. :try_end_c} :catch_d
++
++    goto :goto_13
++
++    :catch_d
++    move-exception v0
++
++    const-string v2, "Backdrop teardown rejected"
++
++    invoke-static {v1, v2, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    :cond_13
++    :goto_13
++    const/4 v0, 0x0
++
++    iput-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->applied:Z
++
++    iget-boolean v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->needsBlur:Z
++
++    if-eqz v2, :cond_26
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->owner:Landroid/graphics/drawable/Drawable;
++
++    instance-of v3, v2, Lio/mesalabs/unica/glass/GlassCapsule;
++
++    if-eqz v3, :cond_26
++
++    check-cast v2, Lio/mesalabs/unica/glass/GlassCapsule;
++
++    const/4 v3, 0x1
++
++    invoke-virtual {v2, v3}, Lio/mesalabs/unica/glass/GlassCapsule;->setOpaqueFallback(Z)V
++
++    :cond_26
++    iget-boolean v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->clipChanged:Z
++
++    if-eqz v2, :cond_42
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v2}, Landroid/view/View;->getBackground()Landroid/graphics/drawable/Drawable;
++
++    move-result-object v2
++
++    iget-object v3, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->owner:Landroid/graphics/drawable/Drawable;
++
++    if-ne v2, v3, :cond_42
++
++    :try_start_34
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    iget-boolean v3, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->originalClipToOutline:Z
++
++    invoke-virtual {v2, v3}, Landroid/view/View;->setClipToOutline(Z)V
++    :try_end_3b
++    .catch Ljava/lang/RuntimeException; {:try_start_34 .. :try_end_3b} :catch_3c
++
++    goto :goto_42
++
++    :catch_3c
++    move-exception v2
++
++    const-string v3, "Clip restoration rejected"
++
++    invoke-static {v1, v3, v2}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    :cond_42
++    :goto_42
++    iput-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->clipChanged:Z
++
++    iget-boolean v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->depthChanged:Z
++
++    if-eqz v1, :cond_81
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v1}, Landroid/view/View;->getElevation()F
++
++    move-result v1
++
++    iget v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->materialElevation:F
++
++    invoke-static {v1, v2}, Ljava/lang/Float;->compare(FF)I
++
++    move-result v1
++
++    if-nez v1, :cond_5d
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    iget v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->originalElevation:F
++
++    invoke-virtual {v1, v2}, Landroid/view/View;->setElevation(F)V
++
++    :cond_5d
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v1}, Landroid/view/View;->getOutlineAmbientShadowColor()I
++
++    move-result v1
++
++    const/high16 v2, 0x22000000
++
++    if-ne v1, v2, :cond_6e
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    iget v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->originalAmbientShadow:I
++
++    invoke-virtual {v1, v2}, Landroid/view/View;->setOutlineAmbientShadowColor(I)V
++
++    :cond_6e
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v1}, Landroid/view/View;->getOutlineSpotShadowColor()I
++
++    move-result v1
++
++    const/high16 v2, 0x44000000    # 512.0f
++
++    if-ne v1, v2, :cond_7f
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    iget v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->originalSpotShadow:I
++
++    invoke-virtual {v1, v2}, Landroid/view/View;->setOutlineSpotShadowColor(I)V
++
++    :cond_7f
++    iput-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->depthChanged:Z
++
++    :cond_81
++    return-void
++.end method
++
++.method public static install(Landroid/view/View;Landroid/graphics/drawable/Drawable;)Lio/mesalabs/unica/glass/GlassBackdrop;
++    .locals 1
++
++    const/4 v0, 0x0
++
++    invoke-static {p0, p1, v0}, Lio/mesalabs/unica/glass/GlassBackdrop;->install(Landroid/view/View;Landroid/graphics/drawable/Drawable;Z)Lio/mesalabs/unica/glass/GlassBackdrop;
++
++    move-result-object p0
++
++    return-object p0
++.end method
++
++.method public static install(Landroid/view/View;Landroid/graphics/drawable/Drawable;Z)Lio/mesalabs/unica/glass/GlassBackdrop;
++    .locals 2
++
++    sget-boolean v0, Lio/mesalabs/unica/glass/GlassBackdrop;->unavailable:Z
++
++    const/4 v1, 0x0
++
++    if-nez v0, :cond_3d
++
++    if-eqz p1, :cond_3d
++
++    invoke-virtual {p0}, Landroid/view/View;->getBackground()Landroid/graphics/drawable/Drawable;
++
++    move-result-object v0
++
++    if-ne v0, p1, :cond_3d
++
++    :try_start_d
++    new-instance v0, Lio/mesalabs/unica/glass/GlassBackdrop;
++
++    invoke-direct {v0, p0, p1, p2}, Lio/mesalabs/unica/glass/GlassBackdrop;-><init>(Landroid/view/View;Landroid/graphics/drawable/Drawable;Z)V
++    :try_end_12
++    .catch Ljava/lang/RuntimeException; {:try_start_d .. :try_end_12} :catch_2c
++    .catch Ljava/lang/LinkageError; {:try_start_d .. :try_end_12} :catch_2c
++
++    :try_start_12
++    invoke-virtual {p0, v0}, Landroid/view/View;->addOnAttachStateChangeListener(Landroid/view/View$OnAttachStateChangeListener;)V
++
++    invoke-virtual {p0, v0}, Landroid/view/View;->addOnLayoutChangeListener(Landroid/view/View$OnLayoutChangeListener;)V
++
++    invoke-virtual {p0}, Landroid/view/View;->isAttachedToWindow()Z
++
++    move-result p0
++
++    if-eqz p0, :cond_21
++
++    invoke-direct {v0}, Lio/mesalabs/unica/glass/GlassBackdrop;->subscribe()V
++
++    :cond_21
++    invoke-direct {v0}, Lio/mesalabs/unica/glass/GlassBackdrop;->update()V
++
++    iget-boolean p0, v0, Lio/mesalabs/unica/glass/GlassBackdrop;->disposed:Z
++    :try_end_26
++    .catch Ljava/lang/RuntimeException; {:try_start_12 .. :try_end_26} :catch_2a
++    .catch Ljava/lang/LinkageError; {:try_start_12 .. :try_end_26} :catch_2a
++
++    if-eqz p0, :cond_29
++
++    return-object v1
++
++    :cond_29
++    return-object v0
++
++    :catch_2a
++    move-exception p0
++
++    goto :goto_2e
++
++    :catch_2c
++    move-exception p0
++
++    move-object v0, v1
++
++    :goto_2e
++    if-eqz v0, :cond_33
++
++    invoke-virtual {v0}, Lio/mesalabs/unica/glass/GlassBackdrop;->dispose()V
++
++    :cond_33
++    const/4 p1, 0x1
++
++    sput-boolean p1, Lio/mesalabs/unica/glass/GlassBackdrop;->unavailable:Z
++
++    const-string p1, "UN1CA-Backdrop"
++
++    const-string p2, "Native backdrop unavailable; existing Samsung blur/rim retained"
++
++    invoke-static {p1, p2, p0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    :cond_3d
++    return-object v1
++.end method
++
++.method private policyUser()I
++    .locals 2
++
++    iget-object p0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {p0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object p0
++
++    const-string v0, "com.android.systemui"
++
++    invoke-virtual {p0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
++
++    move-result-object v1
++
++    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v0
++
++    if-eqz v0, :cond_17
++
++    invoke-static {}, Landroid/app/ActivityManager;->getCurrentUser()I
++
++    move-result p0
++
++    return p0
++
++    :cond_17
++    invoke-virtual {p0}, Landroid/content/Context;->getUserId()I
++
++    move-result p0
++
++    return p0
++.end method
++
++.method private subscribe()V
++    .locals 5
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->disposed:Z
++
++    if-nez v0, :cond_6b
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->observing:Z
++
++    if-nez v0, :cond_6b
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    const-string v1, "accessibility_reduce_transparency"
++
++    invoke-static {v1}, Landroid/provider/Settings$System;->getUriFor(Ljava/lang/String;)Landroid/net/Uri;
++
++    move-result-object v1
++
++    invoke-direct {p0, v1}, Lio/mesalabs/unica/glass/GlassBackdrop;->watch(Landroid/net/Uri;)V
++
++    const/4 v1, 0x1
++
++    iput-boolean v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->observing:Z
++
++    const-string v2, "current_sec_active_themepackage"
++
++    invoke-static {v2}, Landroid/provider/Settings$System;->getUriFor(Ljava/lang/String;)Landroid/net/Uri;
++
++    move-result-object v2
++
++    invoke-direct {p0, v2}, Lio/mesalabs/unica/glass/GlassBackdrop;->watch(Landroid/net/Uri;)V
++
++    const-string v2, "disable_window_blurs"
++
++    invoke-static {v2}, Landroid/provider/Settings$Global;->getUriFor(Ljava/lang/String;)Landroid/net/Uri;
++
++    move-result-object v2
++
++    invoke-direct {p0, v2}, Lio/mesalabs/unica/glass/GlassBackdrop;->watch(Landroid/net/Uri;)V
++
++    const-string v2, "contrast_level"
++
++    invoke-static {v2}, Landroid/provider/Settings$Secure;->getUriFor(Ljava/lang/String;)Landroid/net/Uri;
++
++    move-result-object v2
++
++    invoke-direct {p0, v2}, Lio/mesalabs/unica/glass/GlassBackdrop;->watch(Landroid/net/Uri;)V
++
++    new-instance v2, Landroid/content/IntentFilter;
++
++    sget-object v3, Landroid/os/PowerManager;->ACTION_POWER_SAVE_MODE_CHANGED:Ljava/lang/String;
++
++    invoke-direct {v2, v3}, Landroid/content/IntentFilter;-><init>(Ljava/lang/String;)V
++
++    const-string v3, "com.android.systemui"
++
++    invoke-virtual {v0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
++
++    move-result-object v4
++
++    invoke-virtual {v3, v4}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v3
++
++    if-eqz v3, :cond_4d
++
++    sget-object v3, Landroid/content/Intent;->ACTION_USER_SWITCHED:Ljava/lang/String;
++
++    invoke-virtual {v2, v3}, Landroid/content/IntentFilter;->addAction(Ljava/lang/String;)V
++
++    :cond_4d
++    iget-object v3, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->powerReceiver:Landroid/content/BroadcastReceiver;
++
++    sget v4, Landroid/content/Context;->RECEIVER_NOT_EXPORTED:I
++
++    invoke-virtual {v0, v3, v2, v4}, Landroid/content/Context;->registerReceiver(Landroid/content/BroadcastReceiver;Landroid/content/IntentFilter;I)Landroid/content/Intent;
++
++    iput-boolean v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->receiving:Z
++
++    const-class v2, Landroid/app/UiModeManager;
++
++    invoke-virtual {v0, v2}, Landroid/content/Context;->getSystemService(Ljava/lang/Class;)Ljava/lang/Object;
++
++    move-result-object v2
++
++    check-cast v2, Landroid/app/UiModeManager;
++
++    iput-object v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->uiMode:Landroid/app/UiModeManager;
++
++    if-eqz v2, :cond_6b
++
++    invoke-virtual {v0}, Landroid/content/Context;->getMainExecutor()Ljava/util/concurrent/Executor;
++
++    move-result-object v0
++
++    invoke-virtual {v2, v0, p0}, Landroid/app/UiModeManager;->addContrastChangeListener(Ljava/util/concurrent/Executor;Landroid/app/UiModeManager$ContrastChangeListener;)V
++
++    iput-boolean v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->contrastListening:Z
++
++    :cond_6b
++    return-void
++.end method
++
++.method private unsubscribe()V
++    .locals 4
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->contrastListening:Z
++
++    const-string v1, "UN1CA-Backdrop"
++
++    const/4 v2, 0x0
++
++    if-eqz v0, :cond_15
++
++    iput-boolean v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->contrastListening:Z
++
++    :try_start_9
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->uiMode:Landroid/app/UiModeManager;
++
++    invoke-virtual {v0, p0}, Landroid/app/UiModeManager;->removeContrastChangeListener(Landroid/app/UiModeManager$ContrastChangeListener;)V
++    :try_end_e
++    .catch Ljava/lang/RuntimeException; {:try_start_9 .. :try_end_e} :catch_f
++
++    goto :goto_15
++
++    :catch_f
++    move-exception v0
++
++    const-string v3, "Contrast listener teardown rejected"
++
++    invoke-static {v1, v3, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    :cond_15
++    :goto_15
++    iget-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->receiving:Z
++
++    if-eqz v0, :cond_2d
++
++    iput-boolean v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->receiving:Z
++
++    :try_start_1b
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    iget-object v3, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->powerReceiver:Landroid/content/BroadcastReceiver;
++
++    invoke-virtual {v0, v3}, Landroid/content/Context;->unregisterReceiver(Landroid/content/BroadcastReceiver;)V
++    :try_end_26
++    .catch Ljava/lang/RuntimeException; {:try_start_1b .. :try_end_26} :catch_27
++
++    goto :goto_2d
++
++    :catch_27
++    move-exception v0
++
++    const-string v3, "Power receiver teardown rejected"
++
++    invoke-static {v1, v3, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    :cond_2d
++    :goto_2d
++    iget-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->observing:Z
++
++    if-eqz v0, :cond_49
++
++    iput-boolean v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->observing:Z
++
++    :try_start_33
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v0
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->observer:Landroid/database/ContentObserver;
++
++    invoke-virtual {v0, v2}, Landroid/content/ContentResolver;->unregisterContentObserver(Landroid/database/ContentObserver;)V
++    :try_end_42
++    .catch Ljava/lang/RuntimeException; {:try_start_33 .. :try_end_42} :catch_43
++
++    goto :goto_49
++
++    :catch_43
++    move-exception v0
++
++    const-string v2, "Policy observer teardown rejected"
++
++    invoke-static {v1, v2, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    :cond_49
++    :goto_49
++    const/4 v0, 0x0
++
++    iput-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->uiMode:Landroid/app/UiModeManager;
++
++    return-void
++.end method
++
++.method private update()V
++    .locals 10
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->disposed:Z
++
++    if-nez v0, :cond_139
++
++    sget-boolean v0, Lio/mesalabs/unica/glass/GlassBackdrop;->unavailable:Z
++
++    if-nez v0, :cond_150
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v0}, Landroid/view/View;->getBackground()Landroid/graphics/drawable/Drawable;
++
++    move-result-object v0
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->owner:Landroid/graphics/drawable/Drawable;
++
++    if-ne v0, v1, :cond_150
++
++    const/4 v0, 0x1
++
++    :try_start_13
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v1}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v1
++
++    invoke-virtual {v1}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v1
++
++    const-string v2, "contrast_level"
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->policyUser()I
++
++    move-result v3
++
++    const/4 v4, 0x0
++
++    invoke-static {v1, v2, v4, v3}, Landroid/provider/Settings$Secure;->getFloatForUser(Landroid/content/ContentResolver;Ljava/lang/String;FI)F
++
++    move-result v1
++
++    const/high16 v2, 0x3f800000    # 1.0f
++
++    invoke-static {v2, v1}, Ljava/lang/Math;->min(FF)F
++
++    move-result v1
++
++    invoke-static {v4, v1}, Ljava/lang/Math;->max(FF)F
++
++    move-result v1
++
++    invoke-static {v1}, Ljava/lang/Float;->isFinite(F)Z
++
++    move-result v3
++
++    if-eqz v3, :cond_39
++
++    move v4, v1
++
++    :cond_39
++    iget v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->contrast:F
++
++    cmpl-float v1, v1, v4
++
++    const/4 v3, 0x0
++
++    if-eqz v1, :cond_42
++
++    move v1, v0
++
++    goto :goto_43
++
++    :cond_42
++    move v1, v3
++
++    :goto_43
++    if-eqz v1, :cond_6c
++
++    iput v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->contrast:F
++
++    iget-object v5, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->shader:Landroid/graphics/RuntimeShader;
++
++    const-string v6, "contrast"
++
++    invoke-virtual {v5, v6, v4}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;F)V
++
++    iget-object v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->owner:Landroid/graphics/drawable/Drawable;
++
++    instance-of v5, v4, Lio/mesalabs/unica/glass/GlassCapsule;
++
++    if-eqz v5, :cond_5b
++
++    check-cast v4, Lio/mesalabs/unica/glass/GlassCapsule;
++
++    iget v5, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->contrast:F
++
++    invoke-virtual {v4, v5}, Lio/mesalabs/unica/glass/GlassCapsule;->setUiContrast(F)V
++
++    :cond_5b
++    iget-object v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v4}, Landroid/view/View;->getForeground()Landroid/graphics/drawable/Drawable;
++
++    move-result-object v4
++
++    instance-of v5, v4, Lio/mesalabs/unica/glass/GlassCapsule;
++
++    if-eqz v5, :cond_6c
++
++    check-cast v4, Lio/mesalabs/unica/glass/GlassCapsule;
++
++    iget v5, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->contrast:F
++
++    invoke-virtual {v4, v5}, Lio/mesalabs/unica/glass/GlassCapsule;->setUiContrast(F)V
++
++    :cond_6c
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->allowed()Z
++
++    move-result v4
++
++    if-eqz v4, :cond_13a
++
++    iget v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->contrast:F
++
++    cmpl-float v4, v4, v2
++
++    if-gez v4, :cond_13a
++
++    iget-object v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v4}, Landroid/view/View;->getWidth()I
++
++    move-result v4
++
++    if-lez v4, :cond_13a
++
++    iget-object v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v4}, Landroid/view/View;->getHeight()I
++
++    move-result v4
++
++    if-lez v4, :cond_13a
++
++    iget-object v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v4}, Landroid/view/View;->getWidth()I
++
++    move-result v4
++
++    iget-object v5, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v5}, Landroid/view/View;->getHeight()I
++
++    move-result v5
++
++    iget v6, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->width:I
++
++    if-ne v6, v4, :cond_9e
++
++    iget v6, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->height:I
++
++    if-ne v6, v5, :cond_9e
++
++    move v6, v3
++
++    goto :goto_9f
++
++    :cond_9e
++    move v6, v0
++
++    :goto_9f
++    const/high16 v7, 0x40c00000    # 6.0f
++
++    if-eqz v6, :cond_b1
++
++    iput v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->width:I
++
++    iput v5, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->height:I
++
++    iget-object v8, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->shader:Landroid/graphics/RuntimeShader;
++
++    const-string v9, "size"
++
++    int-to-float v4, v4
++
++    int-to-float v5, v5
++
++    invoke-virtual {v8, v9, v4, v5}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;FF)V
++
++    goto :goto_b7
++
++    :cond_b1
++    if-nez v1, :cond_b7
++
++    iget-object v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->effect:Landroid/graphics/RenderEffect;
++
++    if-nez v4, :cond_e4
++
++    :cond_b7
++    :goto_b7
++    iget-object v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->shader:Landroid/graphics/RuntimeShader;
++
++    const-string v5, "backdrop"
++
++    invoke-static {v4, v5}, Landroid/graphics/RenderEffect;->createRuntimeShaderEffect(Landroid/graphics/RuntimeShader;Ljava/lang/String;)Landroid/graphics/RenderEffect;
++
++    move-result-object v4
++
++    iput-object v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->effect:Landroid/graphics/RenderEffect;
++
++    iget-boolean v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->needsBlur:Z
++
++    if-eqz v4, :cond_e4
++
++    iget-object v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v4}, Landroid/view/View;->getResources()Landroid/content/res/Resources;
++
++    move-result-object v4
++
++    invoke-virtual {v4}, Landroid/content/res/Resources;->getDisplayMetrics()Landroid/util/DisplayMetrics;
++
++    move-result-object v4
++
++    iget v4, v4, Landroid/util/DisplayMetrics;->density:F
++
++    mul-float/2addr v4, v7
++
++    invoke-static {v2, v4}, Ljava/lang/Math;->max(FF)F
++
++    move-result v2
++
++    iget-object v4, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->effect:Landroid/graphics/RenderEffect;
++
++    sget-object v5, Landroid/graphics/Shader$TileMode;->CLAMP:Landroid/graphics/Shader$TileMode;
++
++    invoke-static {v2, v2, v5}, Landroid/graphics/RenderEffect;->createBlurEffect(FFLandroid/graphics/Shader$TileMode;)Landroid/graphics/RenderEffect;
++
++    move-result-object v2
++
++    invoke-static {v4, v2}, Landroid/graphics/RenderEffect;->createChainEffect(Landroid/graphics/RenderEffect;Landroid/graphics/RenderEffect;)Landroid/graphics/RenderEffect;
++
++    move-result-object v2
++
++    iput-object v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->effect:Landroid/graphics/RenderEffect;
++
++    :cond_e4
++    iget-boolean v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->applied:Z
++
++    if-eqz v2, :cond_ec
++
++    if-nez v6, :cond_ec
++
++    if-eqz v1, :cond_fc
++
++    :cond_ec
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v1, v0}, Landroid/view/View;->setClipToOutline(Z)V
++
++    iput-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->clipChanged:Z
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->effect:Landroid/graphics/RenderEffect;
++
++    invoke-virtual {v1, v2}, Landroid/view/View;->setBackdropRenderEffect(Landroid/graphics/RenderEffect;)V
++
++    iput-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->applied:Z
++
++    :cond_fc
++    iget-boolean v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->depthChanged:Z
++
++    if-nez v1, :cond_12a
++
++    iget v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->originalElevation:F
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v2}, Landroid/view/View;->getResources()Landroid/content/res/Resources;
++
++    move-result-object v2
++
++    invoke-virtual {v2}, Landroid/content/res/Resources;->getDisplayMetrics()Landroid/util/DisplayMetrics;
++
++    move-result-object v2
++
++    iget v2, v2, Landroid/util/DisplayMetrics;->density:F
++
++    mul-float/2addr v2, v7
++
++    invoke-static {v1, v2}, Ljava/lang/Math;->max(FF)F
++
++    move-result v1
++
++    iput v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->materialElevation:F
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v2, v1}, Landroid/view/View;->setElevation(F)V
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    const/high16 v2, 0x22000000
++
++    invoke-virtual {v1, v2}, Landroid/view/View;->setOutlineAmbientShadowColor(I)V
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    const/high16 v2, 0x44000000    # 512.0f
++
++    invoke-virtual {v1, v2}, Landroid/view/View;->setOutlineSpotShadowColor(I)V
++
++    iput-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->depthChanged:Z
++
++    :cond_12a
++    iget-boolean v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->needsBlur:Z
++
++    if-eqz v1, :cond_139
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->owner:Landroid/graphics/drawable/Drawable;
++
++    instance-of v2, v1, Lio/mesalabs/unica/glass/GlassCapsule;
++
++    if-eqz v2, :cond_139
++
++    check-cast v1, Lio/mesalabs/unica/glass/GlassCapsule;
++
++    invoke-virtual {v1, v3}, Lio/mesalabs/unica/glass/GlassCapsule;->setOpaqueFallback(Z)V
++
++    :cond_139
++    return-void
++
++    :cond_13a
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->clear()V
++    :try_end_13d
++    .catch Ljava/lang/RuntimeException; {:try_start_13 .. :try_end_13d} :catch_13e
++    .catch Ljava/lang/LinkageError; {:try_start_13 .. :try_end_13d} :catch_13e
++
++    return-void
++
++    :catch_13e
++    move-exception v1
++
++    instance-of v2, v1, Ljava/lang/LinkageError;
++
++    if-eqz v2, :cond_145
++
++    sput-boolean v0, Lio/mesalabs/unica/glass/GlassBackdrop;->unavailable:Z
++
++    :cond_145
++    invoke-virtual {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->dispose()V
++
++    const-string p0, "UN1CA-Backdrop"
++
++    const-string v0, "Backdrop rejected; fallback retained"
++
++    invoke-static {p0, v0, v1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    return-void
++
++    :cond_150
++    invoke-virtual {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->dispose()V
++
++    return-void
++.end method
++
++.method private watch(Landroid/net/Uri;)V
++    .locals 3
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
++
++    move-result-object v0
++
++    const-string v1, "com.android.systemui"
++
++    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v0
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    const/4 v2, 0x0
++
++    if-eqz v0, :cond_24
++
++    invoke-virtual {v1}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v0
++
++    iget-object p0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->observer:Landroid/database/ContentObserver;
++
++    const/4 v1, -0x1
++
++    invoke-virtual {v0, p1, v2, p0, v1}, Landroid/content/ContentResolver;->registerContentObserver(Landroid/net/Uri;ZLandroid/database/ContentObserver;I)V
++
++    return-void
++
++    :cond_24
++    invoke-virtual {v1}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v0
++
++    iget-object p0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->observer:Landroid/database/ContentObserver;
++
++    invoke-virtual {v0, p1, v2, p0}, Landroid/content/ContentResolver;->registerContentObserver(Landroid/net/Uri;ZLandroid/database/ContentObserver;)V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public dispose()V
++    .locals 1
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->disposed:Z
++
++    if-eqz v0, :cond_5
++
++    return-void
++
++    :cond_5
++    const/4 v0, 0x1
++
++    iput-boolean v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->disposed:Z
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->clear()V
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->unsubscribe()V
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v0, p0}, Landroid/view/View;->removeOnAttachStateChangeListener(Landroid/view/View$OnAttachStateChangeListener;)V
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassBackdrop;->view:Landroid/view/View;
++
++    invoke-virtual {v0, p0}, Landroid/view/View;->removeOnLayoutChangeListener(Landroid/view/View$OnLayoutChangeListener;)V
++
++    return-void
++.end method
++
++.method public onContrastChanged(F)V
++    .locals 0
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->update()V
++
++    return-void
++.end method
++
++.method public onLayoutChange(Landroid/view/View;IIIIIIII)V
++    .locals 0
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->update()V
++
++    return-void
++.end method
++
++.method public onViewAttachedToWindow(Landroid/view/View;)V
++    .locals 1
++
++    :try_start_0
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->subscribe()V
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->update()V
++    :try_end_6
++    .catch Ljava/lang/RuntimeException; {:try_start_0 .. :try_end_6} :catch_7
++    .catch Ljava/lang/LinkageError; {:try_start_0 .. :try_end_6} :catch_7
++
++    return-void
++
++    :catch_7
++    move-exception p1
++
++    const/4 v0, 0x1
++
++    sput-boolean v0, Lio/mesalabs/unica/glass/GlassBackdrop;->unavailable:Z
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->dispose()V
++
++    const-string p0, "UN1CA-Backdrop"
++
++    const-string v0, "Backdrop subscriptions unavailable"
++
++    invoke-static {p0, v0, p1}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    return-void
++.end method
++
++.method public onViewDetachedFromWindow(Landroid/view/View;)V
++    .locals 0
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->clear()V
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassBackdrop;->unsubscribe()V
++
++    return-void
++.end method
+diff --git a/smali_classes2/io/mesalabs/unica/glass/GlassCapsule.smali b/smali_classes2/io/mesalabs/unica/glass/GlassCapsule.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes2/io/mesalabs/unica/glass/GlassCapsule.smali
+@@ -0,0 +1,1027 @@
++.class public final Lio/mesalabs/unica/glass/GlassCapsule;
++.super Landroid/graphics/drawable/Drawable;
++.source "GlassCapsule.java"
++
++
++# instance fields
++.field private alpha:I
++
++.field private contrast:F
++
++.field private final density:F
++
++.field private final edge:Landroid/graphics/Paint;
++
++.field private final edges:[I
++
++.field private final fill:Landroid/graphics/Paint;
++
++.field private final fills:[I
++
++.field private final inner:Landroid/graphics/Paint;
++
++.field private final innerBounds:Landroid/graphics/RectF;
++
++.field private final inners:[I
++
++.field private opaqueFallback:Z
++
++.field private final originalFills:[I
++
++.field private final outerBounds:Landroid/graphics/RectF;
++
++.field private pressed:Z
++
++.field private final rimOnly:Z
++
++.field private final selected:Z
++
++.field private shader:Lio/mesalabs/unica/glass/GlassShader;
++
++
++# direct methods
++.method public constructor <init>(FZZZ)V
++    .locals 10
++
++    invoke-direct {p0}, Landroid/graphics/drawable/Drawable;-><init>()V
++
++    new-instance v0, Landroid/graphics/Paint;
++
++    sget v1, Landroid/graphics/Paint;->ANTI_ALIAS_FLAG:I
++
++    invoke-direct {v0, v1}, Landroid/graphics/Paint;-><init>(I)V
++
++    iput-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->fill:Landroid/graphics/Paint;
++
++    new-instance v0, Landroid/graphics/Paint;
++
++    sget v1, Landroid/graphics/Paint;->ANTI_ALIAS_FLAG:I
++
++    invoke-direct {v0, v1}, Landroid/graphics/Paint;-><init>(I)V
++
++    iput-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->edge:Landroid/graphics/Paint;
++
++    new-instance v1, Landroid/graphics/Paint;
++
++    sget v2, Landroid/graphics/Paint;->ANTI_ALIAS_FLAG:I
++
++    invoke-direct {v1, v2}, Landroid/graphics/Paint;-><init>(I)V
++
++    iput-object v1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->inner:Landroid/graphics/Paint;
++
++    new-instance v2, Landroid/graphics/RectF;
++
++    invoke-direct {v2}, Landroid/graphics/RectF;-><init>()V
++
++    iput-object v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->outerBounds:Landroid/graphics/RectF;
++
++    new-instance v2, Landroid/graphics/RectF;
++
++    invoke-direct {v2}, Landroid/graphics/RectF;-><init>()V
++
++    iput-object v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->innerBounds:Landroid/graphics/RectF;
++
++    const/16 v2, 0xff
++
++    iput v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->alpha:I
++
++    iput p1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->density:F
++
++    iput-boolean p3, p0, Lio/mesalabs/unica/glass/GlassCapsule;->selected:Z
++
++    iput-boolean p4, p0, Lio/mesalabs/unica/glass/GlassCapsule;->rimOnly:Z
++
++    invoke-static {p1, p2, p3, p4}, Lio/mesalabs/unica/glass/GlassShader;->create(FZZZ)Lio/mesalabs/unica/glass/GlassShader;
++
++    move-result-object p4
++
++    iput-object p4, p0, Lio/mesalabs/unica/glass/GlassCapsule;->shader:Lio/mesalabs/unica/glass/GlassShader;
++
++    const/4 p4, 0x2
++
++    const/4 v2, 0x1
++
++    const/4 v3, 0x0
++
++    const/4 v4, 0x3
++
++    if-eqz p2, :cond_68
++
++    if-eqz p3, :cond_56
++
++    new-array v5, v4, [I
++
++    const v6, -0x3dbdbdbe
++
++    aput v6, v5, v3
++
++    const v6, -0x47c0c0c1
++
++    aput v6, v5, v2
++
++    const v6, -0x5cc4c4c5
++
++    aput v6, v5, p4
++
++    goto :goto_8d
++
++    :cond_56
++    new-array v5, v4, [I
++
++    const v6, -0x61dbdbdc
++
++    aput v6, v5, v3
++
++    const v6, -0x6bddddde
++
++    aput v6, v5, v2
++
++    const v6, -0x75dbdbdc
++
++    aput v6, v5, p4
++
++    goto :goto_8d
++
++    :cond_68
++    if-eqz p3, :cond_7c
++
++    new-array v5, v4, [I
++
++    const v6, -0x3d000001    # -127.99999f
++
++    aput v6, v5, v3
++
++    const v6, -0x47050301
++
++    aput v6, v5, v2
++
++    const v6, -0x5c080501
++
++    aput v6, v5, p4
++
++    goto :goto_8d
++
++    :cond_7c
++    new-array v5, v4, [I
++
++    const v6, -0x61080501
++
++    aput v6, v5, v3
++
++    const v6, -0x6b080501
++
++    aput v6, v5, v2
++
++    const v6, -0x75080501
++
++    aput v6, v5, p4
++
++    :goto_8d
++    iput-object v5, p0, Lio/mesalabs/unica/glass/GlassCapsule;->fills:[I
++
++    invoke-virtual {v5}, [I->clone()Ljava/lang/Object;
++
++    move-result-object v5
++
++    check-cast v5, [I
++
++    iput-object v5, p0, Lio/mesalabs/unica/glass/GlassCapsule;->originalFills:[I
++
++    const/4 v5, 0x4
++
++    const v6, 0x102d3540
++
++    const v7, 0x66ffffff
++
++    const/4 v8, 0x5
++
++    if-eqz p2, :cond_bd
++
++    new-array v8, v8, [I
++
++    const v9, -0x57050301
++
++    aput v9, v8, v3
++
++    const v9, 0xcf0f3f8
++
++    aput v9, v8, v2
++
++    const v9, 0x43eef1f6
++
++    aput v9, v8, p4
++
++    const v9, 0x8e8edf5
++
++    aput v9, v8, v4
++
++    const v9, 0x78f5f8ff
++
++    aput v9, v8, v5
++
++    goto :goto_d2
++
++    :cond_bd
++    new-array v8, v8, [I
++
++    const v9, -0x17000001
++
++    aput v9, v8, v3
++
++    const v9, 0x142d3540
++
++    aput v9, v8, v2
++
++    aput v7, v8, p4
++
++    aput v6, v8, v4
++
++    const v9, -0x47000001
++
++    aput v9, v8, v5
++
++    :goto_d2
++    iput-object v8, p0, Lio/mesalabs/unica/glass/GlassCapsule;->edges:[I
++
++    if-eqz p2, :cond_e8
++
++    new-array p2, v4, [I
++
++    const v4, 0x35f5f8ff
++
++    aput v4, p2, v3
++
++    const v3, 0x2eef3ff
++
++    aput v3, p2, v2
++
++    const v2, 0xcf5f8ff
++
++    aput v2, p2, p4
++
++    goto :goto_f3
++
++    :cond_e8
++    new-array p2, v4, [I
++
++    aput v7, p2, v3
++
++    const v3, 0x8ffffff
++
++    aput v3, p2, v2
++
++    aput v6, p2, p4
++
++    :goto_f3
++    iput-object p2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->inners:[I
++
++    sget-object p0, Landroid/graphics/Paint$Style;->STROKE:Landroid/graphics/Paint$Style;
++
++    invoke-virtual {v0, p0}, Landroid/graphics/Paint;->setStyle(Landroid/graphics/Paint$Style;)V
++
++    sget-object p0, Landroid/graphics/Paint$Style;->STROKE:Landroid/graphics/Paint$Style;
++
++    invoke-virtual {v1, p0}, Landroid/graphics/Paint;->setStyle(Landroid/graphics/Paint$Style;)V
++
++    if-eqz p3, :cond_104
++
++    const/high16 p0, 0x3e800000    # 0.25f
++
++    goto :goto_107
++
++    :cond_104
++    const p0, 0x3f266666    # 0.65f
++
++    :goto_107
++    mul-float/2addr p0, p1
++
++    invoke-virtual {v0, p0}, Landroid/graphics/Paint;->setStrokeWidth(F)V
++
++    const p0, 0x3ecccccd    # 0.4f
++
++    mul-float/2addr p1, p0
++
++    invoke-virtual {v1, p1}, Landroid/graphics/Paint;->setStrokeWidth(F)V
++
++    return-void
++.end method
++
++.method public constructor <init>(Landroid/view/View;ZZ)V
++    .locals 1
++
++    invoke-virtual {p1}, Landroid/view/View;->getResources()Landroid/content/res/Resources;
++
++    move-result-object p1
++
++    invoke-virtual {p1}, Landroid/content/res/Resources;->getDisplayMetrics()Landroid/util/DisplayMetrics;
++
++    move-result-object p1
++
++    iget p1, p1, Landroid/util/DisplayMetrics;->density:F
++
++    const/4 v0, 0x0
++
++    invoke-direct {p0, p1, p2, p3, v0}, Lio/mesalabs/unica/glass/GlassCapsule;-><init>(FZZZ)V
++
++    return-void
++.end method
++
++.method private updateFallback()V
++    .locals 6
++
++    iget v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->contrast:F
++
++    iget-boolean v1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->opaqueFallback:Z
++
++    if-eqz v1, :cond_9
++
++    const/high16 v1, 0x3f800000    # 1.0f
++
++    goto :goto_a
++
++    :cond_9
++    const/4 v1, 0x0
++
++    :goto_a
++    invoke-static {v0, v1}, Ljava/lang/Math;->max(FF)F
++
++    move-result v0
++
++    const/4 v1, 0x0
++
++    :goto_f
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->fills:[I
++
++    array-length v3, v2
++
++    if-ge v1, v3, :cond_30
++
++    iget-object v3, p0, Lio/mesalabs/unica/glass/GlassCapsule;->originalFills:[I
++
++    aget v3, v3, v1
++
++    ushr-int/lit8 v4, v3, 0x18
++
++    const v5, 0xffffff
++
++    and-int/2addr v3, v5
++
++    int-to-float v5, v4
++
++    rsub-int v4, v4, 0xf5
++
++    int-to-float v4, v4
++
++    mul-float/2addr v4, v0
++
++    add-float/2addr v5, v4
++
++    invoke-static {v5}, Ljava/lang/Math;->round(F)I
++
++    move-result v4
++
++    shl-int/lit8 v4, v4, 0x18
++
++    or-int/2addr v3, v4
++
++    aput v3, v2, v1
++
++    add-int/lit8 v1, v1, 0x1
++
++    goto :goto_f
++
++    :cond_30
++    invoke-virtual {p0}, Lio/mesalabs/unica/glass/GlassCapsule;->getBounds()Landroid/graphics/Rect;
++
++    move-result-object v0
++
++    invoke-virtual {p0, v0}, Lio/mesalabs/unica/glass/GlassCapsule;->onBoundsChange(Landroid/graphics/Rect;)V
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/glass/GlassCapsule;->invalidateSelf()V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public draw(Landroid/graphics/Canvas;)V
++    .locals 4
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->outerBounds:Landroid/graphics/RectF;
++
++    invoke-virtual {v0}, Landroid/graphics/RectF;->isEmpty()Z
++
++    move-result v0
++
++    if-nez v0, :cond_8c
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->shader:Lio/mesalabs/unica/glass/GlassShader;
++
++    if-eqz v0, :cond_26
++
++    :try_start_c
++    invoke-virtual {p0}, Lio/mesalabs/unica/glass/GlassCapsule;->getBounds()Landroid/graphics/Rect;
++
++    move-result-object v1
++
++    iget v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->alpha:I
++
++    iget-boolean v3, p0, Lio/mesalabs/unica/glass/GlassCapsule;->pressed:Z
++
++    invoke-virtual {v0, p1, v1, v2, v3}, Lio/mesalabs/unica/glass/GlassShader;->draw(Landroid/graphics/Canvas;Landroid/graphics/Rect;IZ)Z
++
++    move-result v0
++    :try_end_18
++    .catch Ljava/lang/RuntimeException; {:try_start_c .. :try_end_18} :catch_1b
++    .catch Ljava/lang/LinkageError; {:try_start_c .. :try_end_18} :catch_1b
++
++    if-eqz v0, :cond_26
++
++    goto :goto_8c
++
++    :catch_1b
++    move-exception v0
++
++    const/4 v1, 0x0
++
++    iput-object v1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->shader:Lio/mesalabs/unica/glass/GlassShader;
++
++    const-string v1, "UN1CA-Glass"
++
++    const-string v2, "AGSL draw failed; using gradient material"
++
++    invoke-static {v1, v2, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    :cond_26
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->fill:Landroid/graphics/Paint;
++
++    iget v1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->alpha:I
++
++    invoke-virtual {v0, v1}, Landroid/graphics/Paint;->setAlpha(I)V
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->edge:Landroid/graphics/Paint;
++
++    iget-boolean v1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->selected:Z
++
++    iget v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->alpha:I
++
++    if-eqz v1, :cond_37
++
++    div-int/lit8 v2, v2, 0xa
++
++    :cond_37
++    invoke-virtual {v0, v2}, Landroid/graphics/Paint;->setAlpha(I)V
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->inner:Landroid/graphics/Paint;
++
++    iget-boolean v1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->selected:Z
++
++    if-eqz v1, :cond_42
++
++    const/4 v1, 0x0
++
++    goto :goto_44
++
++    :cond_42
++    iget v1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->alpha:I
++
++    :goto_44
++    invoke-virtual {v0, v1}, Landroid/graphics/Paint;->setAlpha(I)V
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->outerBounds:Landroid/graphics/RectF;
++
++    invoke-virtual {v0}, Landroid/graphics/RectF;->width()F
++
++    move-result v0
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->outerBounds:Landroid/graphics/RectF;
++
++    invoke-virtual {v1}, Landroid/graphics/RectF;->height()F
++
++    move-result v1
++
++    invoke-static {v0, v1}, Ljava/lang/Math;->min(FF)F
++
++    move-result v0
++
++    const/high16 v1, 0x40000000    # 2.0f
++
++    div-float/2addr v0, v1
++
++    iget-boolean v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->rimOnly:Z
++
++    if-nez v2, :cond_65
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->outerBounds:Landroid/graphics/RectF;
++
++    iget-object v3, p0, Lio/mesalabs/unica/glass/GlassCapsule;->fill:Landroid/graphics/Paint;
++
++    invoke-virtual {p1, v2, v0, v0, v3}, Landroid/graphics/Canvas;->drawRoundRect(Landroid/graphics/RectF;FFLandroid/graphics/Paint;)V
++
++    :cond_65
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->outerBounds:Landroid/graphics/RectF;
++
++    iget-object v3, p0, Lio/mesalabs/unica/glass/GlassCapsule;->edge:Landroid/graphics/Paint;
++
++    invoke-virtual {p1, v2, v0, v0, v3}, Landroid/graphics/Canvas;->drawRoundRect(Landroid/graphics/RectF;FFLandroid/graphics/Paint;)V
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->innerBounds:Landroid/graphics/RectF;
++
++    invoke-virtual {v0}, Landroid/graphics/RectF;->isEmpty()Z
++
++    move-result v0
++
++    if-nez v0, :cond_8c
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->innerBounds:Landroid/graphics/RectF;
++
++    invoke-virtual {v0}, Landroid/graphics/RectF;->width()F
++
++    move-result v0
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->innerBounds:Landroid/graphics/RectF;
++
++    invoke-virtual {v2}, Landroid/graphics/RectF;->height()F
++
++    move-result v2
++
++    invoke-static {v0, v2}, Ljava/lang/Math;->min(FF)F
++
++    move-result v0
++
++    div-float/2addr v0, v1
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->innerBounds:Landroid/graphics/RectF;
++
++    iget-object p0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->inner:Landroid/graphics/Paint;
++
++    invoke-virtual {p1, v1, v0, v0, p0}, Landroid/graphics/Canvas;->drawRoundRect(Landroid/graphics/RectF;FFLandroid/graphics/Paint;)V
++
++    :cond_8c
++    :goto_8c
++    return-void
++.end method
++
++.method public getAlpha()I
++    .locals 0
++
++    iget p0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->alpha:I
++
++    return p0
++.end method
++
++.method public getOpacity()I
++    .locals 0
++
++    sget p0, Landroid/graphics/PixelFormat;->TRANSLUCENT:I
++
++    return p0
++.end method
++
++.method public getOutline(Landroid/graphics/Outline;)V
++    .locals 3
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/glass/GlassCapsule;->getBounds()Landroid/graphics/Rect;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Landroid/graphics/Rect;->width()I
++
++    move-result v1
++
++    invoke-virtual {v0}, Landroid/graphics/Rect;->height()I
++
++    move-result v2
++
++    invoke-static {v1, v2}, Ljava/lang/Math;->min(II)I
++
++    move-result v1
++
++    int-to-float v1, v1
++
++    const/high16 v2, 0x40000000    # 2.0f
++
++    div-float/2addr v1, v2
++
++    invoke-virtual {p1, v0, v1}, Landroid/graphics/Outline;->setRoundRect(Landroid/graphics/Rect;F)V
++
++    iget-boolean p0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->selected:Z
++
++    if-eqz p0, :cond_1f
++
++    const p0, 0x3df5c28f    # 0.12f
++
++    goto :goto_22
++
++    :cond_1f
++    const p0, 0x3ecccccd    # 0.4f
++
++    :goto_22
++    invoke-virtual {p1, p0}, Landroid/graphics/Outline;->setAlpha(F)V
++
++    return-void
++.end method
++
++.method public isStateful()Z
++    .locals 0
++
++    const/4 p0, 0x1
++
++    return p0
++.end method
++
++.method protected onBoundsChange(Landroid/graphics/Rect;)V
++    .locals 12
++
++    invoke-virtual {p1}, Landroid/graphics/Rect;->width()I
++
++    move-result v0
++
++    const/4 v1, 0x1
++
++    invoke-static {v1, v0}, Ljava/lang/Math;->max(II)I
++
++    move-result v0
++
++    int-to-float v0, v0
++
++    invoke-virtual {p1}, Landroid/graphics/Rect;->height()I
++
++    move-result v2
++
++    invoke-static {v1, v2}, Ljava/lang/Math;->max(II)I
++
++    move-result v1
++
++    int-to-float v1, v1
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->edge:Landroid/graphics/Paint;
++
++    invoke-virtual {v2}, Landroid/graphics/Paint;->getStrokeWidth()F
++
++    move-result v2
++
++    const/high16 v3, 0x40000000    # 2.0f
++
++    div-float/2addr v2, v3
++
++    const/high16 v3, 0x3f000000    # 0.5f
++
++    invoke-static {v3, v2}, Ljava/lang/Math;->max(FF)F
++
++    move-result v2
++
++    iget-object v3, p0, Lio/mesalabs/unica/glass/GlassCapsule;->outerBounds:Landroid/graphics/RectF;
++
++    iget v4, p1, Landroid/graphics/Rect;->left:I
++
++    int-to-float v4, v4
++
++    add-float/2addr v4, v2
++
++    iget v5, p1, Landroid/graphics/Rect;->top:I
++
++    int-to-float v5, v5
++
++    add-float/2addr v5, v2
++
++    iget v6, p1, Landroid/graphics/Rect;->right:I
++
++    int-to-float v6, v6
++
++    sub-float/2addr v6, v2
++
++    iget v7, p1, Landroid/graphics/Rect;->bottom:I
++
++    int-to-float v7, v7
++
++    sub-float/2addr v7, v2
++
++    invoke-virtual {v3, v4, v5, v6, v7}, Landroid/graphics/RectF;->set(FFFF)V
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->innerBounds:Landroid/graphics/RectF;
++
++    iget-object v3, p0, Lio/mesalabs/unica/glass/GlassCapsule;->outerBounds:Landroid/graphics/RectF;
++
++    invoke-virtual {v2, v3}, Landroid/graphics/RectF;->set(Landroid/graphics/RectF;)V
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->innerBounds:Landroid/graphics/RectF;
++
++    iget v3, p0, Lio/mesalabs/unica/glass/GlassCapsule;->density:F
++
++    const v4, 0x3faccccd    # 1.35f
++
++    mul-float v5, v3, v4
++
++    mul-float/2addr v3, v4
++
++    invoke-virtual {v2, v5, v3}, Landroid/graphics/RectF;->inset(FF)V
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->fill:Landroid/graphics/Paint;
++
++    new-instance v3, Landroid/graphics/LinearGradient;
++
++    iget v4, p1, Landroid/graphics/Rect;->left:I
++
++    int-to-float v4, v4
++
++    iget v5, p1, Landroid/graphics/Rect;->top:I
++
++    int-to-float v5, v5
++
++    iget v6, p1, Landroid/graphics/Rect;->left:I
++
++    int-to-float v6, v6
++
++    iget v7, p1, Landroid/graphics/Rect;->top:I
++
++    int-to-float v7, v7
++
++    add-float/2addr v7, v1
++
++    iget-object v8, p0, Lio/mesalabs/unica/glass/GlassCapsule;->fills:[I
++
++    const/4 v11, 0x3
++
++    new-array v9, v11, [F
++
++    fill-array-data v9, :array_b6
++
++    sget-object v10, Landroid/graphics/Shader$TileMode;->CLAMP:Landroid/graphics/Shader$TileMode;
++
++    invoke-direct/range {v3 .. v10}, Landroid/graphics/LinearGradient;-><init>(FFFF[I[FLandroid/graphics/Shader$TileMode;)V
++
++    invoke-virtual {v2, v3}, Landroid/graphics/Paint;->setShader(Landroid/graphics/Shader;)Landroid/graphics/Shader;
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->edge:Landroid/graphics/Paint;
++
++    new-instance v3, Landroid/graphics/LinearGradient;
++
++    iget v4, p1, Landroid/graphics/Rect;->left:I
++
++    int-to-float v4, v4
++
++    iget v5, p1, Landroid/graphics/Rect;->top:I
++
++    int-to-float v5, v5
++
++    iget v6, p1, Landroid/graphics/Rect;->left:I
++
++    int-to-float v6, v6
++
++    add-float/2addr v6, v0
++
++    iget v7, p1, Landroid/graphics/Rect;->top:I
++
++    int-to-float v7, v7
++
++    add-float/2addr v7, v1
++
++    iget-object v8, p0, Lio/mesalabs/unica/glass/GlassCapsule;->edges:[I
++
++    const/4 v9, 0x5
++
++    new-array v9, v9, [F
++
++    fill-array-data v9, :array_c0
++
++    sget-object v10, Landroid/graphics/Shader$TileMode;->CLAMP:Landroid/graphics/Shader$TileMode;
++
++    invoke-direct/range {v3 .. v10}, Landroid/graphics/LinearGradient;-><init>(FFFF[I[FLandroid/graphics/Shader$TileMode;)V
++
++    invoke-virtual {v2, v3}, Landroid/graphics/Paint;->setShader(Landroid/graphics/Shader;)Landroid/graphics/Shader;
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassCapsule;->inner:Landroid/graphics/Paint;
++
++    new-instance v3, Landroid/graphics/LinearGradient;
++
++    iget v4, p1, Landroid/graphics/Rect;->left:I
++
++    int-to-float v4, v4
++
++    iget v5, p1, Landroid/graphics/Rect;->top:I
++
++    int-to-float v5, v5
++
++    iget v6, p1, Landroid/graphics/Rect;->left:I
++
++    int-to-float v6, v6
++
++    const v7, 0x3f0ccccd    # 0.55f
++
++    mul-float/2addr v0, v7
++
++    add-float/2addr v6, v0
++
++    iget p1, p1, Landroid/graphics/Rect;->top:I
++
++    int-to-float p1, p1
++
++    add-float v7, p1, v1
++
++    iget-object v8, p0, Lio/mesalabs/unica/glass/GlassCapsule;->inners:[I
++
++    new-array v9, v11, [F
++
++    fill-array-data v9, :array_ce
++
++    sget-object v10, Landroid/graphics/Shader$TileMode;->CLAMP:Landroid/graphics/Shader$TileMode;
++
++    invoke-direct/range {v3 .. v10}, Landroid/graphics/LinearGradient;-><init>(FFFF[I[FLandroid/graphics/Shader$TileMode;)V
++
++    invoke-virtual {v2, v3}, Landroid/graphics/Paint;->setShader(Landroid/graphics/Shader;)Landroid/graphics/Shader;
++
++    return-void
++
++    nop
++
++    :array_b6
++    .array-data 4
++        0x0
++        0x3ef0a3d7    # 0.47f
++        0x3f800000    # 1.0f
++    .end array-data
++
++    :array_c0
++    .array-data 4
++        0x0
++        0x3e75c28f    # 0.24f
++        0x3f07ae14    # 0.53f
++        0x3f4a3d71    # 0.79f
++        0x3f800000    # 1.0f
++    .end array-data
++
++    :array_ce
++    .array-data 4
++        0x0
++        0x3f147ae1    # 0.58f
++        0x3f800000    # 1.0f
++    .end array-data
++.end method
++
++.method protected onStateChange([I)Z
++    .locals 7
++
++    array-length v0, p1
++
++    const/4 v1, 0x0
++
++    move v2, v1
++
++    move v3, v2
++
++    :goto_4
++    const/4 v4, 0x1
++
++    if-ge v2, v0, :cond_15
++
++    aget v5, p1, v2
++
++    sget v6, Landroid/R$attr;->state_pressed:I
++
++    if-eq v5, v6, :cond_11
++
++    sget v6, Landroid/R$attr;->state_focused:I
++
++    if-ne v5, v6, :cond_12
++
++    :cond_11
++    move v3, v4
++
++    :cond_12
++    add-int/lit8 v2, v2, 0x1
++
++    goto :goto_4
++
++    :cond_15
++    iget-boolean p1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->pressed:Z
++
++    if-ne v3, p1, :cond_1a
++
++    return v1
++
++    :cond_1a
++    iput-boolean v3, p0, Lio/mesalabs/unica/glass/GlassCapsule;->pressed:Z
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/glass/GlassCapsule;->invalidateSelf()V
++
++    return v4
++.end method
++
++.method public setAlpha(I)V
++    .locals 1
++
++    const/16 v0, 0xff
++
++    invoke-static {v0, p1}, Ljava/lang/Math;->min(II)I
++
++    move-result p1
++
++    const/4 v0, 0x0
++
++    invoke-static {v0, p1}, Ljava/lang/Math;->max(II)I
++
++    move-result p1
++
++    iput p1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->alpha:I
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/glass/GlassCapsule;->invalidateSelf()V
++
++    return-void
++.end method
++
++.method public setColorFilter(Landroid/graphics/ColorFilter;)V
++    .locals 1
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->shader:Lio/mesalabs/unica/glass/GlassShader;
++
++    if-eqz v0, :cond_7
++
++    invoke-virtual {v0, p1}, Lio/mesalabs/unica/glass/GlassShader;->setColorFilter(Landroid/graphics/ColorFilter;)V
++
++    :cond_7
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->fill:Landroid/graphics/Paint;
++
++    invoke-virtual {v0, p1}, Landroid/graphics/Paint;->setColorFilter(Landroid/graphics/ColorFilter;)Landroid/graphics/ColorFilter;
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->edge:Landroid/graphics/Paint;
++
++    invoke-virtual {v0, p1}, Landroid/graphics/Paint;->setColorFilter(Landroid/graphics/ColorFilter;)Landroid/graphics/ColorFilter;
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->inner:Landroid/graphics/Paint;
++
++    invoke-virtual {v0, p1}, Landroid/graphics/Paint;->setColorFilter(Landroid/graphics/ColorFilter;)Landroid/graphics/ColorFilter;
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/glass/GlassCapsule;->invalidateSelf()V
++
++    return-void
++.end method
++
++.method public setOpaqueFallback(Z)V
++    .locals 1
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->opaqueFallback:Z
++
++    if-ne v0, p1, :cond_5
++
++    return-void
++
++    :cond_5
++    iput-boolean p1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->opaqueFallback:Z
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassCapsule;->shader:Lio/mesalabs/unica/glass/GlassShader;
++
++    if-eqz v0, :cond_e
++
++    invoke-virtual {v0, p1}, Lio/mesalabs/unica/glass/GlassShader;->setOpaque(Z)V
++
++    :cond_e
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassCapsule;->updateFallback()V
++
++    return-void
++.end method
++
++.method public setUiContrast(F)V
++    .locals 2
++
++    invoke-static {p1}, Ljava/lang/Float;->isFinite(F)Z
++
++    move-result v0
++
++    const/4 v1, 0x0
++
++    if-eqz v0, :cond_11
++
++    const/high16 v0, 0x3f800000    # 1.0f
++
++    invoke-static {v0, p1}, Ljava/lang/Math;->min(FF)F
++
++    move-result p1
++
++    invoke-static {v1, p1}, Ljava/lang/Math;->max(FF)F
++
++    move-result v1
++
++    :cond_11
++    iget p1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->contrast:F
++
++    cmpl-float p1, p1, v1
++
++    if-nez p1, :cond_18
++
++    return-void
++
++    :cond_18
++    iput v1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->contrast:F
++
++    iget-object p1, p0, Lio/mesalabs/unica/glass/GlassCapsule;->shader:Lio/mesalabs/unica/glass/GlassShader;
++
++    if-eqz p1, :cond_21
++
++    invoke-virtual {p1, v1}, Lio/mesalabs/unica/glass/GlassShader;->setContrast(F)V
++
++    :cond_21
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassCapsule;->updateFallback()V
++
++    return-void
++.end method
+diff --git a/smali_classes2/io/mesalabs/unica/glass/GlassShader.smali b/smali_classes2/io/mesalabs/unica/glass/GlassShader.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes2/io/mesalabs/unica/glass/GlassShader.smali
+@@ -0,0 +1,385 @@
++.class public final Lio/mesalabs/unica/glass/GlassShader;
++.super Ljava/lang/Object;
++.source "GlassShader.java"
++
++
++# static fields
++.field private static final PROGRAM:Ljava/lang/String; = "uniform float2 size; uniform float density; uniform float dark; uniform float selected; uniform float rimOnly; uniform float pressed; uniform float contrast; uniform float opaque;\nfloat sdRoundedBox(in float2 p, in float2 b, in float4 r) { r.xy = (p.x > 0.0) ? r.xy : r.zw; r.x = (p.y > 0.0) ? r.x : r.y; float2 q = abs(p) - b + r.x; return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r.x; }\nfloat4 normalBlendPreMulti(float4 back, float4 front) { return front + back * (1.0 - front.a); }\nhalf4 main(float2 xy) {\n float2 center = size * 0.5; float2 p = xy - center; float2 bounds = max(center - density * 0.6, float2(0.5));\n float radius = min(bounds.x, bounds.y); float sdf = sdRoundedBox(p, bounds, float4(radius));\n float mask = 1.0 - smoothstep(-0.7, 0.7, sdf); float y = clamp(xy.y / max(size.y, 1.0), 0.0, 1.0);\n float bodyAlpha = mix(mix(0.62,0.54,y),mix(0.76,0.64,y),selected); float fillAlpha = mix(bodyAlpha + pressed * 0.035,0.96,max(contrast,opaque));\n float3 tint = mix(float3(0.97,0.98,1.0),float3(mix(0.14,0.26,selected)),dark);\n float4 color = float4(tint * fillAlpha, fillAlpha) * mask * (1.0-rimOnly);\n float rim = 1.0 - smoothstep(0.25*density, 1.05*density, abs(sdf + 0.45*density));\n float topLight = pow(clamp(1.0-y,0.0,1.0), 3.0);\n float cornerLight = pow(clamp(abs(p.x) / max(center.x,1.0),0.0,1.0), 5.0);\n float lightAlpha = clamp((0.035 + 0.60*topLight + 0.10*cornerLight + pressed*0.035 + contrast*0.18) * rim * mask * mix(1.0,0.10,selected),0.0,0.92);\n color = normalBlendPreMulti(color,float4(float3(0.98,0.99,1.0)*lightAlpha,lightAlpha));\n float innerSdf = sdRoundedBox(p-float2(0.0,-density), max(bounds-float2(1.8*density,2.2*density),float2(0.5)), float4(max(radius-1.8*density,0.0)));\n float innerRim = (1.0-smoothstep(0.3*density,1.0*density,abs(innerSdf))) * 0.045 * mask * (1.0-selected);\n color = normalBlendPreMulti(color,float4(float3(0.91,0.94,0.98)*innerRim,innerRim));\n return half4(color); }"
++
++.field private static rejected:Z
++
++
++# instance fields
++.field private contrast:F
++
++.field private height:I
++
++.field private final paint:Landroid/graphics/Paint;
++
++.field private pressedState:Z
++
++.field private final shader:Landroid/graphics/RuntimeShader;
++
++.field private width:I
++
++
++# direct methods
++.method private constructor <init>(FZZZ)V
++    .locals 3
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    new-instance v0, Landroid/graphics/Paint;
++
++    sget v1, Landroid/graphics/Paint;->ANTI_ALIAS_FLAG:I
++
++    invoke-direct {v0, v1}, Landroid/graphics/Paint;-><init>(I)V
++
++    iput-object v0, p0, Lio/mesalabs/unica/glass/GlassShader;->paint:Landroid/graphics/Paint;
++
++    const/4 v1, -0x1
++
++    iput v1, p0, Lio/mesalabs/unica/glass/GlassShader;->width:I
++
++    iput v1, p0, Lio/mesalabs/unica/glass/GlassShader;->height:I
++
++    new-instance v1, Landroid/graphics/RuntimeShader;
++
++    const-string v2, "uniform float2 size; uniform float density; uniform float dark; uniform float selected; uniform float rimOnly; uniform float pressed; uniform float contrast; uniform float opaque;\nfloat sdRoundedBox(in float2 p, in float2 b, in float4 r) { r.xy = (p.x > 0.0) ? r.xy : r.zw; r.x = (p.y > 0.0) ? r.x : r.y; float2 q = abs(p) - b + r.x; return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r.x; }\nfloat4 normalBlendPreMulti(float4 back, float4 front) { return front + back * (1.0 - front.a); }\nhalf4 main(float2 xy) {\n float2 center = size * 0.5; float2 p = xy - center; float2 bounds = max(center - density * 0.6, float2(0.5));\n float radius = min(bounds.x, bounds.y); float sdf = sdRoundedBox(p, bounds, float4(radius));\n float mask = 1.0 - smoothstep(-0.7, 0.7, sdf); float y = clamp(xy.y / max(size.y, 1.0), 0.0, 1.0);\n float bodyAlpha = mix(mix(0.62,0.54,y),mix(0.76,0.64,y),selected); float fillAlpha = mix(bodyAlpha + pressed * 0.035,0.96,max(contrast,opaque));\n float3 tint = mix(float3(0.97,0.98,1.0),float3(mix(0.14,0.26,selected)),dark);\n float4 color = float4(tint * fillAlpha, fillAlpha) * mask * (1.0-rimOnly);\n float rim = 1.0 - smoothstep(0.25*density, 1.05*density, abs(sdf + 0.45*density));\n float topLight = pow(clamp(1.0-y,0.0,1.0), 3.0);\n float cornerLight = pow(clamp(abs(p.x) / max(center.x,1.0),0.0,1.0), 5.0);\n float lightAlpha = clamp((0.035 + 0.60*topLight + 0.10*cornerLight + pressed*0.035 + contrast*0.18) * rim * mask * mix(1.0,0.10,selected),0.0,0.92);\n color = normalBlendPreMulti(color,float4(float3(0.98,0.99,1.0)*lightAlpha,lightAlpha));\n float innerSdf = sdRoundedBox(p-float2(0.0,-density), max(bounds-float2(1.8*density,2.2*density),float2(0.5)), float4(max(radius-1.8*density,0.0)));\n float innerRim = (1.0-smoothstep(0.3*density,1.0*density,abs(innerSdf))) * 0.045 * mask * (1.0-selected);\n color = normalBlendPreMulti(color,float4(float3(0.91,0.94,0.98)*innerRim,innerRim));\n return half4(color); }"
++
++    invoke-direct {v1, v2}, Landroid/graphics/RuntimeShader;-><init>(Ljava/lang/String;)V
++
++    iput-object v1, p0, Lio/mesalabs/unica/glass/GlassShader;->shader:Landroid/graphics/RuntimeShader;
++
++    const/high16 p0, 0x3f000000    # 0.5f
++
++    invoke-static {p0, p1}, Ljava/lang/Math;->max(FF)F
++
++    move-result p0
++
++    const-string p1, "density"
++
++    invoke-virtual {v1, p1, p0}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;F)V
++
++    const/high16 p0, 0x3f800000    # 1.0f
++
++    const/4 p1, 0x0
++
++    if-eqz p2, :cond_2c
++
++    move p2, p0
++
++    goto :goto_2d
++
++    :cond_2c
++    move p2, p1
++
++    :goto_2d
++    const-string v2, "dark"
++
++    invoke-virtual {v1, v2, p2}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;F)V
++
++    if-eqz p3, :cond_36
++
++    move p2, p0
++
++    goto :goto_37
++
++    :cond_36
++    move p2, p1
++
++    :goto_37
++    const-string p3, "selected"
++
++    invoke-virtual {v1, p3, p2}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;F)V
++
++    if-nez p4, :cond_3f
++
++    move p0, p1
++
++    :cond_3f
++    const-string p2, "rimOnly"
++
++    invoke-virtual {v1, p2, p0}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;F)V
++
++    const-string p0, "pressed"
++
++    invoke-virtual {v1, p0, p1}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;F)V
++
++    const-string p0, "contrast"
++
++    invoke-virtual {v1, p0, p1}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;F)V
++
++    const-string p0, "opaque"
++
++    invoke-virtual {v1, p0, p1}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;F)V
++
++    invoke-virtual {v0, v1}, Landroid/graphics/Paint;->setShader(Landroid/graphics/Shader;)Landroid/graphics/Shader;
++
++    return-void
++.end method
++
++.method public static create(FZZZ)Lio/mesalabs/unica/glass/GlassShader;
++    .locals 2
++
++    sget-boolean v0, Lio/mesalabs/unica/glass/GlassShader;->rejected:Z
++
++    const/4 v1, 0x0
++
++    if-nez v0, :cond_16
++
++    :try_start_5
++    new-instance v0, Lio/mesalabs/unica/glass/GlassShader;
++
++    invoke-direct {v0, p0, p1, p2, p3}, Lio/mesalabs/unica/glass/GlassShader;-><init>(FZZZ)V
++    :try_end_a
++    .catch Ljava/lang/RuntimeException; {:try_start_5 .. :try_end_a} :catch_b
++    .catch Ljava/lang/LinkageError; {:try_start_5 .. :try_end_a} :catch_b
++
++    return-object v0
++
++    :catch_b
++    move-exception p0
++
++    const/4 p1, 0x1
++
++    sput-boolean p1, Lio/mesalabs/unica/glass/GlassShader;->rejected:Z
++
++    const-string p1, "UN1CA-Glass"
++
++    const-string p2, "AGSL unavailable; retaining cached gradient material"
++
++    invoke-static {p1, p2, p0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    :cond_16
++    return-object v1
++.end method
++
++
++# virtual methods
++.method public draw(Landroid/graphics/Canvas;Landroid/graphics/Rect;IZ)Z
++    .locals 7
++
++    invoke-virtual {p1}, Landroid/graphics/Canvas;->isHardwareAccelerated()Z
++
++    move-result v0
++
++    if-eqz v0, :cond_78
++
++    invoke-virtual {p2}, Landroid/graphics/Rect;->isEmpty()Z
++
++    move-result v0
++
++    if-nez v0, :cond_78
++
++    iget v0, p0, Lio/mesalabs/unica/glass/GlassShader;->width:I
++
++    invoke-virtual {p2}, Landroid/graphics/Rect;->width()I
++
++    move-result v1
++
++    if-ne v0, v1, :cond_1c
++
++    iget v0, p0, Lio/mesalabs/unica/glass/GlassShader;->height:I
++
++    invoke-virtual {p2}, Landroid/graphics/Rect;->height()I
++
++    move-result v1
++
++    if-eq v0, v1, :cond_33
++
++    :cond_1c
++    invoke-virtual {p2}, Landroid/graphics/Rect;->width()I
++
++    move-result v0
++
++    iput v0, p0, Lio/mesalabs/unica/glass/GlassShader;->width:I
++
++    invoke-virtual {p2}, Landroid/graphics/Rect;->height()I
++
++    move-result v0
++
++    iput v0, p0, Lio/mesalabs/unica/glass/GlassShader;->height:I
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassShader;->shader:Landroid/graphics/RuntimeShader;
++
++    iget v2, p0, Lio/mesalabs/unica/glass/GlassShader;->width:I
++
++    int-to-float v2, v2
++
++    int-to-float v0, v0
++
++    const-string v3, "size"
++
++    invoke-virtual {v1, v3, v2, v0}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;FF)V
++
++    :cond_33
++    iget-boolean v0, p0, Lio/mesalabs/unica/glass/GlassShader;->pressedState:Z
++
++    if-eq v0, p4, :cond_46
++
++    iput-boolean p4, p0, Lio/mesalabs/unica/glass/GlassShader;->pressedState:Z
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassShader;->shader:Landroid/graphics/RuntimeShader;
++
++    if-eqz p4, :cond_40
++
++    const/high16 p4, 0x3f800000    # 1.0f
++
++    goto :goto_41
++
++    :cond_40
++    const/4 p4, 0x0
++
++    :goto_41
++    const-string v1, "pressed"
++
++    invoke-virtual {v0, v1, p4}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;F)V
++
++    :cond_46
++    iget-object p4, p0, Lio/mesalabs/unica/glass/GlassShader;->paint:Landroid/graphics/Paint;
++
++    invoke-virtual {p4, p3}, Landroid/graphics/Paint;->setAlpha(I)V
++
++    invoke-virtual {p1}, Landroid/graphics/Canvas;->save()I
++
++    move-result p3
++
++    :try_start_4f
++    iget p4, p2, Landroid/graphics/Rect;->left:I
++
++    int-to-float p4, p4
++
++    iget v0, p2, Landroid/graphics/Rect;->top:I
++
++    int-to-float v0, v0
++
++    invoke-virtual {p1, p4, v0}, Landroid/graphics/Canvas;->translate(FF)V
++
++    invoke-virtual {p2}, Landroid/graphics/Rect;->width()I
++
++    move-result p4
++
++    int-to-float v4, p4
++
++    invoke-virtual {p2}, Landroid/graphics/Rect;->height()I
++
++    move-result p2
++
++    int-to-float v5, p2
++
++    iget-object v6, p0, Lio/mesalabs/unica/glass/GlassShader;->paint:Landroid/graphics/Paint;
++    :try_end_64
++    .catchall {:try_start_4f .. :try_end_64} :catchall_71
++
++    const/4 v2, 0x0
++
++    const/4 v3, 0x0
++
++    move-object v1, p1
++
++    :try_start_67
++    invoke-virtual/range {v1 .. v6}, Landroid/graphics/Canvas;->drawRect(FFFFLandroid/graphics/Paint;)V
++    :try_end_6a
++    .catchall {:try_start_67 .. :try_end_6a} :catchall_6f
++
++    invoke-virtual {v1, p3}, Landroid/graphics/Canvas;->restoreToCount(I)V
++
++    const/4 p0, 0x1
++
++    return p0
++
++    :catchall_6f
++    move-exception v0
++
++    goto :goto_73
++
++    :catchall_71
++    move-exception v0
++
++    move-object v1, p1
++
++    :goto_73
++    move-object p0, v0
++
++    invoke-virtual {v1, p3}, Landroid/graphics/Canvas;->restoreToCount(I)V
++
++    throw p0
++
++    :cond_78
++    const/4 p0, 0x0
++
++    return p0
++.end method
++
++.method public setColorFilter(Landroid/graphics/ColorFilter;)V
++    .locals 0
++
++    iget-object p0, p0, Lio/mesalabs/unica/glass/GlassShader;->paint:Landroid/graphics/Paint;
++
++    invoke-virtual {p0, p1}, Landroid/graphics/Paint;->setColorFilter(Landroid/graphics/ColorFilter;)Landroid/graphics/ColorFilter;
++
++    return-void
++.end method
++
++.method public setContrast(F)V
++    .locals 2
++
++    invoke-static {p1}, Ljava/lang/Float;->isFinite(F)Z
++
++    move-result v0
++
++    const/4 v1, 0x0
++
++    if-eqz v0, :cond_11
++
++    const/high16 v0, 0x3f800000    # 1.0f
++
++    invoke-static {v0, p1}, Ljava/lang/Math;->min(FF)F
++
++    move-result p1
++
++    invoke-static {v1, p1}, Ljava/lang/Math;->max(FF)F
++
++    move-result v1
++
++    :cond_11
++    iget p1, p0, Lio/mesalabs/unica/glass/GlassShader;->contrast:F
++
++    cmpl-float p1, p1, v1
++
++    if-eqz p1, :cond_20
++
++    iput v1, p0, Lio/mesalabs/unica/glass/GlassShader;->contrast:F
++
++    iget-object p0, p0, Lio/mesalabs/unica/glass/GlassShader;->shader:Landroid/graphics/RuntimeShader;
++
++    const-string p1, "contrast"
++
++    invoke-virtual {p0, p1, v1}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;F)V
++
++    :cond_20
++    return-void
++.end method
++
++.method public setOpaque(Z)V
++    .locals 1
++
++    iget-object p0, p0, Lio/mesalabs/unica/glass/GlassShader;->shader:Landroid/graphics/RuntimeShader;
++
++    if-eqz p1, :cond_7
++
++    const/high16 p1, 0x3f800000    # 1.0f
++
++    goto :goto_8
++
++    :cond_7
++    const/4 p1, 0x0
++
++    :goto_8
++    const-string v0, "opaque"
++
++    invoke-virtual {p0, v0, p1}, Landroid/graphics/RuntimeShader;->setFloatUniform(Ljava/lang/String;F)V
++
++    return-void
++.end method
+diff --git a/smali_classes2/io/mesalabs/unica/glass/GlassSurface.smali b/smali_classes2/io/mesalabs/unica/glass/GlassSurface.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes2/io/mesalabs/unica/glass/GlassSurface.smali
+@@ -0,0 +1,564 @@
++.class public final Lio/mesalabs/unica/glass/GlassSurface;
++.super Ljava/lang/Object;
++.source "GlassSurface.java"
++
++# interfaces
++.implements Landroid/view/View$OnAttachStateChangeListener;
++.implements Landroid/view/View$OnLayoutChangeListener;
++
++
++# instance fields
++.field private active:Z
++
++.field private backdrop:Lio/mesalabs/unica/glass/GlassBackdrop;
++
++.field private final clip:Z
++
++.field private material:Lio/mesalabs/unica/glass/GlassCapsule;
++
++.field private final original:Landroid/graphics/drawable/Drawable;
++
++.field private final tint:Landroid/content/res/ColorStateList;
++
++.field private final view:Landroid/view/View;
++
++
++# direct methods
++.method private constructor <init>(Landroid/view/View;)V
++    .locals 1
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    const/4 v0, 0x1
++
++    iput-boolean v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->active:Z
++
++    iput-object p1, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-virtual {p1}, Landroid/view/View;->getBackground()Landroid/graphics/drawable/Drawable;
++
++    move-result-object v0
++
++    iput-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->original:Landroid/graphics/drawable/Drawable;
++
++    invoke-virtual {p1}, Landroid/view/View;->getBackgroundTintList()Landroid/content/res/ColorStateList;
++
++    move-result-object v0
++
++    iput-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->tint:Landroid/content/res/ColorStateList;
++
++    invoke-virtual {p1}, Landroid/view/View;->getClipToOutline()Z
++
++    move-result p1
++
++    iput-boolean p1, p0, Lio/mesalabs/unica/glass/GlassSurface;->clip:Z
++
++    return-void
++.end method
++
++.method public static applied(Landroid/view/View;)V
++    .locals 2
++
++    if-eqz p0, :cond_b
++
++    invoke-static {p0}, Lio/mesalabs/unica/glass/GlassSurface;->clear(Landroid/view/View;)V
++
++    invoke-static {p0}, Lio/mesalabs/unica/glass/GlassSurface;->key(Landroid/view/View;)I
++
++    move-result v0
++
++    if-nez v0, :cond_c
++
++    :cond_b
++    return-void
++
++    :cond_c
++    new-instance v1, Lio/mesalabs/unica/glass/GlassSurface;
++
++    invoke-direct {v1, p0}, Lio/mesalabs/unica/glass/GlassSurface;-><init>(Landroid/view/View;)V
++
++    invoke-virtual {p0, v0, v1}, Landroid/view/View;->setTag(ILjava/lang/Object;)V
++
++    invoke-virtual {p0, v1}, Landroid/view/View;->addOnAttachStateChangeListener(Landroid/view/View$OnAttachStateChangeListener;)V
++
++    invoke-virtual {p0, v1}, Landroid/view/View;->addOnLayoutChangeListener(Landroid/view/View$OnLayoutChangeListener;)V
++
++    invoke-direct {v1}, Lio/mesalabs/unica/glass/GlassSurface;->installSafely()V
++
++    return-void
++.end method
++
++.method public static clear(Landroid/view/View;)V
++    .locals 4
++
++    if-eqz p0, :cond_13
++
++    invoke-static {p0}, Lio/mesalabs/unica/glass/GlassSurface;->key(Landroid/view/View;)I
++
++    move-result v0
++
++    const/4 v1, 0x0
++
++    if-nez v0, :cond_b
++
++    move-object v2, v1
++
++    goto :goto_f
++
++    :cond_b
++    invoke-virtual {p0, v0}, Landroid/view/View;->getTag(I)Ljava/lang/Object;
++
++    move-result-object v2
++
++    :goto_f
++    instance-of v3, v2, Lio/mesalabs/unica/glass/GlassSurface;
++
++    if-nez v3, :cond_14
++
++    :cond_13
++    return-void
++
++    :cond_14
++    check-cast v2, Lio/mesalabs/unica/glass/GlassSurface;
++
++    const/4 v3, 0x0
++
++    iput-boolean v3, v2, Lio/mesalabs/unica/glass/GlassSurface;->active:Z
++
++    invoke-direct {v2}, Lio/mesalabs/unica/glass/GlassSurface;->removeMaterial()V
++
++    invoke-virtual {p0, v2}, Landroid/view/View;->removeOnAttachStateChangeListener(Landroid/view/View$OnAttachStateChangeListener;)V
++
++    invoke-virtual {p0, v2}, Landroid/view/View;->removeOnLayoutChangeListener(Landroid/view/View$OnLayoutChangeListener;)V
++
++    invoke-virtual {p0, v0, v1}, Landroid/view/View;->setTag(ILjava/lang/Object;)V
++
++    return-void
++.end method
++
++.method private install()V
++    .locals 5
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassSurface;->removeMaterial()V
++
++    iget-boolean v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->active:Z
++
++    if-eqz v0, :cond_62
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassSurface;->permitted()Z
++
++    move-result v0
++
++    if-eqz v0, :cond_62
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-virtual {v0}, Landroid/view/View;->getResources()Landroid/content/res/Resources;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Landroid/content/res/Resources;->getConfiguration()Landroid/content/res/Configuration;
++
++    move-result-object v0
++
++    iget v0, v0, Landroid/content/res/Configuration;->uiMode:I
++
++    and-int/lit8 v0, v0, 0x30
++
++    const/16 v1, 0x20
++
++    const/4 v2, 0x1
++
++    const/4 v3, 0x0
++
++    if-ne v0, v1, :cond_23
++
++    move v0, v2
++
++    goto :goto_24
++
++    :cond_23
++    move v0, v3
++
++    :goto_24
++    new-instance v1, Lio/mesalabs/unica/glass/GlassCapsule;
++
++    iget-object v4, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-direct {v1, v4, v0, v3}, Lio/mesalabs/unica/glass/GlassCapsule;-><init>(Landroid/view/View;ZZ)V
++
++    iput-object v1, p0, Lio/mesalabs/unica/glass/GlassSurface;->material:Lio/mesalabs/unica/glass/GlassCapsule;
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-virtual {v0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    const-class v1, Landroid/app/UiModeManager;
++
++    invoke-virtual {v0, v1}, Landroid/content/Context;->getSystemService(Ljava/lang/Class;)Ljava/lang/Object;
++
++    move-result-object v0
++
++    check-cast v0, Landroid/app/UiModeManager;
++
++    if-eqz v0, :cond_46
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassSurface;->material:Lio/mesalabs/unica/glass/GlassCapsule;
++
++    invoke-virtual {v0}, Landroid/app/UiModeManager;->getContrast()F
++
++    move-result v0
++
++    invoke-virtual {v1, v0}, Lio/mesalabs/unica/glass/GlassCapsule;->setUiContrast(F)V
++
++    :cond_46
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    const/4 v1, 0x0
++
++    invoke-virtual {v0, v1}, Landroid/view/View;->setBackgroundTintList(Landroid/content/res/ColorStateList;)V
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassSurface;->material:Lio/mesalabs/unica/glass/GlassCapsule;
++
++    invoke-virtual {v0, v1}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-virtual {v0, v2}, Landroid/view/View;->setClipToOutline(Z)V
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassSurface;->material:Lio/mesalabs/unica/glass/GlassCapsule;
++
++    invoke-static {v0, v1, v3}, Lio/mesalabs/unica/glass/GlassBackdrop;->install(Landroid/view/View;Landroid/graphics/drawable/Drawable;Z)Lio/mesalabs/unica/glass/GlassBackdrop;
++
++    move-result-object v0
++
++    iput-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->backdrop:Lio/mesalabs/unica/glass/GlassBackdrop;
++
++    :cond_62
++    return-void
++.end method
++
++.method private installSafely()V
++    .locals 2
++
++    :try_start_0
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassSurface;->install()V
++    :try_end_3
++    .catch Ljava/lang/RuntimeException; {:try_start_0 .. :try_end_3} :catch_4
++    .catch Ljava/lang/LinkageError; {:try_start_0 .. :try_end_3} :catch_4
++
++    return-void
++
++    :catch_4
++    move-exception v0
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassSurface;->removeMaterial()V
++
++    const-string p0, "UN1CA-GlassSurface"
++
++    const-string v1, "Native material unavailable"
++
++    invoke-static {p0, v1, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    return-void
++.end method
++
++.method private static key(Landroid/view/View;)I
++    .locals 3
++
++    invoke-virtual {p0}, Landroid/view/View;->getResources()Landroid/content/res/Resources;
++
++    move-result-object v0
++
++    invoke-virtual {p0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object p0
++
++    invoke-virtual {p0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
++
++    move-result-object p0
++
++    const-string v1, "unica_glass_surface"
++
++    const-string v2, "id"
++
++    invoke-virtual {v0, v1, v2, p0}, Landroid/content/res/Resources;->getIdentifier(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result p0
++
++    return p0
++.end method
++
++.method private permitted()Z
++    .locals 8
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-virtual {v0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    const-class v1, Landroid/os/PowerManager;
++
++    invoke-virtual {v0, v1}, Landroid/content/Context;->getSystemService(Ljava/lang/Class;)Ljava/lang/Object;
++
++    move-result-object v0
++
++    check-cast v0, Landroid/os/PowerManager;
++
++    iget-object v1, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-virtual {v1}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v1
++
++    invoke-virtual {v1}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v1
++
++    const-string v2, "current_sec_active_themepackage"
++
++    invoke-static {v1, v2}, Landroid/provider/Settings$System;->getString(Landroid/content/ContentResolver;Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v1
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-virtual {v2}, Landroid/view/View;->getResources()Landroid/content/res/Resources;
++
++    move-result-object v2
++
++    invoke-virtual {v2}, Landroid/content/res/Resources;->getDisplayMetrics()Landroid/util/DisplayMetrics;
++
++    move-result-object v2
++
++    iget v2, v2, Landroid/util/DisplayMetrics;->density:F
++
++    iget-object v3, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-virtual {v3}, Landroid/view/View;->getWidth()I
++
++    move-result v3
++
++    iget-object v4, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-virtual {v4}, Landroid/view/View;->getHeight()I
++
++    move-result v4
++
++    const/4 v5, 0x0
++
++    if-lez v3, :cond_9f
++
++    if-lez v4, :cond_9f
++
++    invoke-static {v3, v4}, Ljava/lang/Math;->min(II)I
++
++    move-result v6
++
++    int-to-float v6, v6
++
++    const/high16 v7, 0x42e00000    # 112.0f
++
++    mul-float/2addr v2, v7
++
++    cmpg-float v2, v6, v2
++
++    if-gtz v2, :cond_9f
++
++    invoke-static {v3, v4}, Ljava/lang/Math;->max(II)I
++
++    move-result v2
++
++    int-to-float v2, v2
++
++    invoke-static {v3, v4}, Ljava/lang/Math;->min(II)I
++
++    move-result v3
++
++    int-to-float v3, v3
++
++    const v4, 0x3fcccccd    # 1.6f
++
++    mul-float/2addr v3, v4
++
++    cmpl-float v2, v2, v3
++
++    if-ltz v2, :cond_9f
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-virtual {v2}, Landroid/view/View;->isHardwareAccelerated()Z
++
++    move-result v2
++
++    if-eqz v2, :cond_9f
++
++    if-eqz v0, :cond_69
++
++    invoke-virtual {v0}, Landroid/os/PowerManager;->isPowerSaveMode()Z
++
++    move-result v0
++
++    if-nez v0, :cond_9f
++
++    :cond_69
++    const-string v0, "sesl.debug.blurcompat.blur_force_off"
++
++    invoke-static {v0, v5}, Landroid/os/SystemProperties;->getInt(Ljava/lang/String;I)I
++
++    move-result v0
++
++    const/4 v2, 0x1
++
++    if-eq v0, v2, :cond_9f
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-virtual {v0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v0
++
++    const-string v3, "accessibility_reduce_transparency"
++
++    invoke-static {v0, v3, v5}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
++
++    move-result v0
++
++    if-nez v0, :cond_9f
++
++    iget-object p0, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-virtual {p0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object p0
++
++    invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object p0
++
++    const-string v0, "disable_window_blurs"
++
++    invoke-static {p0, v0, v5}, Landroid/provider/Settings$Global;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
++
++    move-result p0
++
++    if-nez p0, :cond_9f
++
++    if-eqz v1, :cond_9e
++
++    invoke-virtual {v1}, Ljava/lang/String;->isEmpty()Z
++
++    move-result p0
++
++    if-eqz p0, :cond_9f
++
++    :cond_9e
++    return v2
++
++    :cond_9f
++    return v5
++.end method
++
++.method private removeMaterial()V
++    .locals 3
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->backdrop:Lio/mesalabs/unica/glass/GlassBackdrop;
++
++    const/4 v1, 0x0
++
++    if-eqz v0, :cond_a
++
++    invoke-virtual {v0}, Lio/mesalabs/unica/glass/GlassBackdrop;->dispose()V
++
++    iput-object v1, p0, Lio/mesalabs/unica/glass/GlassSurface;->backdrop:Lio/mesalabs/unica/glass/GlassBackdrop;
++
++    :cond_a
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->material:Lio/mesalabs/unica/glass/GlassCapsule;
++
++    if-eqz v0, :cond_2d
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    invoke-virtual {v0}, Landroid/view/View;->getBackground()Landroid/graphics/drawable/Drawable;
++
++    move-result-object v0
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassSurface;->material:Lio/mesalabs/unica/glass/GlassCapsule;
++
++    if-ne v0, v2, :cond_2d
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassSurface;->original:Landroid/graphics/drawable/Drawable;
++
++    invoke-virtual {v0, v2}, Landroid/view/View;->setBackground(Landroid/graphics/drawable/Drawable;)V
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    iget-object v2, p0, Lio/mesalabs/unica/glass/GlassSurface;->tint:Landroid/content/res/ColorStateList;
++
++    invoke-virtual {v0, v2}, Landroid/view/View;->setBackgroundTintList(Landroid/content/res/ColorStateList;)V
++
++    iget-object v0, p0, Lio/mesalabs/unica/glass/GlassSurface;->view:Landroid/view/View;
++
++    iget-boolean v2, p0, Lio/mesalabs/unica/glass/GlassSurface;->clip:Z
++
++    invoke-virtual {v0, v2}, Landroid/view/View;->setClipToOutline(Z)V
++
++    :cond_2d
++    iput-object v1, p0, Lio/mesalabs/unica/glass/GlassSurface;->material:Lio/mesalabs/unica/glass/GlassCapsule;
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public onLayoutChange(Landroid/view/View;IIIIIIII)V
++    .locals 0
++
++    sub-int/2addr p4, p2
++
++    sub-int/2addr p8, p6
++
++    if-ne p4, p8, :cond_9
++
++    sub-int/2addr p5, p3
++
++    sub-int/2addr p9, p7
++
++    if-ne p5, p9, :cond_9
++
++    return-void
++
++    :cond_9
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassSurface;->installSafely()V
++
++    return-void
++.end method
++
++.method public onViewAttachedToWindow(Landroid/view/View;)V
++    .locals 0
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassSurface;->installSafely()V
++
++    return-void
++.end method
++
++.method public onViewDetachedFromWindow(Landroid/view/View;)V
++    .locals 0
++
++    invoke-direct {p0}, Lio/mesalabs/unica/glass/GlassSurface;->removeMaterial()V
++
++    return-void
++.end method
