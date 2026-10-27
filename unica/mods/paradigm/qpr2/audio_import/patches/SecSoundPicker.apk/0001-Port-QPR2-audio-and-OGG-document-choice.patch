@@ -1,0 +1,324 @@
+Subject: [PATCH] Offer the QPR2 audio/OGG document route beside the native Samsung sound chooser
+
+diff --git a/res/values-nl/unica_sound_documents.xml b/res/values-nl/unica_sound_documents.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values-nl/unica_sound_documents.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources><string name="unica_sound_document_title">Bestand kiezen…</string><string name="unica_sound_document_unavailable">Geen bestandskiezer beschikbaar</string></resources>
+diff --git a/res/values/public.xml b/res/values/public.xml
+--- a/res/values/public.xml
++++ b/res/values/public.xml
+@@ -6380,4 +6380,7 @@
+     <public type="drawable" name="unica_inline_gap_7f070033" id="0x7f070033" />
+     <public type="drawable" name="unica_inline_gap_7f070034" id="0x7f070034" />
+     <public type="drawable" name="unica_inline_gap_7f070035" id="0x7f070035" />
++    <public type="id" name="unica_sound_document_import" id="0x7f08034a" />
++    <public type="string" name="unica_sound_document_title" id="0x7f100182" />
++    <public type="string" name="unica_sound_document_unavailable" id="0x7f100183" />
+ </resources>
+diff --git a/res/values/unica_sound_documents.xml b/res/values/unica_sound_documents.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values/unica_sound_documents.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources><item type="id" name="unica_sound_document_import" /><string name="unica_sound_document_title">Choose a file…</string><string name="unica_sound_document_unavailable">No file picker is available</string></resources>
+diff --git a/smali/com/samsung/android/secsoundpicker/SecSoundPickerActivity.smali b/smali/com/samsung/android/secsoundpicker/SecSoundPickerActivity.smali
+--- a/smali/com/samsung/android/secsoundpicker/SecSoundPickerActivity.smali
++++ b/smali/com/samsung/android/secsoundpicker/SecSoundPickerActivity.smali
+@@ -3213,7 +3213,11 @@
+ .end method
+ 
+ .method public onCreateOptionsMenu(Landroid/view/Menu;)Z
+-    .locals 5
++    .locals 9
++
++    move-object v5, p0
++
++    move-object v6, p1
+ 
+     const-string v0, "onCreateOptionsMenu"
+ 
+@@ -3300,6 +3304,12 @@
+ 
+     move-result p0
+ 
++    iget-boolean v7, v5, Lcom/samsung/android/secsoundpicker/SecSoundPickerActivity;->mHasAddMenu:Z
++
++    iget v8, v5, Lcom/samsung/android/secsoundpicker/SecSoundPickerActivity;->mType:I
++
++    invoke-static {v5, v6, v7, v8}, Lio/mesalabs/unica/audio/Qpr2SoundDocuments;->add(Landroid/app/Activity;Landroid/view/Menu;ZI)V
++
+     return p0
+ .end method
+ 
+@@ -3341,6 +3351,22 @@
+ 
+ .method public onOptionsItemSelected(Landroid/view/MenuItem;)Z
+     .locals 4
++
++    iget-boolean v0, p0, Lcom/samsung/android/secsoundpicker/SecSoundPickerActivity;->mHasAddMenu:Z
++
++    iget v1, p0, Lcom/samsung/android/secsoundpicker/SecSoundPickerActivity;->mType:I
++
++    invoke-static {p0, p1, v0, v1}, Lio/mesalabs/unica/audio/Qpr2SoundDocuments;->handle(Landroid/app/Activity;Landroid/view/MenuItem;ZI)Z
++
++    move-result v0
++
++    if-eqz v0, :unica_original_sound_menu
++
++    const/4 v0, 0x1
++
++    return v0
++
++    :unica_original_sound_menu
+ 
+     invoke-interface {p1}, Landroid/view/MenuItem;->getItemId()I
+ 
+diff --git a/smali_classes2/io/mesalabs/unica/audio/Qpr2SoundDocuments.smali b/smali_classes2/io/mesalabs/unica/audio/Qpr2SoundDocuments.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes2/io/mesalabs/unica/audio/Qpr2SoundDocuments.smali
+@@ -0,0 +1,240 @@
++.class public final Lio/mesalabs/unica/audio/Qpr2SoundDocuments;
++.super Ljava/lang/Object;
++.source "Qpr2SoundDocuments.java"
++
++
++# direct methods
++.method public constructor <init>()V
++    .locals 0
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    return-void
++.end method
++
++.method public static add(Landroid/app/Activity;Landroid/view/Menu;ZI)V
++    .locals 1
++
++    if-eqz p0, :cond_30
++
++    if-eqz p1, :cond_30
++
++    invoke-static {p2, p3}, Lio/mesalabs/unica/audio/Qpr2SoundDocuments;->supported(ZI)Z
++
++    move-result p2
++
++    if-eqz p2, :cond_30
++
++    const-string p2, "unica_sound_document_import"
++
++    const-string p3, "id"
++
++    invoke-static {p0, p2, p3}, Lio/mesalabs/unica/audio/Qpr2SoundDocuments;->id(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result p2
++
++    const-string p3, "unica_sound_document_title"
++
++    const-string v0, "string"
++
++    invoke-static {p0, p3, v0}, Lio/mesalabs/unica/audio/Qpr2SoundDocuments;->id(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result p0
++
++    if-eqz p2, :cond_30
++
++    if-eqz p0, :cond_30
++
++    invoke-interface {p1, p2}, Landroid/view/Menu;->findItem(I)Landroid/view/MenuItem;
++
++    move-result-object p3
++
++    if-nez p3, :cond_30
++
++    const/4 p3, 0x0
++
++    const/16 v0, 0x63
++
++    invoke-interface {p1, p3, p2, v0, p0}, Landroid/view/Menu;->add(IIII)Landroid/view/MenuItem;
++
++    move-result-object p0
++
++    sget p1, Landroid/view/MenuItem;->SHOW_AS_ACTION_NEVER:I
++
++    invoke-interface {p0, p1}, Landroid/view/MenuItem;->setShowAsAction(I)V
++
++    :cond_30
++    return-void
++.end method
++
++.method public static handle(Landroid/app/Activity;Landroid/view/MenuItem;ZI)Z
++    .locals 1
++
++    const/4 v0, 0x0
++
++    if-eqz p0, :cond_40
++
++    if-eqz p1, :cond_40
++
++    invoke-static {p2, p3}, Lio/mesalabs/unica/audio/Qpr2SoundDocuments;->supported(ZI)Z
++
++    move-result p2
++
++    if-eqz p2, :cond_40
++
++    invoke-interface {p1}, Landroid/view/MenuItem;->isEnabled()Z
++
++    move-result p2
++
++    if-eqz p2, :cond_40
++
++    const-string p2, "unica_sound_document_import"
++
++    const-string p3, "id"
++
++    invoke-static {p0, p2, p3}, Lio/mesalabs/unica/audio/Qpr2SoundDocuments;->id(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result p2
++
++    if-eqz p2, :cond_40
++
++    invoke-interface {p1}, Landroid/view/MenuItem;->getItemId()I
++
++    move-result p1
++
++    if-ne p1, p2, :cond_40
++
++    :try_start_21
++    invoke-static {}, Lio/mesalabs/unica/audio/Qpr2SoundDocuments;->intent()Landroid/content/Intent;
++
++    move-result-object p1
++
++    const/16 p2, 0x12c
++
++    invoke-virtual {p0, p1, p2}, Landroid/app/Activity;->startActivityForResult(Landroid/content/Intent;I)V
++    :try_end_2a
++    .catch Landroid/content/ActivityNotFoundException; {:try_start_21 .. :try_end_2a} :catch_2b
++    .catch Ljava/lang/SecurityException; {:try_start_21 .. :try_end_2a} :catch_2b
++
++    goto :goto_3e
++
++    :catch_2b
++    const-string p1, "unica_sound_document_unavailable"
++
++    const-string p2, "string"
++
++    invoke-static {p0, p1, p2}, Lio/mesalabs/unica/audio/Qpr2SoundDocuments;->id(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result p1
++
++    if-eqz p1, :cond_3e
++
++    sget p2, Landroid/widget/Toast;->LENGTH_SHORT:I
++
++    invoke-static {p0, p1, p2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;II)Landroid/widget/Toast;
++
++    move-result-object p0
++
++    invoke-virtual {p0}, Landroid/widget/Toast;->show()V
++
++    :cond_3e
++    :goto_3e
++    const/4 p0, 0x1
++
++    return p0
++
++    :cond_40
++    return v0
++.end method
++
++.method private static id(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)I
++    .locals 1
++
++    invoke-virtual {p0}, Landroid/app/Activity;->getResources()Landroid/content/res/Resources;
++
++    move-result-object v0
++
++    invoke-virtual {p0}, Landroid/app/Activity;->getPackageName()Ljava/lang/String;
++
++    move-result-object p0
++
++    invoke-virtual {v0, p1, p2, p0}, Landroid/content/res/Resources;->getIdentifier(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result p0
++
++    return p0
++.end method
++
++.method public static intent()Landroid/content/Intent;
++    .locals 6
++
++    new-instance v0, Landroid/content/Intent;
++
++    sget-object v1, Landroid/content/Intent;->ACTION_GET_CONTENT:Ljava/lang/String;
++
++    invoke-direct {v0, v1}, Landroid/content/Intent;-><init>(Ljava/lang/String;)V
++
++    const-string v1, "audio/*"
++
++    invoke-virtual {v0, v1}, Landroid/content/Intent;->setType(Ljava/lang/String;)Landroid/content/Intent;
++
++    move-result-object v0
++
++    sget-object v2, Landroid/content/Intent;->EXTRA_MIME_TYPES:Ljava/lang/String;
++
++    const/4 v3, 0x2
++
++    new-array v3, v3, [Ljava/lang/String;
++
++    const/4 v4, 0x0
++
++    aput-object v1, v3, v4
++
++    const/4 v1, 0x1
++
++    const-string v5, "application/ogg"
++
++    aput-object v5, v3, v1
++
++    invoke-virtual {v0, v2, v3}, Landroid/content/Intent;->putExtra(Ljava/lang/String;[Ljava/lang/String;)Landroid/content/Intent;
++
++    sget-object v1, Landroid/content/Intent;->CATEGORY_OPENABLE:Ljava/lang/String;
++
++    invoke-virtual {v0, v1}, Landroid/content/Intent;->addCategory(Ljava/lang/String;)Landroid/content/Intent;
++
++    sget v1, Landroid/content/Intent;->FLAG_GRANT_READ_URI_PERMISSION:I
++
++    invoke-virtual {v0, v1}, Landroid/content/Intent;->addFlags(I)Landroid/content/Intent;
++
++    sget-object v1, Landroid/content/Intent;->EXTRA_ALLOW_MULTIPLE:Ljava/lang/String;
++
++    invoke-virtual {v0, v1, v4}, Landroid/content/Intent;->putExtra(Ljava/lang/String;Z)Landroid/content/Intent;
++
++    return-object v0
++.end method
++
++.method private static supported(ZI)Z
++    .locals 1
++
++    if-eqz p0, :cond_c
++
++    const/4 p0, 0x1
++
++    if-eq p1, p0, :cond_b
++
++    const/4 v0, 0x2
++
++    if-eq p1, v0, :cond_b
++
++    const/4 v0, 0x4
++
++    if-ne p1, v0, :cond_c
++
++    :cond_b
++    return p0
++
++    :cond_c
++    const/4 p0, 0x0
++
++    return p0
++.end method
