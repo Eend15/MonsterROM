@@ -903,16 +903,16 @@ fi
 # SEC_PRODUCT_FEATURE_LCD_CONFIG_COLOR_WEAKNESS_SOLUTION
 if $SOURCE_LCD_SUPPORT_MDNIE_HW && [[ "$SOURCE_LCD_CONFIG_COLOR_WEAKNESS_SOLUTION" != "0" ]]; then
     if ! $TARGET_LCD_SUPPORT_MDNIE_HW; then
-        SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_LCD_SUPPORT_MDNIE_HW" --delete
+        SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_LCD_SUPPORT_MDNIE_HW" --delete || return 1
 
         APPLY_PATCH "system" "system/framework/framework.jar" \
-            "$MODPATH/mdnie/hw/framework.jar/0001-Disable-HW-mDNIe.patch"
+            "$MODPATH/mdnie/hw/${PRODUCT_PATCH_ABI}framework.jar/0001-Disable-HW-mDNIe.patch" || return 1
         if [[ "$TARGET_LCD_CONFIG_COLOR_WEAKNESS_SOLUTION" == "0" ]]; then
             APPLY_PATCH "system" "system/framework/framework.jar" \
-                "$MODPATH/mdnie/hw/framework.jar/0002-Disable-A11Y_COLOR_BOOL_SUPPORT_DMC_COLORWEAKNESS.patch"
+                "$MODPATH/mdnie/hw/${PRODUCT_PATCH_ABI}framework.jar/0002-Disable-A11Y_COLOR_BOOL_SUPPORT_DMC_COLORWEAKNESS.patch" || return 1
         fi
         APPLY_PATCH "system" "system/framework/services.jar" \
-            "$MODPATH/mdnie/hw/services.jar/0001-Disable-HW-mDNIe.patch"
+            "$MODPATH/mdnie/hw/${PRODUCT_PATCH_ABI}services.jar/0001-Disable-HW-mDNIe.patch" || return 1
     fi
 elif $SOURCE_LCD_SUPPORT_MDNIE_HW && [[ "$SOURCE_LCD_CONFIG_COLOR_WEAKNESS_SOLUTION" == "0" ]]; then
     # TODO handle these conditions
