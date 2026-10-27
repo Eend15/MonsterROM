@@ -1015,6 +1015,19 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 capture_actions
+    MODPATH="$PARADIGM_MODPATH/qpr2/capture_actions"
+    LOG_STEP_IN "- Adding QPR2 capture_actions"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/app/SmartCapture/SmartCapture.apk" \
+            "$MODPATH/patches/SmartCapture.apk/0001-Expose-QPR2-post-recording-edit-action.patch"
+        APPLY_PATCH "system" "system/app/SmartCapture/SmartCapture.apk" \
+            "$MODPATH/patches/SmartCapture.apk/0002-Keep-recording-actions-without-preview-bitmap.patch"
+        APPLY_PATCH "system" "system/app/SmartCapture/SmartCapture.apk" \
+            "$MODPATH/patches/SmartCapture.apk/0099-Identify-QPR2-r13.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

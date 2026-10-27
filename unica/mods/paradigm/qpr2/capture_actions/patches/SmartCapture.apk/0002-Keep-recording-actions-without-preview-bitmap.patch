@@ -1,0 +1,34 @@
+Subject: [PATCH] Keep saved-recording actions available when native thumbnail extraction is unavailable
+
+diff --git a/smali_classes3/com/samsung/android/app/smartcapture/baseutil/notification/ScreenRecorderNotification.smali b/smali_classes3/com/samsung/android/app/smartcapture/baseutil/notification/ScreenRecorderNotification.smali
+--- a/smali_classes3/com/samsung/android/app/smartcapture/baseutil/notification/ScreenRecorderNotification.smali
++++ b/smali_classes3/com/samsung/android/app/smartcapture/baseutil/notification/ScreenRecorderNotification.smali
+@@ -312,17 +312,8 @@
+ 
+     move-result-object p1
+ 
+-    if-nez p1, :cond_2
+-
+-    sget-object p0, Lcom/samsung/android/app/smartcapture/baseutil/notification/ScreenRecorderNotification;->TAG:Ljava/lang/String;
+-
+-    const-string p1, "notification preview bitmap is null!!"
+-
+-    invoke-static {p0, p1}, Lcom/samsung/android/app/smartcapture/baseutil/log/Log;->e(Ljava/lang/String;Ljava/lang/String;)I
+-
+-    return-void
+-
+-    :cond_2
++    if-eqz p1, :unica_recording_actions
++
+     new-instance v0, Landroidx/core/app/m;
+ 
+     invoke-direct {v0}, Landroidx/core/app/g0;-><init>()V
+@@ -336,6 +327,8 @@
+     iput-object v5, v0, Landroidx/core/app/m;->a:Landroidx/core/graphics/drawable/IconCompat;
+ 
+     invoke-virtual {v6, v0}, Landroidx/core/app/NotificationCompat$Builder;->e(Landroidx/core/app/g0;)V
++
++    :unica_recording_actions
+ 
+     new-instance p1, Landroid/content/Intent;
+ 
