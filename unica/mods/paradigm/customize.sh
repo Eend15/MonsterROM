@@ -358,6 +358,18 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
     fi
     LOG_STEP_OUT
 
+    # QPR2 diagnostics
+    MODPATH="$PARADIGM_MODPATH/qpr2/diagnostics"
+    LOG_STEP_IN "- Adding QPR2 diagnostics"
+    # Keep the original SDK-36 / One UI 8 build unchanged.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/DeviceDiagnostics/DeviceDiagnostics.apk" \
+            "$MODPATH/patches/DeviceDiagnostics.apk/0001-Retain-permission-state-across-activity-recreation.patch"
+        APPLY_PATCH "system" "system/priv-app/DeviceDiagnostics/DeviceDiagnostics.apk" \
+            "$MODPATH/patches/DeviceDiagnostics.apk/0099-Identify-reviewed-QPR2-backport.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

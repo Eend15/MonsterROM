@@ -1,0 +1,236 @@
+Subject: [PATCH] Retain pending permission requests and denial state without skipping recreated diagnostic UI
+
+diff --git a/smali/com/android/devicediagnostics/PermissionsHelper.smali b/smali/com/android/devicediagnostics/PermissionsHelper.smali
+--- a/smali/com/android/devicediagnostics/PermissionsHelper.smali
++++ b/smali/com/android/devicediagnostics/PermissionsHelper.smali
+@@ -7,6 +7,8 @@
+ .field public active:Z
+ 
++.field public requestInFlight:Z
++
+ .field public final activity:Lcom/android/settingslib/collapsingtoolbar/CollapsingToolbarBaseActivity;
+ 
+ .field public final onPermissionsGranted:Lkotlin/jvm/functions/Function0;
+ 
+@@ -203,10 +205,67 @@
+     iput-boolean v0, p0, Lcom/android/devicediagnostics/PermissionsHelper;->active:Z
+ 
++    iput-boolean v0, p0, Lcom/android/devicediagnostics/PermissionsHelper;->requestInFlight:Z
++
+     iget-object v0, p0, Lcom/android/devicediagnostics/PermissionsHelper;->requestPermissions:Landroidx/activity/result/ActivityResultRegistry$register$2;
+ 
+     iget-object p0, p0, Lcom/android/devicediagnostics/PermissionsHelper;->permissions:[Ljava/lang/String;
+ 
+     invoke-virtual {v0, p0}, Landroidx/activity/result/ActivityResultRegistry$register$2;->launch(Ljava/lang/Object;)V
+ 
+     return-void
+ .end method
++
++.method public final restoreState(Landroid/os/Bundle;)V
++    .locals 2
++
++    const/4 v0, 0x0
++
++    if-eqz p1, :cond_0
++
++    const-string v1, "permissions_helper_request_in_flight"
++
++    invoke-virtual {p1, v1, v0}, Landroid/os/Bundle;->getBoolean(Ljava/lang/String;Z)Z
++
++    move-result v1
++
++    goto :goto_0
++
++    :cond_0
++    move v1, v0
++
++    :goto_0
++    iput-boolean v1, p0, Lcom/android/devicediagnostics/PermissionsHelper;->active:Z
++
++    iput-boolean v1, p0, Lcom/android/devicediagnostics/PermissionsHelper;->requestInFlight:Z
++
++    if-eqz p1, :cond_1
++
++    const-string v1, "permissions_helper_denied_once"
++
++    invoke-virtual {p1, v1, v0}, Landroid/os/Bundle;->getBoolean(Ljava/lang/String;Z)Z
++
++    move-result v0
++
++    :cond_1
++    iput-boolean v0, p0, Lcom/android/devicediagnostics/PermissionsHelper;->permissionsDeniedOnce:Z
++
++    return-void
++.end method
++
++.method public final saveState(Landroid/os/Bundle;)V
++    .locals 2
++
++    const-string v0, "permissions_helper_request_in_flight"
++
++    iget-boolean v1, p0, Lcom/android/devicediagnostics/PermissionsHelper;->requestInFlight:Z
++
++    invoke-virtual {p1, v0, v1}, Landroid/os/Bundle;->putBoolean(Ljava/lang/String;Z)V
++
++    const-string v0, "permissions_helper_denied_once"
++
++    iget-boolean p0, p0, Lcom/android/devicediagnostics/PermissionsHelper;->permissionsDeniedOnce:Z
++
++    invoke-virtual {p1, v0, p0}, Landroid/os/Bundle;->putBoolean(Ljava/lang/String;Z)V
++
++    return-void
++.end method
+diff --git a/smali/com/android/devicediagnostics/PermissionsHelper$requestPermissions$1.smali b/smali/com/android/devicediagnostics/PermissionsHelper$requestPermissions$1.smali
+--- a/smali/com/android/devicediagnostics/PermissionsHelper$requestPermissions$1.smali
++++ b/smali/com/android/devicediagnostics/PermissionsHelper$requestPermissions$1.smali
+@@ -21,6 +21,10 @@
+     iget-object p0, p0, Lcom/android/devicediagnostics/PermissionsHelper$requestPermissions$1;->this$0:Lcom/android/devicediagnostics/PermissionsHelper;
+ 
++    const/4 v0, 0x0
++
++    iput-boolean v0, p0, Lcom/android/devicediagnostics/PermissionsHelper;->requestInFlight:Z
++
+     invoke-interface {p1}, Ljava/util/Map;->entrySet()Ljava/util/Set;
+ 
+     move-result-object p1
+ 
+diff --git a/smali/com/android/devicediagnostics/PermissionsHelper$requestPermissionsAgain$1.smali b/smali/com/android/devicediagnostics/PermissionsHelper$requestPermissionsAgain$1.smali
+--- a/smali/com/android/devicediagnostics/PermissionsHelper$requestPermissionsAgain$1.smali
++++ b/smali/com/android/devicediagnostics/PermissionsHelper$requestPermissionsAgain$1.smali
+@@ -80,6 +80,10 @@
+ 
+     :cond_0
++    const/4 v0, 0x1
++
++    iput-boolean v0, p1, Lcom/android/devicediagnostics/PermissionsHelper;->requestInFlight:Z
++
+     iget-object p2, p1, Lcom/android/devicediagnostics/PermissionsHelper;->requestPermissions:Landroidx/activity/result/ActivityResultRegistry$register$2;
+ 
+     iget-object p1, p1, Lcom/android/devicediagnostics/PermissionsHelper;->permissions:[Ljava/lang/String;
+ 
+diff --git a/smali/com/android/devicediagnostics/evaluated/QrCodeScanActivity.smali b/smali/com/android/devicediagnostics/evaluated/QrCodeScanActivity.smali
+--- a/smali/com/android/devicediagnostics/evaluated/QrCodeScanActivity.smali
++++ b/smali/com/android/devicediagnostics/evaluated/QrCodeScanActivity.smali
+@@ -63,13 +63,17 @@
+ .end method
+ 
+ 
+ # virtual methods
+ .method public final onCreate(Landroid/os/Bundle;)V
+-    .locals 0
++    .locals 1
+ 
+     invoke-super {p0, p1}, Lcom/android/settingslib/collapsingtoolbar/CollapsingToolbarBaseActivity;->onCreate(Landroid/os/Bundle;)V
++
++    iget-object v0, p0, Lcom/android/devicediagnostics/evaluated/QrCodeScanActivity;->permissions:Lcom/android/devicediagnostics/PermissionsHelper;
++
++    invoke-virtual {v0, p1}, Lcom/android/devicediagnostics/PermissionsHelper;->restoreState(Landroid/os/Bundle;)V
+ 
+     const p1, 0x7f0d001e
+ 
+     invoke-virtual {p0, p1}, Lcom/android/settingslib/collapsingtoolbar/CollapsingToolbarBaseActivity;->setContentView(I)V
+ 
+@@ -212,5 +216,19 @@
+ 
+     invoke-virtual {p0}, Lcom/android/devicediagnostics/PermissionsHelper;->requestPermissions()V
+ 
+     return-void
+ .end method
++
++.method public final onSaveInstanceState(Landroid/os/Bundle;)V
++    .locals 0
++
++    invoke-virtual {p1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
++
++    invoke-super {p0, p1}, Lcom/android/settingslib/collapsingtoolbar/CollapsingToolbarBaseActivity;->onSaveInstanceState(Landroid/os/Bundle;)V
++
++    iget-object p0, p0, Lcom/android/devicediagnostics/evaluated/QrCodeScanActivity;->permissions:Lcom/android/devicediagnostics/PermissionsHelper;
++
++    invoke-virtual {p0, p1}, Lcom/android/devicediagnostics/PermissionsHelper;->saveState(Landroid/os/Bundle;)V
++
++    return-void
++.end method
+diff --git a/smali/com/android/devicediagnostics/trusted/QrCodeDisplayActivity.smali b/smali/com/android/devicediagnostics/trusted/QrCodeDisplayActivity.smali
+--- a/smali/com/android/devicediagnostics/trusted/QrCodeDisplayActivity.smali
++++ b/smali/com/android/devicediagnostics/trusted/QrCodeDisplayActivity.smali
+@@ -47,13 +47,17 @@
+ .end method
+ 
+ 
+ # virtual methods
+ .method public final onCreate(Landroid/os/Bundle;)V
+-    .locals 0
++    .locals 1
+ 
+     invoke-super {p0, p1}, Lcom/android/settingslib/collapsingtoolbar/CollapsingToolbarBaseActivity;->onCreate(Landroid/os/Bundle;)V
++
++    iget-object v0, p0, Lcom/android/devicediagnostics/trusted/QrCodeDisplayActivity;->permissions:Lcom/android/devicediagnostics/PermissionsHelper;
++
++    invoke-virtual {v0, p1}, Lcom/android/devicediagnostics/PermissionsHelper;->restoreState(Landroid/os/Bundle;)V
+ 
+     const p1, 0x7f0d001e
+ 
+     invoke-virtual {p0, p1}, Lcom/android/settingslib/collapsingtoolbar/CollapsingToolbarBaseActivity;->setContentView(I)V
+ 
+@@ -73,5 +77,19 @@
+ 
+     invoke-virtual {p0}, Lcom/android/devicediagnostics/PermissionsHelper;->requestPermissions()V
+ 
+     return-void
+ .end method
++
++.method public final onSaveInstanceState(Landroid/os/Bundle;)V
++    .locals 0
++
++    invoke-virtual {p1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
++
++    invoke-super {p0, p1}, Lcom/android/settingslib/collapsingtoolbar/CollapsingToolbarBaseActivity;->onSaveInstanceState(Landroid/os/Bundle;)V
++
++    iget-object p0, p0, Lcom/android/devicediagnostics/trusted/QrCodeDisplayActivity;->permissions:Lcom/android/devicediagnostics/PermissionsHelper;
++
++    invoke-virtual {p0, p1}, Lcom/android/devicediagnostics/PermissionsHelper;->saveState(Landroid/os/Bundle;)V
++
++    return-void
++.end method
+diff --git a/smali/com/android/devicediagnostics/trusted/WaitForResultActivity.smali b/smali/com/android/devicediagnostics/trusted/WaitForResultActivity.smali
+--- a/smali/com/android/devicediagnostics/trusted/WaitForResultActivity.smali
++++ b/smali/com/android/devicediagnostics/trusted/WaitForResultActivity.smali
+@@ -106,13 +106,17 @@
+     :cond_0
+     return-void
+ .end method
+ 
+ .method public final onCreate(Landroid/os/Bundle;)V
+-    .locals 0
++    .locals 1
+ 
+     invoke-super {p0, p1}, Lcom/android/settingslib/collapsingtoolbar/CollapsingToolbarBaseActivity;->onCreate(Landroid/os/Bundle;)V
++
++    iget-object v0, p0, Lcom/android/devicediagnostics/trusted/WaitForResultActivity;->permissions:Lcom/android/devicediagnostics/PermissionsHelper;
++
++    invoke-virtual {v0, p1}, Lcom/android/devicediagnostics/PermissionsHelper;->restoreState(Landroid/os/Bundle;)V
+ 
+     const p1, 0x7f0d001e
+ 
+     invoke-virtual {p0, p1}, Lcom/android/settingslib/collapsingtoolbar/CollapsingToolbarBaseActivity;->setContentView(I)V
+ 
+@@ -132,5 +136,19 @@
+ 
+     invoke-virtual {p0}, Lcom/android/devicediagnostics/PermissionsHelper;->requestPermissions()V
+ 
+     return-void
+ .end method
++
++.method public final onSaveInstanceState(Landroid/os/Bundle;)V
++    .locals 0
++
++    invoke-virtual {p1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
++
++    invoke-super {p0, p1}, Lcom/android/settingslib/collapsingtoolbar/CollapsingToolbarBaseActivity;->onSaveInstanceState(Landroid/os/Bundle;)V
++
++    iget-object p0, p0, Lcom/android/devicediagnostics/trusted/WaitForResultActivity;->permissions:Lcom/android/devicediagnostics/PermissionsHelper;
++
++    invoke-virtual {p0, p1}, Lcom/android/devicediagnostics/PermissionsHelper;->saveState(Landroid/os/Bundle;)V
++
++    return-void
++.end method
