@@ -1,0 +1,77 @@
+Subject: [PATCH] Scope QPR2 selection descriptions to the original PrintSpooler preview
+
+Keep PrintSpooler.apk, its UID, private data and original Samsung signer intact.
+Its final PreviewPageFrame directly extends LinearLayout, has no setSelected
+override, and PageAdapter invokes LinearLayout.setSelected for both states.
+Provide QPR2's super-then-stateDescription behavior only to that exact class
+under its original package context. Other LinearLayouts keep super behavior.
+Use Samsung framework string fields, not GSI resource IDs or new app resources.
+
+diff --git a/smali_classes5/android/widget/LinearLayout.smali b/smali_classes5/android/widget/LinearLayout.smali
+--- a/smali_classes5/android/widget/LinearLayout.smali
++++ b/smali_classes5/android/widget/LinearLayout.smali
+@@ -5285,7 +5285,64 @@
+     :cond_0
+     return-void
+ .end method
+ 
++.method public whitelist setSelected(Z)V
++    .locals 3
++
++    invoke-super {p0, p1}, Landroid/view/ViewGroup;->setSelected(Z)V
++
++    invoke-virtual {p0}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Ljava/lang/Class;->getName()Ljava/lang/String;
++
++    move-result-object v0
++
++    const-string v1, "com.android.printspooler.widget.PreviewPageFrame"
++
++    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v0
++
++    if-eqz v0, :qpr2_print_done
++
++    invoke-virtual {p0}, Landroid/widget/LinearLayout;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
++
++    move-result-object v1
++
++    const-string v2, "com.android.printspooler"
++
++    invoke-virtual {v2, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v1
++
++    if-eqz v1, :qpr2_print_done
++
++    if-eqz p1, :qpr2_print_not_selected
++
++    sget v1, Lcom/android/internal/R$string;->selected:I
++
++    goto :qpr2_print_description
++
++    :qpr2_print_not_selected
++    sget v1, Lcom/android/internal/R$string;->not_selected:I
++
++    :qpr2_print_description
++    invoke-virtual {v0, v1}, Landroid/content/Context;->getString(I)Ljava/lang/String;
++
++    move-result-object v0
++
++    invoke-virtual {p0, v0}, Landroid/widget/LinearLayout;->setStateDescription(Ljava/lang/CharSequence;)V
++
++    :qpr2_print_done
++    return-void
++.end method
++
+ .method public whitelist setShowDividers(I)V
+     .locals 1
+ 

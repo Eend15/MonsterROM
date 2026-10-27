@@ -632,6 +632,35 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 print_accessibility
+    MODPATH="$PARADIGM_MODPATH/qpr2/print_accessibility"
+    LOG_STEP_IN "- Adding QPR2 print_accessibility"
+    # Keep the original SDK-36 / One UI 8 build unchanged.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        # Keep the original signed APK/data. The framework adds only this exact
+        # preview class's localized selected/not-selected state description.
+        DECODE_APK "system" "system/framework/framework.jar" || return 1
+        for QPR2_CHECK in framework apks; do
+            QPR2_CHECK_ROOT="$APKTOOL_DIR/system/framework/framework.jar"
+            if [ "$QPR2_CHECK" = "apks" ]; then QPR2_CHECK_ROOT="$WORK_DIR/system/system"; fi
+            [ -s "$MODPATH/$QPR2_CHECK.sha256" ] || {
+                ABORT "Missing original-print source contract: $QPR2_CHECK"
+                return 1
+            }
+            while read -r QPR2_EXPECTED QPR2_FILE; do
+                [ "$(sha256sum "$QPR2_CHECK_ROOT/$QPR2_FILE" | cut -d ' ' -f 1)" = "$QPR2_EXPECTED" ] || {
+                    ABORT "Unreviewed original-print source: $QPR2_FILE"
+                    return 1
+                }
+            done < "$MODPATH/$QPR2_CHECK.sha256" || return 1
+        done
+        unset QPR2_CHECK QPR2_CHECK_ROOT QPR2_EXPECTED QPR2_FILE
+        APPLY_PATCH "system" "system/framework/framework.jar" \
+            "$MODPATH/patches/framework.jar/0001-Describe-original-Samsung-print-preview-selection.patch" || return 1
+        SET_PROP "system" "ro.unica.qpr2.print_accessibility" "true" || return 1
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
