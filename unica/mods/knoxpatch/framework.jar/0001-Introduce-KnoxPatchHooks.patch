@@ -6,8 +6,8 @@ Subject: [PATCH] Introduce KnoxPatchHooks
 UN1CA: this patch is not complete! Please check unica/mods/knoxpatch/customize.sh for more info.
 ---
  .../android/os/SystemProperties.smali         |  22 +-
- .../io/mesalabs/unica/KnoxPatchHooks.smali    | 269 ++++++++++++++++++
- 2 files changed, 289 insertions(+), 2 deletions(-)
+ .../io/mesalabs/unica/KnoxPatchHooks.smali    | 267 ++++++++++++++++++
+ 2 files changed, 287 insertions(+), 2 deletions(-)
  create mode 100644 smali_classes6/io/mesalabs/unica/KnoxPatchHooks.smali
 
 diff --git a/smali_classes3/android/os/SystemProperties.smali b/smali_classes3/android/os/SystemProperties.smali
@@ -61,7 +61,7 @@ new file mode 100644
 index 00000000..8b68148a
 --- /dev/null
 +++ b/smali_classes6/io/mesalabs/unica/KnoxPatchHooks.smali
-@@ -0,0 +1,269 @@
+@@ -0,0 +1,267 @@
 +.class public final Lio/mesalabs/unica/KnoxPatchHooks;
 +.super Ljava/lang/Object;
 +.source "KnoxPatchHooks.java"
@@ -236,9 +236,7 @@ index 00000000..8b68148a
 +
 +    if-nez v0, :cond_0
 +
-+    const-string v0, "39"
-+
-+    invoke-static {v0}, Ljava/lang/Integer;->parseInt(Ljava/lang/String;)I
++    invoke-static {}, Lcom/samsung/android/knox/EdmUtils;->getAPILevelForInternal()I
 +
 +    move-result v0
 +
@@ -333,4 +331,3 @@ index 00000000..8b68148a
 +.end method
 -- 
 2.54.0
-
