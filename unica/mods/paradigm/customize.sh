@@ -590,6 +590,19 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 downloads
+    MODPATH="$PARADIGM_MODPATH/qpr2/downloads"
+    LOG_STEP_IN "- Adding QPR2 downloads"
+    # Keep the original SDK-36 / One UI 8 build unchanged.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        # android.media also contains five unmodified Samsung-signed packages.
+        # Rebuilding just DownloadsProvider with our platform key breaks that UID
+        # during PackageManager bootstrap. Keep its genuine media certificate;
+        # retain the experimental patch files, but do not apply/re-sign them.
+        LOG "Keeping Samsung-signed DownloadsProvider; QPR2 backport deferred (android.media signer)"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

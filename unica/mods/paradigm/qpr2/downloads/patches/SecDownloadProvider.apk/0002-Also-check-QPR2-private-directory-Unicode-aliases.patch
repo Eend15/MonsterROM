@@ -1,0 +1,44 @@
+Subject: [PATCH] Close the separately inlined private-directory Unicode route
+
+BUILD-ONLY: depends on retained downloads/0001 and is NOT deployable with the
+available ROM platform key. The exact Samsung android.media signer is required.
+The retained patch only updates isFileInExternalAndroidDirs. Samsung inlines
+QPR2 isFileInPrivateExternalAndroidDirs in checkDestinationFilePathRestrictions;
+apply the same raw-or-NFD/default-ignorable-filtered predicate there, retaining
+its existing canonicalization, IOException handler, permissions and rejection.
+
+diff --git a/smali/com/android/providers/downloads/Helpers.smali b/smali/com/android/providers/downloads/Helpers.smali
+--- a/smali/com/android/providers/downloads/Helpers.smali
++++ b/smali/com/android/providers/downloads/Helpers.smali
+@@ -641,10 +641,31 @@
+ 
+     invoke-virtual {p3, p6}, Ljava/util/regex/Pattern;->matcher(Ljava/lang/CharSequence;)Ljava/util/regex/Matcher;
+ 
++    move-result-object v0
++
++    invoke-virtual {v0}, Ljava/util/regex/Matcher;->matches()Z
++
++    move-result v0
++
++    if-nez v0, :qpr2_private_match
++
++    invoke-static {p6}, Lcom/android/providers/downloads/Helpers;->normalizeAndFilterDefaultIgnorableCodepoints(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object p6
++
++    invoke-virtual {p3, p6}, Ljava/util/regex/Pattern;->matcher(Ljava/lang/CharSequence;)Ljava/util/regex/Matcher;
++
+     move-result-object p3
+ 
+     invoke-virtual {p3}, Ljava/util/regex/Matcher;->matches()Z
+ 
+     move-result p3
++
++    goto :qpr2_private_checked
++
++    :qpr2_private_match
++    const/4 p3, 0x1
++
++    :qpr2_private_checked
+     :try_end_2
+     .catch Ljava/io/IOException; {:try_start_2 .. :try_end_2} :catch_2
