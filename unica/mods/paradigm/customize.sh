@@ -952,6 +952,19 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 systemui_controls
+    MODPATH="$PARADIGM_MODPATH/qpr2/systemui_controls"
+    LOG_STEP_IN "- Adding QPR2 systemui_controls"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+            "$MODPATH/patches/SystemUI.apk/0001-Port-QPR2-USB-approval-state-and-detach-handling.patch"
+        APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+            "$MODPATH/patches/SystemUI.apk/0002-Apply-the-QPR2-panning-choice-at-drag-start.patch"
+        APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+            "$MODPATH/patches/SystemUI.apk/0099-Identify-QPR2-SystemUI-r10.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

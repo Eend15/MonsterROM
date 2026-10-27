@@ -1,0 +1,33 @@
+Subject: [PATCH] Connect the new Settings panning choice to each actual Samsung magnifier drag
+
+diff --git a/smali/com/android/systemui/accessibility/WindowMagnificationController.smali b/smali/com/android/systemui/accessibility/WindowMagnificationController.smali
+--- a/smali/com/android/systemui/accessibility/WindowMagnificationController.smali
++++ b/smali/com/android/systemui/accessibility/WindowMagnificationController.smali
+@@ -3194,7 +3194,26 @@
+ .end method
+ 
+ .method public final onStart()V
+-    .locals 1
++    .locals 4
++
++    iget-object v0, p0, Lcom/android/systemui/accessibility/WindowMagnificationController;->mSecureSettings:Lcom/android/systemui/util/settings/SecureSettings;
++
++    const-string v1, "accessibility_allow_diagonal_scrolling"
++
++    const/4 v2, 0x1
++
++    const/4 v3, -0x2
++
++    invoke-interface {v0, v1, v2, v3}, Lcom/android/systemui/util/settings/UserSettingsProxy;->getIntForUser(Ljava/lang/String;II)I
++
++    move-result v0
++
++    if-eqz v0, :unica_diagonal_disabled
++
++    const/4 v0, 0x1
++
++    :unica_diagonal_disabled
++    iput-boolean v0, p0, Lcom/android/systemui/accessibility/WindowMagnificationController;->mAllowDiagonalScrolling:Z
+ 
+     const/4 v0, 0x1
+ 

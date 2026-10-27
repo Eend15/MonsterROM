@@ -1,0 +1,16 @@
+Subject: [PATCH] Identify the reviewed SystemUI controls build
+
+diff --git a/apktool.yml b/apktool.yml
+--- a/apktool.yml
++++ b/apktool.yml
+@@ -8,8 +8,8 @@
+   minSdkVersion: 37
+   targetSdkVersion: 37
+ versionInfo:
+-  versionCode: 39
+-  versionName: 17-UN1CA.QPR2.clean4
++  versionCode: 41
++  versionName: 17-UN1CA.QPR2.r17
+ resourcesInfo:
+   packageId: 126
+   sparseEntries: true
