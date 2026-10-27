@@ -804,6 +804,34 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 camera_path
+    MODPATH="$PARADIGM_MODPATH/qpr2/camera_path"
+    LOG_STEP_IN "- Adding QPR2 camera_path"
+    # Framework/boot-classpath change: explicit isolated-build opt-in only.
+    if [ "${UN1CA_QPR2_CAMERA_PATH:-false}" = "true" ]; then
+        [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ] && [ "${UN1CA_QPR2_CAMERA_METADATA:-false}" = "true" ] || {
+            ABORT "QPR2 Path conversion needs SDK 37 and the explicit QPR2 metadata-schema opt-in"
+            return 1
+        }
+        QPR2_PATH_SOURCE_FW="$(cut -d '/' -f 1,2 <<< "$SOURCE_FIRMWARE" | tr '/' '_')"
+        [ "$(sha256sum "$FW_DIR/$QPR2_PATH_SOURCE_FW/system/system/framework/framework.jar" | cut -d ' ' -f 1)" = \
+            "cce04246d5e13f4c46127e7daa1ceee8e32d2bb05c7637b05bac7cb6d6d98505" ] || {
+            ABORT "QPR2 Path conversion needs the reviewed original Samsung framework cohort"
+            return 1
+        }
+        [ "$(sha256sum "$WORK_DIR/system/system/lib64/libcamera_metadata.so" | cut -d ' ' -f 1)" = \
+            "6f9903343859e8af58f2661db15baed9e1053286fbe19e244954661d821724f6" ] || {
+            ABORT "Apply the reviewed native metadata schema before QPR2 Path conversion"
+            return 1
+        }
+        APPLY_PATCH "system" "system/framework/framework.jar" \
+            "$MODPATH/patches/framework.jar/0001-Port-QPR2-subject-Path-metadata-conversion.patch"
+        APPLY_PATCH "system" "system/framework/framework.jar" \
+            "$MODPATH/patches/framework.jar/0002-Reject-malformed-subject-Path-data.patch"
+        unset QPR2_PATH_SOURCE_FW
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
