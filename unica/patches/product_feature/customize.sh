@@ -1368,8 +1368,23 @@ if ! $SOURCE_WLAN_SUPPORT_MOBILEAP_DUALAP; then
     fi
 else
     if ! $TARGET_WLAN_SUPPORT_MOBILEAP_DUALAP; then
-        # TODO handle this condition
-        LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_MOBILEAP_DUALAP" "TARGET_WLAN_SUPPORT_MOBILEAP_DUALAP"
+        if [[ "$SOURCE_PLATFORM_SDK_VERSION" -ge 37 ]]; then
+            APPLY_PATCH "system" "system/framework/semwifi-service.jar" \
+                "$MODPATH/wifi/dualap/${PRODUCT_PATCH_ABI}semwifi-service.jar/0001-Disable-unsupported-capabilities.patch"
+            APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+                "$MODPATH/wifi/dualap/${PRODUCT_PATCH_ABI}SecSettings.apk/0001-Disable-unsupported-capabilities.patch"
+            if [ -f "$WORK_DIR/product/overlay/SoftapOverlay/SoftapOverlay.apk" ]; then
+                DECODE_APK "product" "overlay/SoftapOverlay/SoftapOverlay.apk"
+                EVAL "sed -i '/name=\"config_wifiBridgedSoftApSupported\"/s/>true</>false</' \"$APKTOOL_DIR/product/overlay/SoftapOverlay/SoftapOverlay.apk/res/values/bools.xml\""
+            fi
+            SMALI_PATCH "system" "system/framework/semwifi-service.jar" \
+                "smali/com/samsung/android/server/wifi/ap/SemSoftApConfiguration.smali" "replaceall" \
+                "SPF_DualAp=true" \
+                "SPF_DualAp=false"
+        else
+            # TODO handle this condition
+            LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_MOBILEAP_DUALAP" "TARGET_WLAN_SUPPORT_MOBILEAP_DUALAP"
+        fi
     fi
 fi
 
