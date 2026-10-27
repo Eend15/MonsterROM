@@ -1,0 +1,73 @@
+From d3795b813861efd4865d3b0a2e86aec9b40f6bbe Mon Sep 17 00:00:00 2001
+From: ditternation <ditternation@outlook.com>
+Date: Wed, 30 Sep 2026 15:33:54 +0200
+Subject: [PATCH] Allow custom refresh rate thresholds
+
+---
+ .../hardware/display/RefreshRateConfig.smali     | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/smali_classes6/com/samsung/android/hardware/display/RefreshRateConfig.smali b/smali_classes6/com/samsung/android/hardware/display/RefreshRateConfig.smali
+index 77b64db..3a03ee3 100644
+--- a/smali_classes6/com/samsung/android/hardware/display/RefreshRateConfig.smali
++++ b/smali_classes6/com/samsung/android/hardware/display/RefreshRateConfig.smali
+@@ -241,7 +241,7 @@
+ 
+     invoke-virtual {p2, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+ 
+-    const-string v0, "HFR_SUPPORTED_REFRESH_RATE_NS: "
++    const-string v0, "HFR_SUPPORTED_REFRESH_RATE_NS: CONFIG_HFR_NS"
+ 
+     invoke-virtual {p2, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+ 
+@@ -259,7 +259,7 @@
+ 
+     invoke-virtual {p2, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+ 
+-    const-string v0, "SEAMLESS_BRT: "
++    const-string v0, "SEAMLESS_BRT: CONFIG_SEAMLESS_BRT"
+ 
+     invoke-virtual {p2, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+ 
+@@ -277,7 +277,7 @@
+ 
+     invoke-virtual {p2, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+ 
+-    const-string p1, "SEAMLESS_LUX: "
++    const-string p1, "SEAMLESS_LUX: CONFIG_SEAMLESS_LUX"
+ 
+     invoke-virtual {p2, p1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+ 
+@@ -471,7 +471,7 @@
+ .end method
+ 
+ .method public static blacklist getMainInstance()Lcom/samsung/android/hardware/display/RefreshRateConfig;
+-    .locals 4
++    .locals 5
+ 
+     sget-object v0, Lcom/samsung/android/hardware/display/RefreshRateConfig;->sInstance:Lcom/samsung/android/hardware/display/RefreshRateConfig;
+ 
+@@ -483,14 +483,18 @@
+ 
+     const-string/jumbo v2, "persist.dm.passive.ambient_brightness"
+ 
+-    const-string v3, ""
++    const-string v3, "CONFIG_SEAMLESS_BRT"
+ 
+-    invoke-direct {v0, v3, v3, v1, v2}, Lcom/samsung/android/hardware/display/RefreshRateConfig$BrightnessThreshold;-><init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
++    const-string v4, "CONFIG_SEAMLESS_LUX"
++
++    invoke-direct {v0, v3, v4, v1, v2}, Lcom/samsung/android/hardware/display/RefreshRateConfig$BrightnessThreshold;-><init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+ 
+     const-string v1, "4"
+ 
+     const-string v2, "1,60,120"
+ 
++    const-string v3, "CONFIG_HFR_NS"
++
+     invoke-static {v1, v2, v3, v0}, Lcom/samsung/android/hardware/display/RefreshRateConfig;->createRefreshRateConfig(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/samsung/android/hardware/display/RefreshRateConfig$BrightnessThreshold;)Lcom/samsung/android/hardware/display/RefreshRateConfig;
+ 
+     move-result-object v0
+-- 
+2.53.0
+
