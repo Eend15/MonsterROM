@@ -898,6 +898,15 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 glass
+    MODPATH="$PARADIGM_MODPATH/qpr2/glass"
+    LOG_STEP_IN "- Adding QPR2 glass"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SamsungDialer/SamsungDialer.apk" \
+            "$MODPATH/patches/SamsungDialer.apk/0001-Connect-native-Phone-glass-and-backdrop-lens.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
