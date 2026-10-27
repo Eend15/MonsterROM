@@ -865,6 +865,15 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 subject_preview_settings
+    MODPATH="$PARADIGM_MODPATH/qpr2/subject_preview_settings"
+    LOG_STEP_IN "- Adding QPR2 subject_preview_settings"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0001-Expose-the-reviewed-CPU-subject-preview-in-Samsung-Labs.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
