@@ -37,12 +37,12 @@ MATCH_TARGET_FEATURES()
     TARGET_FEATURES="$(sort <<< "$TARGET_FEATURES")"
 
     for f in $SOURCE_FEATURES; do
-        if ! grep -q "$f" <<< "$TARGET_FEATURES"; then
+        if ! grep -Fxq "$f" <<< "$TARGET_FEATURES"; then
             DELETE_FROM_WORK_DIR "system" "system/etc/permissions/$f"
         fi
     done
     for f in $TARGET_FEATURES; do
-        if ! grep -q "$f" <<< "$SOURCE_FEATURES"; then
+        if ! grep -Fxq "$f" <<< "$SOURCE_FEATURES"; then
             ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/etc/permissions/$f" 0 0 644 "u:object_r:system_file:s0"
         fi
     done
