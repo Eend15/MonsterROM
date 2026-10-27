@@ -1,3 +1,10 @@
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    # The following Floppy module supplies the reviewed SDK37 kernel cohort.
+    # Do not download/stage an unrelated latest release first.
+    LOG "- Using the pinned SDK37 Floppy kernel instead of downloading Chiclet"
+    return 0
+fi
+
 KERNEL_API_URL="https://api.github.com/repos/UN1CA/kernel_samsung_exynos2100/releases/latest"
 
 LATEST_TAG="$(
