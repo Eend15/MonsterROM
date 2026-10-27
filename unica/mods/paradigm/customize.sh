@@ -916,6 +916,8 @@ PERL
             "$MODPATH/patches/SamsungGallery2018.apk/0001-Connect-existing-blur-surfaces-to-QPR2-material.patch"
         APPLY_PATCH "system" "system/priv-app/SamsungGallery2018/SamsungGallery2018.apk" \
             "$MODPATH/patches/SamsungGallery2018.apk/0099-Identify-QPR2-r11.patch"
+        APPLY_PATCH "system" "system/priv-app/SamsungContacts/SamsungContacts.apk" \
+            "$MODPATH/patches/SamsungContacts.apk/0001-Connect-existing-blur-surfaces-to-QPR2-material.patch"
     fi
     LOG_STEP_OUT
 
