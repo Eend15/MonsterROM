@@ -1,0 +1,30 @@
+Subject: [PATCH] Recheck the r9s mass Camera processor predicate after timeout
+
+Port the locked-predicate race fix to the actual SDK36 mass app, whose
+PictureProcessorManager is in classes3. Keep real releaseNodeChain, the
+seven-second busy failure, exception handling and native buffer ownership.
+
+--- a/smali_classes3/com/samsung/android/camera/core2/processor/PictureProcessorManager.smali
++++ b/smali_classes3/com/samsung/android/camera/core2/processor/PictureProcessorManager.smali
+@@ -692,7 +692,7 @@
+     :goto_0
+     iget-object v1, p0, Lcom/samsung/android/camera/core2/processor/PictureProcessorManager;->mImmediateProcessorReleaseCond:Ljava/util/concurrent/locks/Condition;
+ 
+-    invoke-interface {v1}, Ljava/util/concurrent/locks/Condition;->signal()V
++    invoke-interface {v1}, Ljava/util/concurrent/locks/Condition;->signalAll()V
+ 
+     const-string v1, "deinitialize X"
+ 
+@@ -897,7 +897,11 @@
+     goto :goto_0
+ 
+     :cond_0
+-    new-instance p1, Lcom/samsung/android/camera/core2/exception/InvalidOperationException;
++    iget-object v0, p0, Lcom/samsung/android/camera/core2/processor/PictureProcessorManager;->mImmediateProcessor:Lcom/samsung/android/camera/core2/processor/ImmediateProcessor;
++
++    if-eqz v0, :cond_1
++
++    new-instance p1, Lcom/samsung/android/camera/core2/exception/InvalidOperationException;
+ 
+     sget-object p2, Ljava/util/Locale;->UK:Ljava/util/Locale;
+ 
