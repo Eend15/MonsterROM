@@ -115,6 +115,8 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
     PARADIGM_MODPATH="$MODPATH"
 
     # Public QPR2 API and actual observer lifecycle used by current apps.
+    APPLY_PATCH "system" "system/framework/framework.jar" \
+        "$PARADIGM_MODPATH/qpr2/insets_lifecycle/framework.jar/0001-Port-QPR2-window-insets-animation-observers.patch"
 
     # This is an isolated ROM build, not a claim that a live Camera2 extension or
     # the Samsung ISP has been validated. Both schema and Path must be included
