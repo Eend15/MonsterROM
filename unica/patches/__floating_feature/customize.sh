@@ -220,6 +220,15 @@ APPLY_CUSTOM_FEATURE()
 }
 # ]
 
+# Keep the SDK-37 donor's audio-eraser model/runtime declaration coherent with
+# the retained newer native cohort. Screen-recorder support is already in the
+# blacklist above. The CPU preview does not invent a Samsung subject/AI flag.
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    BLACKLIST+="
+SEC_FLOATING_FEATURE_AUDIO_CONFIG_MULTISOURCE_SEPARATOR
+"
+fi
+
 LOG_STEP_IN "- Applying target floating feature config"
 APPLY_TARGET_FEATURE
 LOG_STEP_OUT
