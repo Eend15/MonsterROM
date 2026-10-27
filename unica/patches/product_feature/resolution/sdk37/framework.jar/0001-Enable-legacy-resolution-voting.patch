@@ -1,0 +1,16 @@
+diff --git a/smali_classes6/com/samsung/android/rune/CoreRune.smali b/smali_classes6/com/samsung/android/rune/CoreRune.smali
+--- a/smali_classes6/com/samsung/android/rune/CoreRune.smali
++++ b/smali_classes6/com/samsung/android/rune/CoreRune.smali
+@@ -2994,9 +2994,9 @@
+-    sput-boolean v4, Lcom/samsung/android/rune/CoreRune;->FW_SUPPORT_MULTI_RESOLUTION:Z
++    sput-boolean v3, Lcom/samsung/android/rune/CoreRune;->FW_SUPPORT_MULTI_RESOLUTION:Z
+ 
+-    sput-boolean v4, Lcom/samsung/android/rune/CoreRune;->FW_DYNAMIC_RESOLUTION_CONTROL:Z
++    sput-boolean v3, Lcom/samsung/android/rune/CoreRune;->FW_DYNAMIC_RESOLUTION_CONTROL:Z
+ 
+-    sput-boolean v4, Lcom/samsung/android/rune/CoreRune;->FW_RESOLUTION_VOTE_POLICY:Z
++    sput-boolean v3, Lcom/samsung/android/rune/CoreRune;->FW_RESOLUTION_VOTE_POLICY:Z
+ 
+     sput-boolean v4, Lcom/samsung/android/rune/CoreRune;->FW_RESOLUTION_POLICY_FOR_SHELL_TRANSITION:Z
+ 
+     sput-boolean v4, Lcom/samsung/android/rune/CoreRune;->FW_MULTI_RESOLUTION_POLICY:Z
