@@ -111,6 +111,7 @@ PRODUCT_ENABLE_OPTICAL()
 }
 
 PRODUCT_PATCH_ABI=""
+PRODUCT_SDK37_RESOLUTION=false
 if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
     PRODUCT_PATCH_ABI="sdk37/"
 fi
@@ -140,6 +141,24 @@ LOG_MISSING_PATCHES()
     fi
 }
 # ]
+
+# Admit only the reviewed SDK37 profiles and dispatch around the ENTIRE legacy
+# branches. Never import their SDK36 compositor or R8-generated UI replacements.
+# Reject unsupported transitions before any product-feature mutations.
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    if [[ "$SOURCE_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL" != "$TARGET_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL" ]]; then
+        if [ "$TARGET_CODENAME" = "p3s" ] && [ "$TARGET_PLATFORM_SDK_VERSION" -eq 35 ] && \
+                [ "$TARGET_OS_SINGLE_SYSTEM_IMAGE" = "essi" ] && \
+                [ "$SOURCE_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL" = false ] && \
+                [ "$TARGET_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL" = true ] && \
+                [ "$(GET_FINGERPRINT_SENSOR_TYPE "$TARGET_FINGERPRINT_CONFIG_SENSOR")" = ultrasonic ]; then
+            PRODUCT_SDK37_RESOLUTION=true
+        else
+            ABORT "Unreviewed SDK37 dynamic-resolution capability transition"
+            return 1
+        fi
+    fi
+fi
 
 # SEC_PRODUCT_FEATURE_BUILD_MAINLINE_API_LEVEL
 if [[ "$SOURCE_PRODUCT_SHIPPING_API_LEVEL" != "$TARGET_PRODUCT_SHIPPING_API_LEVEL" ]]; then
@@ -283,7 +302,45 @@ if [[ "$SOURCE_COMMON_CONFIG_MDNIE_MODE" != "$TARGET_COMMON_CONFIG_MDNIE_MODE" ]
 fi
 
 # SEC_PRODUCT_FEATURE_COMMON_CONFIG_DYN_RESOLUTION_CONTROL
-if ! $SOURCE_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
+if $PRODUCT_SDK37_RESOLUTION; then
+    # Keep the SDK37 compositor and bootanimation; only enable the reviewed
+    # forced-size resolution policy, never the legacy native/R8 replacements.
+    SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_COMMON_CONFIG_DYN_RESOLUTION_CONTROL" "WQHD,FHD,HD" || return 1
+
+    # LPM blits SPI images at their stored size, unlike bootanimation's QMG
+    # scaling. Restore the original QHD media without replacing either binary
+    # or overwriting newer source-only media with a whole-directory import.
+    for PRODUCT_RESOLUTION_MEDIA in battery_error.spi battery_low.spi battery_protection.spi \
+            battery_temperature_error.spi battery_temperature_limit.spi battery_water_usb.spi \
+            incomplete_connect.spi lcd_density.txt new_vi_0_100.spi new_vi_1_100.spi new_vi_2_100.spi \
+            new_vi_level_0_1.spi new_vi_level_0_2.spi new_vi_level_0_3.spi new_vi_level_0_4.spi \
+            new_vi_level_1_1.spi new_vi_level_1_2.spi new_vi_level_1_3.spi new_vi_level_1_4.spi \
+            new_vi_level_2_1.spi new_vi_level_2_2.spi new_vi_level_2_3.spi new_vi_level_2_4.spi \
+            slow_charging_usb.spi temperature_limit_usb.spi water_protection_usb.spi; do
+        ADD_TO_WORK_DIR "b0qxxx" "system" "system/media/$PRODUCT_RESOLUTION_MEDIA" \
+            0 0 644 "u:object_r:system_file:s0" || return 1
+    done
+    unset PRODUCT_RESOLUTION_MEDIA
+
+    APPLY_PATCH "system" "system/framework/framework.jar" \
+        "$MODPATH/resolution/sdk37/framework.jar/0001-Enable-legacy-resolution-voting.patch" || return 1
+    APPLY_PATCH "system" "system/framework/gamemanager.jar" \
+        "$MODPATH/resolution/sdk37/gamemanager.jar/0001-Enable-resolution-notifications.patch" || return 1
+
+    # Both SDK37 confirmation listeners retain the source entry point's ABI.
+    SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+        "smali_classes3/com/samsung/android/settings/display/SecDisplayUtils.smali" "null" \
+        "setDisplayMode(Ljava/lang/String;Landroid/view/Display;)V" || return 1
+    APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+        "$MODPATH/resolution/sdk37/SecSettings.apk/0001-Enable-resolution-controls.patch" || return 1
+    APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+        "$MODPATH/resolution/sdk37/SecSettings.apk/0002-Connect-reset-routines-and-backup.patch" || return 1
+    APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+        "$MODPATH/resolution/sdk37/SecSettings.apk/0003-Add-resolution-policy.patch" || return 1
+
+    APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+        "$MODPATH/resolution/sdk37/SystemUI.apk/0001-Scale-edge-mask-for-resolution.patch" || return 1
+elif ! $SOURCE_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
     if $TARGET_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL; then
         if [[ "$(GET_FINGERPRINT_SENSOR_TYPE "$TARGET_FINGERPRINT_CONFIG_SENSOR")" == "optical" ]]; then
             ABORT "TARGET_COMMON_SUPPORT_DYN_RESOLUTION_CONTROL is not supported on targets with an optical fingerprint sensor"
