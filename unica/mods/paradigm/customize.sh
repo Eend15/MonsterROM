@@ -920,6 +920,8 @@ PERL
             "$MODPATH/patches/SamsungContacts.apk/0001-Connect-existing-blur-surfaces-to-QPR2-material.patch"
         APPLY_PATCH "system" "system/priv-app/SecSoundPicker/SecSoundPicker.apk" \
             "$MODPATH/patches/SecSoundPicker.apk/0001-Connect-native-volume-strip-to-QPR2-material.patch"
+        APPLY_PATCH "system" "system/app/SmartCapture/SmartCapture.apk" \
+            "$MODPATH/patches/SmartCapture.apk/0001-Connect-Capture-toolbars-to-QPR2-material.patch"
     fi
     LOG_STEP_OUT
 
