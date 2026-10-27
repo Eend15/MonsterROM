@@ -61,6 +61,12 @@ while IFS= read -r f; do
 
     PATCH_FSTAB "$TMP_DIR/out/ramdisk_extracted"
 
+    if [ -f "$WORK_DIR/kernel/floppy-preserved.json" ]; then
+        bash "$SRC_DIR/platform/$TARGET_PLATFORM/patches/floppy/customize.sh" fstab \
+            "$TMP_DIR/out/ramdisk_extracted" "$WORK_DIR/vendor/etc/fstab.exynos2100" \
+            "$WORK_DIR/kernel/floppy-preserved.json" || exit 1
+    fi
+
     LOG "- Repacking $BOOT_FILE/$(basename "$f")"
 
     if [[ "$RAMDISK_FORMAT" == "gz" ]]; then
