@@ -1,0 +1,32 @@
+From 4463d74624598458ec43f2892eeca8b96a9177eb Mon Sep 17 00:00:00 2001
+From: utkustnr <utkuustuner@proton.me>
+Date: Fri, 24 Oct 2025 15:11:39 +0200
+Subject: [PATCH] Allow app target SDK bypass
+
+---
+ .../server/pm/InstallPackageHelper.smali      | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/smali_classes2/com/android/server/pm/InstallPackageHelper.smali b/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
+--- a/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
++++ b/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
+@@ -15617,5 +15617,17 @@
+     :cond_16
+     move v0, v8
+
++    iget-object v0, v1, Lcom/android/server/pm/InstallPackageHelper;->mContext:Landroid/content/Context;
++
++    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v0
++
++    const-string v4, "unica_allow_sdkbypass"
++
++    invoke-static {v0, v4, v8}, Landroid/provider/Settings$System;->getInt(Landroid/content/ContentResolver;Ljava/lang/String;I)I
++
++    move-result v0
++
+     :goto_11
+     if-nez v0, :cond_17
+-- 
+2.51.1
