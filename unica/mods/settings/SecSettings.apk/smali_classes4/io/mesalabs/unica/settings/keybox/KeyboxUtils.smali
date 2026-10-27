@@ -32,6 +32,47 @@
     return-void
 .end method
 
+.method public static clearKeyboxData(Landroid/content/Context;)Z
+    .locals 3
+
+    :try_start_clear
+    invoke-virtual {p0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
+
+    move-result-object v0
+
+    const-string v1, "unica_keybox_data"
+
+    const-string v2, ""
+
+    invoke-static {v0, v1, v2}, Landroid/provider/Settings$Secure;->putString(Landroid/content/ContentResolver;Ljava/lang/String;Ljava/lang/String;)Z
+
+    move-result v0
+    :try_end_clear
+    .catch Ljava/lang/SecurityException; {:try_start_clear .. :try_end_clear} :catch_clear
+
+    if-eqz v0, :clear_failed
+
+    return v0
+
+    :catch_clear
+    move-exception v0
+
+    const-string v1, "KeyboxUtils"
+
+    const-string v2, "Could not clear keybox data"
+
+    invoke-static {v1, v2, v0}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
+
+    :clear_failed
+    const/4 v0, 0x1
+
+    invoke-static {p0, v0}, Lio/mesalabs/unica/settings/keybox/KeyboxUtils;->showToast(Landroid/content/Context;I)V
+
+    const/4 v0, 0x0
+
+    return v0
+.end method
+
 .method public static hasKeyboxData(Landroid/content/Context;)Z
     .locals 1
 
@@ -247,8 +288,21 @@
     invoke-virtual {v1, p1}, Landroid/content/ContentResolver;->openInputStream(Landroid/net/Uri;)Ljava/io/InputStream;
 
     move-result-object p1
+
+    if-nez p1, :keybox_stream_ready
+
+    new-instance v1, Ljava/io/FileNotFoundException;
+
+    const-string v2, "Document provider returned no stream"
+
+    invoke-direct {v1, v2}, Ljava/io/FileNotFoundException;-><init>(Ljava/lang/String;)V
+
+    throw v1
+
+    :keybox_stream_ready
     :try_end_0
     .catch Ljava/io/IOException; {:try_start_0 .. :try_end_0} :catch_0
+    .catch Ljava/lang/SecurityException; {:try_start_0 .. :try_end_0} :catch_0
 
     :try_start_1
     new-instance v1, Ljava/io/BufferedReader;
@@ -339,6 +393,19 @@
 
     invoke-static {v2, v3, v0}, Landroid/provider/Settings$Secure;->putString(Landroid/content/ContentResolver;Ljava/lang/String;Ljava/lang/String;)Z
 
+    move-result v2
+
+    if-nez v2, :keybox_saved
+
+    new-instance v2, Ljava/io/IOException;
+
+    const-string v3, "Could not store keybox data"
+
+    invoke-direct {v2, v3}, Ljava/io/IOException;-><init>(Ljava/lang/String;)V
+
+    throw v2
+
+    :keybox_saved
     const/4 v0, 0x0
 
     invoke-static {p0, v0}, Lio/mesalabs/unica/settings/keybox/KeyboxUtils;->showToast(Landroid/content/Context;I)V
@@ -359,6 +426,7 @@
     invoke-virtual {p1}, Ljava/io/InputStream;->close()V
     :try_end_6
     .catch Ljava/io/IOException; {:try_start_6 .. :try_end_6} :catch_0
+    .catch Ljava/lang/SecurityException; {:try_start_6 .. :try_end_6} :catch_0
 
     :cond_2
     return-void
@@ -407,6 +475,7 @@
     throw v0
     :try_end_a
     .catch Ljava/io/IOException; {:try_start_a .. :try_end_a} :catch_0
+    .catch Ljava/lang/SecurityException; {:try_start_a .. :try_end_a} :catch_0
 
     :catch_0
     move-exception p1

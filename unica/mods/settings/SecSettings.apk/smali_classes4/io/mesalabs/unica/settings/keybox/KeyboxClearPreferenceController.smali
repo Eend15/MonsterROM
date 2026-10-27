@@ -152,15 +152,11 @@
 
     iget-object p1, p0, Lcom/android/settingslib/core/AbstractPreferenceController;->mContext:Landroid/content/Context;
 
-    invoke-virtual {p1}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
+    invoke-static {p1}, Lio/mesalabs/unica/settings/keybox/KeyboxUtils;->clearKeyboxData(Landroid/content/Context;)Z
 
-    move-result-object p1
+    move-result v0
 
-    const-string v0, "unica_keybox_data"
-
-    const-string v1, ""
-
-    invoke-static {p1, v0, v1}, Landroid/provider/Settings$Secure;->putString(Landroid/content/ContentResolver;Ljava/lang/String;Ljava/lang/String;)Z
+    if-eqz v0, :cond_1
 
     iget-object p1, p0, Lcom/android/settingslib/core/AbstractPreferenceController;->mContext:Landroid/content/Context;
 

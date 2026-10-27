@@ -44,6 +44,8 @@
 
     move-result-object p1
 
+    if-eqz p1, :cond_0
+
     iget-object p0, p0, Lio/mesalabs/unica/settings/keybox/KeyboxLoadPreferenceController$$ExternalSyntheticLambda0;->f$0:Lio/mesalabs/unica/settings/keybox/KeyboxLoadPreferenceController;
 
     iget-object v0, p0, Lio/mesalabs/unica/settings/keybox/KeyboxLoadPreferenceController;->mContext:Landroid/content/Context;
