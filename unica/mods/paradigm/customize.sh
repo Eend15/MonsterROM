@@ -908,6 +908,8 @@ PERL
             "$MODPATH/patches/SystemUI.apk/0001-Add-native-glass-to-brightness-and-volume-controls.patch"
         APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
             "$MODPATH/patches/SystemUI.apk/0002-Reveal-glass-behind-native-slider-tracks.patch"
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0001-Connect-existing-blur-surfaces-to-QPR2-material.patch"
     fi
     LOG_STEP_OUT
 
