@@ -148,6 +148,70 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
+    # Preserve the original Galaxy Store update route without replacing the
+    # newer SDK37 app with an older listing or changing its Samsung signer.
+    LOG "- Checking latest compatible Game Booster app"
+    if PARADIGM_GAME_URL="$(GET_GALAXY_STORE_DOWNLOAD_URL "com.samsung.android.game.gametools")"; then
+        (
+            PARADIGM_GAME_APK="$WORK_DIR/system/system/priv-app/GameTools_Dream/GameTools_Dream.apk"
+            [ ! -e "$APKTOOL_DIR/system/priv-app/GameTools_Dream/GameTools_Dream.apk" ] || exit 1
+            PARADIGM_GAME_TEMP="$(mktemp -d "$OUT_DIR/paradigm-game.XXXXXX")" || exit 1
+            trap 'rm -rf -- "$PARADIGM_GAME_TEMP"' EXIT
+            DOWNLOAD_FILE "$PARADIGM_GAME_URL" "$PARADIGM_GAME_TEMP/GameTools.apk" || exit 1
+            cat > "$PARADIGM_GAME_TEMP/GameToolsUpdate.java" <<'JAVA'
+import com.android.apksig.ApkVerifier;
+import com.android.apksig.apk.ApkUtils;
+import java.io.File;
+import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.zip.ZipFile;
+
+class GameToolsUpdate {
+    static ByteBuffer manifest(String path) throws Exception {
+        try (var zip = new ZipFile(path); var in = zip.getInputStream(zip.getEntry("AndroidManifest.xml"))) {
+            return ByteBuffer.wrap(in.readAllBytes());
+        }
+    }
+    public static void main(String[] args) throws Exception {
+        var oldSig = new ApkVerifier.Builder(new File(args[0])).setMinCheckedPlatformVersion(37).build().verify();
+        var newSig = new ApkVerifier.Builder(new File(args[1])).setMinCheckedPlatformVersion(37).build().verify();
+        if (!oldSig.isVerified() || !newSig.isVerified() || oldSig.getSignerCertificates().size() != 1 ||
+                newSig.getSignerCertificates().size() != 1 || !Arrays.equals(oldSig.getSignerCertificates().get(0).getEncoded(),
+                newSig.getSignerCertificates().get(0).getEncoded())) throw new IllegalStateException("Game Booster signer mismatch");
+        var oldXml = manifest(args[0]); var newXml = manifest(args[1]);
+        if (!"com.samsung.android.game.gametools".equals(ApkUtils.getPackageNameFromBinaryAndroidManifest(oldXml.duplicate())) ||
+                !"com.samsung.android.game.gametools".equals(ApkUtils.getPackageNameFromBinaryAndroidManifest(newXml.duplicate())) ||
+                ApkUtils.getMinSdkVersionFromBinaryAndroidManifest(newXml.duplicate()) > 37) throw new IllegalStateException("Incompatible Game Booster package");
+        long oldVersion = ApkUtils.getLongVersionCodeFromBinaryAndroidManifest(oldXml.duplicate());
+        long newVersion = ApkUtils.getLongVersionCodeFromBinaryAndroidManifest(newXml.duplicate());
+        if (newVersion <= oldVersion) { System.out.println("Keeping newer/equal Samsung Game Booster: " + oldVersion + " >= " + newVersion); return; }
+        var staged = Files.createTempFile(Path.of(args[0]).getParent(), ".GameTools.", ".apk");
+        try {
+            Files.copy(Path.of(args[1]), staged, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(staged, Path.of(args[0]), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } finally { Files.deleteIfExists(staged); }
+        System.out.println("Updated Samsung-signed Game Booster: " + oldVersion + " -> " + newVersion);
+    }
+}
+JAVA
+            java -cp "$TOOLS_DIR/bin/signapk.jar" "$PARADIGM_GAME_TEMP/GameToolsUpdate.java" \
+                "$PARADIGM_GAME_APK" "$PARADIGM_GAME_TEMP/GameTools.apk"
+        ) || {
+            ABORT "Failed to verify the compatible Samsung Game Booster update; existing APK retained"
+            return 1
+        }
+    else
+        PARADIGM_GAME_SOURCE="$FW_DIR/${SOURCE_FIRMWARE%%/*}_$(cut -d / -f 2 <<< "$SOURCE_FIRMWARE")/system/system/priv-app/GameTools_Dream/GameTools_Dream.apk"
+        cmp -s "$PARADIGM_GAME_SOURCE" "$WORK_DIR/system/system/priv-app/GameTools_Dream/GameTools_Dream.apk" || {
+            ABORT "No SDK37 Game Booster listing and the original Samsung app is not retained"
+            return 1
+        }
+        LOGW "No compatible SDK37 Galaxy Store listing; keeping the newer Samsung donor Game Booster (not an update)"
+    fi
+    unset PARADIGM_GAME_URL PARADIGM_GAME_SOURCE
     return 0
 fi
 
