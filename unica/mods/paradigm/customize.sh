@@ -248,6 +248,53 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
     fi
     LOG_STEP_OUT
 
+    # QPR2 runtime_cohort
+    MODPATH="$PARADIGM_MODPATH/qpr2/runtime_cohort"
+    LOG_STEP_IN "- Adding QPR2 runtime_cohort"
+    # An explicit isolated custom-ROM profile. No phone/data update migration.
+    if [ "${UN1CA_QPR2_RUNTIME_COHORT:-off}" = "trial-r15" ]; then
+        [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ] && \
+            [ "$(GET_PROP "$WORK_DIR/vendor/default.prop" "ro.zygote")" = "zygote64" ] || {
+            ABORT "QPR2 runtime was exercised for the SDK-37 zygote64 cohort"
+            return 1
+        }
+        PARADIGM_VERIFY_RUNTIME || {
+            ABORT "Retained Samsung Bionic/compat32 runtime contract changed"
+            return 1
+        }
+        [ "$(sha256sum "$WORK_DIR/system/system/lib64/libc++.so" | cut -d ' ' -f 1)" = \
+            "cb118e98c74d3454858921123b9b51ba13df9cad7dfa141dd892c453661a4d78" ] || {
+            ABORT "Retained Samsung libc++ cohort changed"
+            return 1
+        }
+        # Validate both inputs and both existing identities before the first write.
+        while read -r QPR2_MODULE QPR2_OLD QPR2_NEW QPR2_OLD_SHA QPR2_NEW_SHA; do
+            [ "$(sha256sum "$SRC_DIR/prebuilts/qpr2-runtime/system/system/apex/$QPR2_NEW" | cut -d ' ' -f 1)" = "$QPR2_NEW_SHA" ] || {
+                ABORT "Unreviewed QPR2 runtime input: $QPR2_MODULE"
+                return 1
+            }
+            if [ -f "$WORK_DIR/system/system/apex/$QPR2_OLD" ]; then
+                [ "$(sha256sum "$WORK_DIR/system/system/apex/$QPR2_OLD" | cut -d ' ' -f 1)" = "$QPR2_OLD_SHA" ] || {
+                    ABORT "Unreviewed old runtime container: $QPR2_MODULE"
+                    return 1
+                }
+            fi
+            if [ -f "$WORK_DIR/system/system/apex/$QPR2_NEW" ]; then
+                [ "$(sha256sum "$WORK_DIR/system/system/apex/$QPR2_NEW" | cut -d ' ' -f 1)" = "$QPR2_NEW_SHA" ] || {
+                    ABORT "Unreviewed new-name runtime container: $QPR2_MODULE"
+                    return 1
+                }
+            elif [ ! -f "$WORK_DIR/system/system/apex/$QPR2_OLD" ]; then
+                ABORT "Missing original runtime container: $QPR2_MODULE"
+                return 1
+            fi
+        done < "$MODPATH/components.sha256"
+        # shellcheck disable=SC2034 # Read by the subsequent ART/Conscrypt patches.
+        QPR2_RUNTIME_PREFLIGHT=trial-r15
+        unset QPR2_MODULE QPR2_OLD QPR2_NEW QPR2_OLD_SHA QPR2_NEW_SHA
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
