@@ -1293,8 +1293,17 @@ if ! $SOURCE_WLAN_SUPPORT_MOBILEAP_5G_BASEDON_COUNTRY; then
     fi
 else
     if ! $TARGET_WLAN_SUPPORT_MOBILEAP_5G_BASEDON_COUNTRY; then
-        # TODO handle this condition
-        LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_MOBILEAP_5G_BASEDON_COUNTRY" "TARGET_WLAN_SUPPORT_MOBILEAP_5G_BASEDON_COUNTRY"
+        if [[ "$SOURCE_PLATFORM_SDK_VERSION" -ge 37 ]]; then
+            APPLY_PATCH "system" "system/framework/semwifi-service.jar" \
+                "$MODPATH/wifi/5g_basedon_country/${PRODUCT_PATCH_ABI}semwifi-service.jar/0001-Disable-unsupported-capabilities.patch"
+            SMALI_PATCH "system" "system/framework/semwifi-service.jar" \
+                "smali/com/samsung/android/server/wifi/ap/SemSoftApConfiguration.smali" "replaceall" \
+                "SPF_5G_BASEDON_COUNTRY=true" \
+                "SPF_5G_BASEDON_COUNTRY=false"
+        else
+            # TODO handle this condition
+            LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_MOBILEAP_5G_BASEDON_COUNTRY" "TARGET_WLAN_SUPPORT_MOBILEAP_5G_BASEDON_COUNTRY"
+        fi
     fi
 fi
 
