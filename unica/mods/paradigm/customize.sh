@@ -989,6 +989,19 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 contacts_controls
+    MODPATH="$PARADIGM_MODPATH/qpr2/contacts_controls"
+    LOG_STEP_IN "- Adding QPR2 contacts_controls"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SamsungContacts/SamsungContacts.apk" \
+            "$MODPATH/patches/SamsungContacts.apk/0001-Port-QPR2-country-aware-recipient-matching.patch"
+        APPLY_PATCH "system" "system/priv-app/SamsungContacts/SamsungContacts.apk" \
+            "$MODPATH/patches/SamsungContacts.apk/0002-Retain-original-backup-certificate-with-knownSigner.patch"
+        APPLY_PATCH "system" "system/priv-app/SamsungContacts/SamsungContacts.apk" \
+            "$MODPATH/patches/SamsungContacts.apk/0099-Identify-QPR2-r12.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

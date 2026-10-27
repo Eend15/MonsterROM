@@ -1,0 +1,14 @@
+Subject: [PATCH] Retain the previous Contacts backup signer using the standard knownSigner permission
+
+diff --git a/AndroidManifest.xml b/AndroidManifest.xml
+--- a/AndroidManifest.xml
++++ b/AndroidManifest.xml
+@@ -11,7 +11,7 @@
+     <permission android:name="com.samsung.contacts.permission.START_RELATION_DETAIL" android:protectionLevel="signatureOrSystem"/>
+     <permission android:name="com.samsung.contacts.permission.JOINED_CONTACT" android:protectionLevel="signatureOrSystem"/>
+     <permission android:name="com.samsung.android.app.contacts.permission.MANAGE_CONTACT_ACCESS" android:protectionLevel="signatureOrSystem"/>
+-    <permission android:name="com.samsung.android.app.contacts.permission.BACKUP_REPOSITORY" android:protectionLevel="signature"/>
++    <permission android:name="com.samsung.android.app.contacts.permission.BACKUP_REPOSITORY" android:protectionLevel="signature|knownSigner" android:knownCerts="32C332B4AD0F837CDA2E2B342974AEA5D5708616DC40C9FBAD665AB338CBEA36"/>
+     <permission android:name="com.samsung.contacts.permission.TRASH_BIN" android:protectionLevel="signatureOrSystem"/>
+     <permission android:name="com.samsung.android.app.contacts.permission.SOS_MSG_PICKER" android:protectionLevel="signatureOrSystem"/>
+     <permission android:name="com.samsung.contacts.permission.QR_CODE" android:protectionLevel="signatureOrSystem"/>
