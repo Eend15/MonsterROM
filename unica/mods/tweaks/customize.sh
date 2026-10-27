@@ -13,3 +13,10 @@ if [[ "$(GET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_FMRADIO_CONFIG_CHIP_V
         'isRadioNotSupportedInRegion()Z' \
         'false'
 fi
+
+TWEAKS_PATCH_ABI="sdk36"
+[ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ] && TWEAKS_PATCH_ABI="sdk37"
+for TWEAKS_ARCHIVE in "system/framework/services.jar" "system_ext/priv-app/SystemUI/SystemUI.apk"; do
+    APPLY_SMALI_PATCHES "$MODPATH/$TWEAKS_PATCH_ABI/smali" "$TWEAKS_ARCHIVE"
+done
+unset TWEAKS_PATCH_ABI TWEAKS_ARCHIVE
