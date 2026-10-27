@@ -249,7 +249,8 @@ if $SOURCE_AUDIO_SUPPORT_VIRTUAL_VIBRATION_SOUND; then
         APPLY_PATCH "system" "system/framework/framework.jar" \
             "$MODPATH/audio/virtual_vib/framework.jar/0001-Disable-virtual-vibration-support.patch"
         APPLY_PATCH "system" "system/framework/services.jar" \
-            "$MODPATH/audio/virtual_vib/services.jar/0001-Disable-virtual-vibration-support.patch"
+            "$MODPATH/audio/virtual_vib/${PRODUCT_PATCH_ABI}services.jar/0001-Disable-virtual-vibration-support.patch"
+        if [ "$SOURCE_PLATFORM_SDK_VERSION" -lt 37 ]; then
         SMALI_PATCH "system" "system/framework/services.jar" \
             "smali/com/android/server/audio/BtHelper\$\$ExternalSyntheticLambda0.smali" "remove"
         EVAL "sed -i \"/.source/q\" \"$APKTOOL_DIR/system/framework/services.jar/smali_classes2/com/android/server/vibrator/VibratorManagerInternal.smali\""
@@ -257,10 +258,11 @@ if $SOURCE_AUDIO_SUPPORT_VIRTUAL_VIBRATION_SOUND; then
             "smali_classes2/com/android/server/vibrator/VibratorManagerService\$SamsungBroadcastReceiver\$\$ExternalSyntheticLambda1.smali" "remove"
         SMALI_PATCH "system" "system/framework/services.jar" \
             "smali_classes2/com/android/server/vibrator/VirtualVibSoundHelper.smali" "remove"
+        fi
         APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-            "$MODPATH/audio/virtual_vib/SecSettings.apk/0001-Disable-virtual-vibration-support.patch"
+            "$MODPATH/audio/virtual_vib/${PRODUCT_PATCH_ABI}SecSettings.apk/0001-Disable-virtual-vibration-support.patch"
         APPLY_PATCH "system" "system/priv-app/SettingsProvider/SettingsProvider.apk" \
-            "$MODPATH/audio/virtual_vib/SettingsProvider.apk/0001-Disable-virtual-vibration-support.patch"
+            "$MODPATH/audio/virtual_vib/${PRODUCT_PATCH_ABI}SettingsProvider.apk/0001-Disable-virtual-vibration-support.patch"
     fi
 else
     if $TARGET_AUDIO_SUPPORT_VIRTUAL_VIBRATION_SOUND; then
