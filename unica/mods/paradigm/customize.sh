@@ -1039,6 +1039,17 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 audio_devices
+    MODPATH="$PARADIGM_MODPATH/qpr2/audio_devices"
+    LOG_STEP_IN "- Adding QPR2 audio_devices"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SoundAlive_C/SoundAlive_C.apk" \
+            "$MODPATH/patches/SoundAlive_C.apk/0001-Add-QPR2-connected-audio-device-discovery.patch"
+        APPLY_PATCH "system" "system/priv-app/SoundAlive_C/SoundAlive_C.apk" \
+            "$MODPATH/patches/SoundAlive_C.apk/0099-Identify-QPR2-r14.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
