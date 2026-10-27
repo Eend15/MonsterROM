@@ -1,0 +1,593 @@
+Subject: [PATCH] Add the fourth Search command using Samsung search and native accessibility semantics
+
+diff --git a/res/values-nl/unica_phone_search.xml b/res/values-nl/unica_phone_search.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values-nl/unica_phone_search.xml
+@@ -0,0 +1,4 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <string name="unica_phone_search_tab_title">Zoeken</string>
++</resources>
+diff --git a/res/values/public.xml b/res/values/public.xml
+--- a/res/values/public.xml
++++ b/res/values/public.xml
+@@ -17329,4 +17329,6 @@
+     <public type="color" name="unica_glass_track" id="0x7f060973" />
+     <public type="drawable" name="unica_glass_capsule" id="0x7f080787" />
+     <public type="drawable" name="unica_glass_rim" id="0x7f080788" />
++    <public type="id" name="unica_phone_search_tab" id="0x7f0a0b97" />
++    <public type="string" name="unica_phone_search_tab_title" id="0x7f1307d0" />
+ </resources>
+diff --git a/res/values/unica_phone_search.xml b/res/values/unica_phone_search.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values/unica_phone_search.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <item type="id" name="unica_phone_search_tab" />
++    <string name="unica_phone_search_tab_title">Search</string>
++</resources>
+diff --git a/smali/ak/b0.smali b/smali/ak/b0.smali
+--- a/smali/ak/b0.smali
++++ b/smali/ak/b0.smali
+@@ -455,6 +455,8 @@
+     throw p0
+ 
+     :cond_d
++    invoke-static {v1}, Lio/mesalabs/unica/glass/PhoneSearchTab;->add(Lcom/samsung/android/dialer/tab/view/TabLayout;)V
++
+     iget-object p1, p0, Lak/b0;->k:Lh/l;
+ 
+     invoke-static {p1}, Lkp/e0;->i(Landroid/content/Context;)Z
+diff --git a/smali/hc/k.smali b/smali/hc/k.smali
+--- a/smali/hc/k.smali
++++ b/smali/hc/k.smali
+@@ -1735,7 +1735,9 @@
+ .end method
+ 
+ .method public final onInitializeAccessibilityNodeInfo(Landroid/view/accessibility/AccessibilityNodeInfo;)V
+-    .locals 4
++    .locals 5
++
++    move-object v4, p0
+ 
+     invoke-super {p0, p1}, Landroid/view/View;->onInitializeAccessibilityNodeInfo(Landroid/view/accessibility/AccessibilityNodeInfo;)V
+ 
+@@ -1861,6 +1863,8 @@
+ 
+     invoke-virtual {p1, p0}, Landroid/view/accessibility/AccessibilityNodeInfo;->setContentDescription(Ljava/lang/CharSequence;)V
+ 
++    invoke-static {v4, p1}, Lio/mesalabs/unica/glass/PhoneSearchTab;->accessibility(Landroid/view/View;Landroid/view/accessibility/AccessibilityNodeInfo;)V
++
+     return-void
+ 
+     :cond_2
+@@ -1909,6 +1913,8 @@
+     invoke-virtual {p1, p0}, Landroid/view/accessibility/AccessibilityNodeInfo;->setContentDescription(Ljava/lang/CharSequence;)V
+ 
+     :cond_3
++    invoke-static {v4, p1}, Lio/mesalabs/unica/glass/PhoneSearchTab;->accessibility(Landroid/view/View;Landroid/view/accessibility/AccessibilityNodeInfo;)V
++
+     return-void
+ .end method
+ 
+diff --git a/smali/hc/l.smali b/smali/hc/l.smali
+--- a/smali/hc/l.smali
++++ b/smali/hc/l.smali
+@@ -5289,6 +5289,16 @@
+ .method public final v(Lhc/h;Z)V
+     .locals 10
+ 
++    invoke-static {p0, p1}, Lio/mesalabs/unica/glass/PhoneSearchTab;->activate(Lhc/l;Lhc/h;)Z
++
++    move-result v0
++
++    if-eqz v0, :unica_regular_tab
++
++    return-void
++
++    :unica_regular_tab
++
+     if-eqz p1, :cond_0
+ 
+     iget-object v0, p1, Lhc/h;->h:Lhc/k;
+diff --git a/smali_classes3/io/mesalabs/unica/glass/PhoneSearchTab.smali b/smali_classes3/io/mesalabs/unica/glass/PhoneSearchTab.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes3/io/mesalabs/unica/glass/PhoneSearchTab.smali
+@@ -0,0 +1,493 @@
++.class public final Lio/mesalabs/unica/glass/PhoneSearchTab;
++.super Ljava/lang/Object;
++.source "PhoneSearchTab.java"
++
++
++# direct methods
++.method public constructor <init>()V
++    .locals 0
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    return-void
++.end method
++
++.method public static accessibility(Landroid/view/View;Landroid/view/accessibility/AccessibilityNodeInfo;)V
++    .locals 2
++
++    const-string v0, "unica_phone_search_tab"
++
++    const-string v1, "id"
++
++    invoke-static {p0, v0, v1}, Lio/mesalabs/unica/glass/PhoneSearchTab;->id(Landroid/view/View;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result v0
++
++    if-eqz v0, :cond_41
++
++    invoke-virtual {p0}, Landroid/view/View;->getId()I
++
++    move-result v1
++
++    if-ne v1, v0, :cond_41
++
++    const-string v0, "android.widget.Button"
++
++    invoke-virtual {p1, v0}, Landroid/view/accessibility/AccessibilityNodeInfo;->setClassName(Ljava/lang/CharSequence;)V
++
++    const/4 v0, 0x0
++
++    invoke-virtual {p1, v0}, Landroid/view/accessibility/AccessibilityNodeInfo;->setCheckable(Z)V
++
++    invoke-virtual {p1, v0}, Landroid/view/accessibility/AccessibilityNodeInfo;->setChecked(Z)V
++
++    invoke-virtual {p1, v0}, Landroid/view/accessibility/AccessibilityNodeInfo;->setSelected(Z)V
++
++    const/4 v0, 0x0
++
++    invoke-virtual {p1, v0}, Landroid/view/accessibility/AccessibilityNodeInfo;->setCollectionItemInfo(Landroid/view/accessibility/AccessibilityNodeInfo$CollectionItemInfo;)V
++
++    invoke-virtual {p1, v0}, Landroid/view/accessibility/AccessibilityNodeInfo;->setStateDescription(Ljava/lang/CharSequence;)V
++
++    invoke-virtual {p1}, Landroid/view/accessibility/AccessibilityNodeInfo;->getExtras()Landroid/os/Bundle;
++
++    move-result-object v0
++
++    const-string v1, "AccessibilityNodeInfo.roleDescription"
++
++    invoke-virtual {v0, v1}, Landroid/os/Bundle;->remove(Ljava/lang/String;)V
++
++    invoke-virtual {p0}, Landroid/view/View;->isEnabled()Z
++
++    move-result v0
++
++    invoke-virtual {p1, v0}, Landroid/view/accessibility/AccessibilityNodeInfo;->setClickable(Z)V
++
++    invoke-virtual {p0}, Landroid/view/View;->isEnabled()Z
++
++    move-result p0
++
++    if-eqz p0, :cond_41
++
++    sget-object p0, Landroid/view/accessibility/AccessibilityNodeInfo$AccessibilityAction;->ACTION_CLICK:Landroid/view/accessibility/AccessibilityNodeInfo$AccessibilityAction;
++
++    invoke-virtual {p1, p0}, Landroid/view/accessibility/AccessibilityNodeInfo;->addAction(Landroid/view/accessibility/AccessibilityNodeInfo$AccessibilityAction;)V
++
++    :cond_41
++    return-void
++.end method
++
++.method public static activate(Lhc/l;Lhc/h;)Z
++    .locals 3
++
++    instance-of v0, p0, Lcom/samsung/android/dialer/tab/view/TabLayout;
++
++    const/4 v1, 0x0
++
++    if-eqz v0, :cond_45
++
++    if-eqz p1, :cond_45
++
++    iget-object v0, p1, Lhc/h;->g:Lhc/l;
++
++    if-ne v0, p0, :cond_45
++
++    const-string v0, "unica_phone_search_tab"
++
++    const-string v2, "id"
++
++    invoke-static {p0, v0, v2}, Lio/mesalabs/unica/glass/PhoneSearchTab;->id(Landroid/view/View;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result v0
++
++    if-eqz v0, :cond_45
++
++    iget p1, p1, Lhc/h;->i:I
++
++    if-ne p1, v0, :cond_45
++
++    invoke-static {p0}, Lio/mesalabs/unica/glass/PhoneSearchTab;->open(Landroid/view/View;)Z
++
++    move-result p1
++
++    if-nez p1, :cond_43
++
++    invoke-virtual {p0}, Lhc/l;->getResources()Landroid/content/res/Resources;
++
++    move-result-object p1
++
++    invoke-virtual {p1}, Landroid/content/res/Resources;->getConfiguration()Landroid/content/res/Configuration;
++
++    move-result-object p1
++
++    invoke-virtual {p1}, Landroid/content/res/Configuration;->getLocales()Landroid/os/LocaleList;
++
++    move-result-object p1
++
++    invoke-virtual {p1, v1}, Landroid/os/LocaleList;->get(I)Ljava/util/Locale;
++
++    move-result-object p1
++
++    invoke-virtual {p1}, Ljava/util/Locale;->getLanguage()Ljava/lang/String;
++
++    move-result-object p1
++
++    const-string v0, "nl"
++
++    invoke-virtual {v0, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result p1
++
++    if-eqz p1, :cond_3e
++
++    const-string p1, "Zoeken is momenteel niet beschikbaar"
++
++    goto :goto_40
++
++    :cond_3e
++    const-string p1, "Search is currently unavailable"
++
++    :goto_40
++    invoke-virtual {p0, p1}, Lhc/l;->announceForAccessibility(Ljava/lang/CharSequence;)V
++
++    :cond_43
++    const/4 p0, 0x1
++
++    return p0
++
++    :cond_45
++    return v1
++.end method
++
++.method public static add(Lcom/samsung/android/dialer/tab/view/TabLayout;)V
++    .locals 6
++
++    if-eqz p0, :cond_6c
++
++    invoke-virtual {p0}, Lcom/samsung/android/dialer/tab/view/TabLayout;->getTabCount()I
++
++    move-result v0
++
++    if-eqz v0, :cond_6c
++
++    const-string v0, "unica_phone_search_tab"
++
++    const-string v1, "id"
++
++    invoke-static {p0, v0, v1}, Lio/mesalabs/unica/glass/PhoneSearchTab;->id(Landroid/view/View;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result v0
++
++    const-string v1, "unica_phone_search_tab_title"
++
++    const-string v2, "string"
++
++    invoke-static {p0, v1, v2}, Lio/mesalabs/unica/glass/PhoneSearchTab;->id(Landroid/view/View;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result v1
++
++    if-eqz v0, :cond_6c
++
++    if-eqz v1, :cond_6c
++
++    const/4 v2, 0x0
++
++    move v3, v2
++
++    :goto_1e
++    invoke-virtual {p0}, Lcom/samsung/android/dialer/tab/view/TabLayout;->getTabCount()I
++
++    move-result v4
++
++    if-ge v3, v4, :cond_2f
++
++    invoke-virtual {p0, v3}, Lcom/samsung/android/dialer/tab/view/TabLayout;->r(I)Lhc/h;
++
++    move-result-object v4
++
++    iget v4, v4, Lhc/h;->i:I
++
++    if-eq v4, v0, :cond_6c
++
++    add-int/lit8 v3, v3, 0x1
++
++    goto :goto_1e
++
++    :cond_2f
++    const-string v3, "tw_ic_ab_search_mtrl_modified"
++
++    const-string v4, "drawable"
++
++    invoke-static {p0, v3, v4}, Lio/mesalabs/unica/glass/PhoneSearchTab;->id(Landroid/view/View;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result v3
++
++    if-eqz v3, :cond_6c
++
++    invoke-virtual {p0}, Lcom/samsung/android/dialer/tab/view/TabLayout;->s()Lhc/h;
++
++    move-result-object v4
++
++    iput v0, v4, Lhc/h;->i:I
++
++    invoke-virtual {p0}, Lcom/samsung/android/dialer/tab/view/TabLayout;->getContext()Landroid/content/Context;
++
++    move-result-object v5
++
++    invoke-virtual {v5, v1}, Landroid/content/Context;->getString(I)Ljava/lang/String;
++
++    move-result-object v1
++
++    iput-object v1, v4, Lhc/h;->b:Ljava/lang/CharSequence;
++
++    invoke-virtual {p0}, Lcom/samsung/android/dialer/tab/view/TabLayout;->getContext()Landroid/content/Context;
++
++    move-result-object v1
++
++    invoke-virtual {v1, v3}, Landroid/content/Context;->getDrawable(I)Landroid/graphics/drawable/Drawable;
++
++    move-result-object v1
++
++    iput-object v1, v4, Lhc/h;->a:Landroid/graphics/drawable/Drawable;
++
++    iget-object v1, v4, Lhc/h;->h:Lhc/k;
++
++    invoke-virtual {v1, v0}, Lhc/k;->setId(I)V
++
++    iget-object v0, v4, Lhc/h;->h:Lhc/k;
++
++    iget-object v1, v4, Lhc/h;->b:Ljava/lang/CharSequence;
++
++    invoke-virtual {v0, v1}, Lhc/k;->setContentDescription(Ljava/lang/CharSequence;)V
++
++    iget-object v0, v4, Lhc/h;->h:Lhc/k;
++
++    iget-object v1, v4, Lhc/h;->b:Ljava/lang/CharSequence;
++
++    invoke-virtual {v0, v1}, Lhc/k;->setTooltipText(Ljava/lang/CharSequence;)V
++
++    invoke-virtual {v4}, Lhc/h;->a()V
++
++    invoke-virtual {p0, v4, v2}, Lcom/samsung/android/dialer/tab/view/TabLayout;->h(Lhc/h;Z)V
++
++    :cond_6c
++    return-void
++.end method
++
++.method private static id(Landroid/view/View;Ljava/lang/String;Ljava/lang/String;)I
++    .locals 1
++
++    invoke-virtual {p0}, Landroid/view/View;->getContext()Landroid/content/Context;
++
++    move-result-object p0
++
++    invoke-virtual {p0}, Landroid/content/Context;->getResources()Landroid/content/res/Resources;
++
++    move-result-object v0
++
++    invoke-virtual {p0}, Landroid/content/Context;->getPackageName()Ljava/lang/String;
++
++    move-result-object p0
++
++    invoke-virtual {v0, p1, p2, p0}, Landroid/content/res/Resources;->getIdentifier(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result p0
++
++    return p0
++.end method
++
++.method private static open(Landroid/view/View;)Z
++    .locals 4
++
++    const-string v0, "dialtacts_toolbar"
++
++    const-string v1, "id"
++
++    invoke-static {p0, v0, v1}, Lio/mesalabs/unica/glass/PhoneSearchTab;->id(Landroid/view/View;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result v0
++
++    const-string v2, "dialer_menu_search"
++
++    invoke-static {p0, v2, v1}, Lio/mesalabs/unica/glass/PhoneSearchTab;->id(Landroid/view/View;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result v1
++
++    const/4 v2, 0x0
++
++    if-nez v0, :cond_13
++
++    move-object p0, v2
++
++    goto :goto_1b
++
++    :cond_13
++    invoke-virtual {p0}, Landroid/view/View;->getRootView()Landroid/view/View;
++
++    move-result-object p0
++
++    invoke-virtual {p0, v0}, Landroid/view/View;->findViewById(I)Landroid/view/View;
++
++    move-result-object p0
++
++    :goto_1b
++    instance-of v0, p0, Landroidx/appcompat/widget/Toolbar;
++
++    const/4 v3, 0x0
++
++    if-eqz v0, :cond_46
++
++    check-cast p0, Landroidx/appcompat/widget/Toolbar;
++
++    invoke-virtual {p0}, Landroidx/appcompat/widget/Toolbar;->getMenu()Landroid/view/Menu;
++
++    move-result-object p0
++
++    if-eqz v1, :cond_2c
++
++    invoke-interface {p0, v1}, Landroid/view/Menu;->findItem(I)Landroid/view/MenuItem;
++
++    move-result-object v2
++
++    :cond_2c
++    if-eqz v2, :cond_46
++
++    invoke-interface {v2}, Landroid/view/MenuItem;->isEnabled()Z
++
++    move-result v0
++
++    if-eqz v0, :cond_46
++
++    invoke-interface {v2}, Landroid/view/MenuItem;->isVisible()Z
++
++    move-result v0
++
++    if-eqz v0, :cond_46
++
++    invoke-interface {v2}, Landroid/view/MenuItem;->getItemId()I
++
++    move-result v0
++
++    invoke-interface {p0, v0, v3}, Landroid/view/Menu;->performIdentifierAction(II)Z
++
++    move-result p0
++
++    if-eqz p0, :cond_46
++
++    const/4 p0, 0x1
++
++    return p0
++
++    :cond_46
++    const-string p0, "UN1CA-PhoneSearch"
++
++    const-string v0, "Original search menu is unavailable or did not handle the action"
++
++    invoke-static {p0, v0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
++
++    return v3
++.end method
++
++.method public static shortcut(Landroid/view/View;Landroid/view/KeyEvent;)Z
++    .locals 5
++
++    const/4 v0, 0x0
++
++    if-eqz p0, :cond_53
++
++    if-eqz p1, :cond_53
++
++    invoke-virtual {p1}, Landroid/view/KeyEvent;->getAction()I
++
++    move-result v1
++
++    sget v2, Landroid/view/KeyEvent;->ACTION_DOWN:I
++
++    if-ne v1, v2, :cond_53
++
++    invoke-virtual {p1}, Landroid/view/KeyEvent;->getRepeatCount()I
++
++    move-result v1
++
++    if-nez v1, :cond_53
++
++    invoke-virtual {p1}, Landroid/view/KeyEvent;->isAltPressed()Z
++
++    move-result v1
++
++    if-nez v1, :cond_53
++
++    invoke-virtual {p1}, Landroid/view/KeyEvent;->isMetaPressed()Z
++
++    move-result v1
++
++    if-nez v1, :cond_53
++
++    invoke-virtual {p1}, Landroid/view/KeyEvent;->isShiftPressed()Z
++
++    move-result v1
++
++    if-nez v1, :cond_53
++
++    invoke-virtual {p1}, Landroid/view/KeyEvent;->getKeyCode()I
++
++    move-result v1
++
++    sget v2, Landroid/view/KeyEvent;->KEYCODE_F:I
++
++    const/4 v3, 0x1
++
++    if-ne v1, v2, :cond_36
++
++    invoke-virtual {p1}, Landroid/view/KeyEvent;->isCtrlPressed()Z
++
++    move-result v1
++
++    if-eqz v1, :cond_36
++
++    move v1, v3
++
++    goto :goto_37
++
++    :cond_36
++    move v1, v0
++
++    :goto_37
++    invoke-virtual {p1}, Landroid/view/KeyEvent;->getKeyCode()I
++
++    move-result v2
++
++    sget v4, Landroid/view/KeyEvent;->KEYCODE_SEARCH:I
++
++    if-ne v2, v4, :cond_47
++
++    invoke-virtual {p1}, Landroid/view/KeyEvent;->isCtrlPressed()Z
++
++    move-result p1
++
++    if-nez p1, :cond_47
++
++    move p1, v3
++
++    goto :goto_48
++
++    :cond_47
++    move p1, v0
++
++    :goto_48
++    if-nez v1, :cond_4c
++
++    if-eqz p1, :cond_53
++
++    :cond_4c
++    invoke-static {p0}, Lio/mesalabs/unica/glass/PhoneSearchTab;->open(Landroid/view/View;)Z
++
++    move-result p0
++
++    if-eqz p0, :cond_53
++
++    return v3
++
++    :cond_53
++    return v0
++.end method
