@@ -95,6 +95,19 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
         "$MODPATH/brandsound/SecSoundPicker.apk/0001-Enable-SUPPORT_SAMSUNG_BRAND_SOUND_ONEUI_7.patch"
     LOG_STEP_OUT
 
+    # The donor has no vendor Pet Detector assets. Use the original Paradigm
+    # pa2qxxx payload, not a different model with a matching filename.
+    # Merge the three owned files; never remove unrelated vendor assets.
+    LOG_STEP_IN "- Adding Pet Detector support in Galaxy AI features"
+    (cd "$SRC_DIR/prebuilts/samsung/pa2qxxx/vendor" && sha256sum -c "$MODPATH/petdetector.sha256")
+    ADD_TO_WORK_DIR "pa2qxxx" "vendor" "etc/petdetector/studio_pd/config_thresholds.json" 0 0 644 "u:object_r:vendor_configs_file:s0"
+    ADD_TO_WORK_DIR "pa2qxxx" "vendor" "etc/petdetector/studio_pd/studio_pd_cnn.info" 0 0 644 "u:object_r:vendor_configs_file:s0"
+    ADD_TO_WORK_DIR "pa2qxxx" "vendor" "etc/petdetector/studio_pd/studio_pd_cnn.tflite" 0 0 644 "u:object_r:vendor_configs_file:s0"
+    SET_METADATA "vendor" "etc/petdetector/studio_pd/config_thresholds.json" 0 0 644 "u:object_r:vendor_configs_file:s0"
+    SET_METADATA "vendor" "etc/petdetector/studio_pd/studio_pd_cnn.info" 0 0 644 "u:object_r:vendor_configs_file:s0"
+    SET_METADATA "vendor" "etc/petdetector/studio_pd/studio_pd_cnn.tflite" 0 0 644 "u:object_r:vendor_configs_file:s0"
+    LOG_STEP_OUT
+
     # QPR2 feature customization is owned here. Keep the reviewed order and
     # each former child MODPATH: payloads/contracts/patches stay in place.
     # No conditional sourcing or feature-function wrapper: errexit stays active
