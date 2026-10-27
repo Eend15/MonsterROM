@@ -904,6 +904,8 @@ PERL
     if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
         APPLY_PATCH "system" "system/priv-app/SamsungDialer/SamsungDialer.apk" \
             "$MODPATH/patches/SamsungDialer.apk/0001-Connect-native-Phone-glass-and-backdrop-lens.patch"
+        APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+            "$MODPATH/patches/SystemUI.apk/0001-Add-native-glass-to-brightness-and-volume-controls.patch"
     fi
     LOG_STEP_OUT
 
