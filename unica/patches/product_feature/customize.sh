@@ -1522,7 +1522,20 @@ fi
 
 # SEC_PRODUCT_FEATURE_WLAN_SUPPORT_TWT_CONTROL
 # SEC_PRODUCT_FEATURE_WLAN_SUPPORT_LOWLATENCY
-if $SOURCE_WLAN_SUPPORT_TWT_CONTROL && $SOURCE_WLAN_SUPPORT_LOWLATENCY; then
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    if $SOURCE_WLAN_SUPPORT_TWT_CONTROL && ! $TARGET_WLAN_SUPPORT_TWT_CONTROL; then
+        # SDK37 obtains TWT feature bits from the vendor, not the old default
+        # map. Treat TWT and LOWLATENCY as independent target capabilities.
+        SMALI_PATCH "system" "system/framework/semwifi-service.jar" \
+            "smali/com/samsung/android/server/wifi/driver/WifiDriverFeatureProvider.smali" "return" \
+            "isTwtSupported()Z" "false"
+    elif ! $SOURCE_WLAN_SUPPORT_TWT_CONTROL && $TARGET_WLAN_SUPPORT_TWT_CONTROL; then
+        LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_TWT_CONTROL" "TARGET_WLAN_SUPPORT_TWT_CONTROL"
+    fi
+    if ! $SOURCE_WLAN_SUPPORT_LOWLATENCY && $TARGET_WLAN_SUPPORT_LOWLATENCY; then
+        LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_LOWLATENCY" "TARGET_WLAN_SUPPORT_LOWLATENCY"
+    fi
+elif $SOURCE_WLAN_SUPPORT_TWT_CONTROL && $SOURCE_WLAN_SUPPORT_LOWLATENCY; then
     if ! $TARGET_WLAN_SUPPORT_TWT_CONTROL; then
         APPLY_PATCH "system" "system/framework/semwifi-service.jar" \
             "$MODPATH/wifi/twt_control/semwifi-service.jar/0001-Disable-TWT_CONTROL-support.patch"
@@ -1543,6 +1556,16 @@ else
         # TODO handle this condition
         LOG_MISSING_PATCHES "SOURCE_WLAN_SUPPORT_LOWLATENCY" "TARGET_WLAN_SUPPORT_LOWLATENCY"
     fi
+fi
+
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ] && \
+        $SOURCE_WLAN_SUPPORT_LOWLATENCY && ! $TARGET_WLAN_SUPPORT_LOWLATENCY; then
+    # SDK37 reads the vendor optimizer bitmask instead of an API36 default
+    # map. Clear bit 0 only: dynamic/enhanced scan capability bits are distinct.
+    SMALI_PATCH "system" "system/framework/semwifi-service.jar" \
+        "smali/com/samsung/android/server/wifi/driver/WifiDriverFeatureProvider.smali" "replace" \
+        "getOptimizerFeature()I" "return p0" \
+        $'    and-int/lit8 p0, p0, -0x2\n\n    return p0'
 fi
 
 # SEC_PRODUCT_FEATURE_WLAN_SUPPORT_SWITCH_FOR_INDIVIDUAL_APPS
