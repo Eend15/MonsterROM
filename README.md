@@ -2,10 +2,10 @@
   <img loading="lazy" src="readme-res/banner.png"/>
 </h1>
 <p align="center">
-  <a href="https://github.com/salvogiangri/UN1CA/blob/sixteen/LICENSE"><img loading="lazy" src="https://img.shields.io/github/license/salvogiangri/UN1CA?style=for-the-badge&logo=github"/></a>
-  <a href="https://github.com/salvogiangri/UN1CA/commits/sixteen"><img loading="lazy" src="https://img.shields.io/github/last-commit/salvogiangri/UN1CA/sixteen?style=for-the-badge"/></a>
-  <a href="https://github.com/salvogiangri/UN1CA/stargazers"><img loading="lazy" src="https://img.shields.io/github/stars/salvogiangri/UN1CA?style=for-the-badge"/></a>
-  <a href="https://github.com/salvogiangri/UN1CA/actions/workflows/ci.yml"><img loading="lazy" src="https://img.shields.io/github/actions/workflow/status/salvogiangri/UN1CA/ci.yml?style=for-the-badge"/></a>
+  <a href="LICENSE"><img loading="lazy" src="https://img.shields.io/github/license/devcore94/MonsterROM?style=for-the-badge&logo=github"/></a>
+  <a href="https://github.com/devcore94/MonsterROM/commits/seventeen"><img loading="lazy" src="https://img.shields.io/github/last-commit/devcore94/MonsterROM/seventeen?style=for-the-badge"/></a>
+  <a href="https://github.com/devcore94/MonsterROM/stargazers"><img loading="lazy" src="https://img.shields.io/github/stars/devcore94/MonsterROM?style=for-the-badge"/></a>
+  <a href="https://github.com/devcore94/MonsterROM/actions/workflows/ci.yml"><img loading="lazy" src="https://img.shields.io/github/actions/workflow/status/devcore94/MonsterROM/ci.yml?branch=seventeen&style=for-the-badge"/></a>
   <a href="https://crowdin.com/project/UN1CA"><img loading="lazy" src="https://img.shields.io/badge/Crowdin-263238?style=for-the-badge&logo=crowdin"/></a>
 </p>
 <p align="center">UN1CA <i>(/ˈu.ni.ka/)</i> is a work-in-progress custom firmware for Samsung Galaxy devices.</p>
@@ -15,6 +15,22 @@
   •
   <a href="https://t.me/unicarom">💬 Telegram</a>
 </p>
+
+# MonsterROM — SDK37 development branch
+
+This fork retains **[Salvo Giangreco (salvogiangri)](https://github.com/salvogiangri)**
+as UN1CA's original author, the upstream history, copyright notices and contributor
+credits. MonsterROM adaptations are maintained by **ditternation / devcore94**
+(`ditternation@outlook.com`). This is not an official UN1CA release.
+
+The `seventeen` branch targets a One UI 9.5 backport using the supplied Samsung
+**One UI 9.0 / Android 17 SDK37** base, with selected QPR2 code backports and
+camera-control styling. Branding `90500` / `37.2` is not a genuine 9.5 donor or
+proof of complete feature parity. Knox remains the actual 3.14 / API 41.
+
+**Start with [BUILDING.md](BUILDING.md)** for exact firmware/kernel prerequisites,
+the original build commands, development signing and remaining qualification
+limits. Source checks alone do not establish a bootable or feature-complete ROM.
 
 # What is UN1CA?
 UN1CA is a work-in-progress custom firmware for Samsung Galaxy devices, designed to provide a refined, optimized and more rich One UI experience.
@@ -27,8 +43,14 @@ The goal is to deliver a fast, smooth and modern UX while offering additional to
 Any form of contribution, suggestions, bug report or feature request for the project will be welcome.
 
 # Features
+> This SDK37 port is not feature-complete or device-qualified. Prophide is now
+> implemented and host-tested; compatible SSCO assets, portable current MCA,
+> Downloads media signing, clean-host kernel compilation and physical validation
+> remain open. The feature list below includes upstream goals, not a claim that
+> every Galaxy AI feature works on every target. See [build status](BUILDING.md#status-and-limits).
+
 ### Core features:
-- Based on the latest stable Galaxy S22 firmware
+- ESSI source: Galaxy S26 One UI 9.0 / SDK 37; QSSI retains its configured source
 - EROFS powered
 - Galaxy S25 wallpapers/sounds included
 - Galaxy AI support
