@@ -2,58 +2,50 @@ name: Update prebuilt blobs
 
 on:
   workflow_dispatch:
+    inputs:
+      device:
+        description: Blob profile to update (all, a53xtfn, pa2qxxx-sdk37, etc.)
+        type: string
+        default: all
   schedule:
     - cron: "0 12 * * *"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.device || 'all' }}
+  # A targeted manual retry must not cancel another firmware extraction.
+  cancel-in-progress: ${{ github.event_name == 'schedule' }}
 
 jobs:
-  update:
+  plan:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      matrix: ${{ steps.profiles.outputs.matrix }}
+    steps:
+      - name: Checkout blob profile definitions only
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github
+      - name: Select requested profiles
+        id: profiles
+        env:
+          BLOB_DEVICE: ${{ inputs.device || 'all' }}
+        run: python3 -B .github/blob_matrix.py --device "$BLOB_DEVICE" >> "$GITHUB_OUTPUT"
+
+  update:
+    needs: plan
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: blob-profile-${{ matrix.device }}
+      cancel-in-progress: false
     permissions:
       contents: write
       pull-requests: write
 
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - module: "Galaxy A52 (a52qnsxx)"
-            device: "a52qnsxx"
-            firmware: "SM-A525F/EUX/352938771234569"
-          - module: "Galaxy A53 5G (a53xtfn)"
-            device: "a53xtfn"
-            firmware: "SM-S536DL/TFA/352574701234567"
-          - module: "Galaxy A73 5G (a73xqxx)"
-            device: "a73xqxx"
-            firmware: "SM-A736B/XME/352828291234563"
-          - module: "Galaxy S22 Ultra (Snapdragon) (b0qxxx)"
-            device: "b0qxxx"
-            firmware: "SM-S908E/TUR/350280381234560"
-          - module: "Galaxy S22 Ultra (Exynos) (b0sxxx)"
-            device: "b0sxxx"
-            firmware: "SM-S908B/EUX/353074281234565"
-          - module: "Galaxy Z Flip4 (b4qxxx)"
-            device: "b4qxxx"
-            firmware: "SM-F721B/BTE/350525851234569"
-          - module: "Galaxy Tab A9+ 5G (gta9pxxx)"
-            device: "gta9pxxx"
-            firmware: "SM-X216B/EUX/352862571234563"
-          - module: "Galaxy Jump3 (m44xktt)"
-            device: "m44xktt"
-            firmware: "SM-M446K/KTC/350454001234561"
-          # Keep the original pa2qxxx SDK36 cohort intact for legacy consumers.
-          - module: "Galaxy S25+ (One UI 9.0 / SDK37 wallpapers)"
-            device: "pa2qxxx-sdk37"
-            firmware: "SM-S936B/EUX/35063460"
-          - module: "Galaxy S21 FE 5G (Snapdragon) (r9qxxx)"
-            device: "r9qxxx"
-            firmware: "SM-G990B/EUX/353718681234563"
-          - module: "Galaxy S21 FE 5G (Exynos) (r9sxxx)"
-            device: "r9sxxx"
-            firmware: "SM-G990E/THL/355798871234563"
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
 
     steps:
       - name: Checkout repo
@@ -96,6 +88,8 @@ jobs:
 
       - name: Set up build environment
         if: steps.sdk37.outputs.update != 'false'
+        env:
+          REQUIRE_F2FS: ${{ matrix.f2fs || false }}
         run: |
           sudo apt update
           DEBIAN_FRONTEND=noninteractive sudo apt install -yq \
@@ -112,6 +106,12 @@ jobs:
             exit 1
           fi
           # Native filesystem mounts are still checked by the real extractor.
+          # This donor has a known F2FS system image; verify the real native
+          # read-only mount path before downloading and unpacking its firmware.
+          if [ "${REQUIRE_F2FS:-false}" = true ]; then
+            sudo apt-get install -y --no-install-recommends f2fs-tools
+            bash .github/prepare_f2fs.sh
+          fi
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 

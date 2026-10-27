@@ -1,0 +1,13 @@
+[
+  {"module": "Galaxy A52 (a52qnsxx)", "device": "a52qnsxx", "firmware": "SM-A525F/EUX/352938771234569"},
+  {"module": "Galaxy A53 5G (a53xtfn)", "device": "a53xtfn", "firmware": "SM-S536DL/TFA/352574701234567", "f2fs": true},
+  {"module": "Galaxy A73 5G (a73xqxx)", "device": "a73xqxx", "firmware": "SM-A736B/XME/352828291234563"},
+  {"module": "Galaxy S22 Ultra (Snapdragon) (b0qxxx)", "device": "b0qxxx", "firmware": "SM-S908E/TUR/350280381234560"},
+  {"module": "Galaxy S22 Ultra (Exynos) (b0sxxx)", "device": "b0sxxx", "firmware": "SM-S908B/EUX/353074281234565"},
+  {"module": "Galaxy Z Flip4 (b4qxxx)", "device": "b4qxxx", "firmware": "SM-F721B/BTE/350525851234569"},
+  {"module": "Galaxy Tab A9+ 5G (gta9pxxx)", "device": "gta9pxxx", "firmware": "SM-X216B/EUX/352862571234563"},
+  {"module": "Galaxy Jump3 (m44xktt)", "device": "m44xktt", "firmware": "SM-M446K/KTC/350454001234561"},
+  {"module": "Galaxy S25+ (One UI 9.0 / SDK37 wallpapers)", "device": "pa2qxxx-sdk37", "firmware": "SM-S936B/EUX/35063460"},
+  {"module": "Galaxy S21 FE 5G (Snapdragon) (r9qxxx)", "device": "r9qxxx", "firmware": "SM-G990B/EUX/353718681234563"},
+  {"module": "Galaxy S21 FE 5G (Exynos) (r9sxxx)", "device": "r9sxxx", "firmware": "SM-G990E/THL/355798871234563"}
+]
