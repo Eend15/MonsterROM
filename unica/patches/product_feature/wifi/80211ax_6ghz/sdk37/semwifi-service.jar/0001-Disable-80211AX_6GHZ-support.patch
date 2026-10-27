@@ -1,0 +1,51 @@
+From 22c5035dd21f28258f813fd22d50e86f8ee0ccfe Mon Sep 17 00:00:00 2001
+From: ditternation <ditternation@outlook.com>
+Date: Wed, 30 Sep 2026 17:27:38 +0200
+Subject: [PATCH] Disable 80211AX_6GHZ support
+
+---
+ .../server/wifi/SemFrameworkFacade.smali      |  2 +-
+ .../wifi/b2b/WifiB2bPolicyManager.smali       | 12 ++++++-
+ 2 files changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/smali/com/samsung/android/server/wifi/SemFrameworkFacade.smali b/smali/com/samsung/android/server/wifi/SemFrameworkFacade.smali
+index f6cc885..80ec459 100644
+--- a/smali/com/samsung/android/server/wifi/SemFrameworkFacade.smali
++++ b/smali/com/samsung/android/server/wifi/SemFrameworkFacade.smali
+@@ -1519,7 +1519,7 @@
+ .method public isSupported6Ghz()Z
+     .locals 0
+ 
+-    const/4 p0, 0x1
++    const/4 p0, 0x0
+ 
+     return p0
+ .end method
+diff --git a/smali/com/samsung/android/server/wifi/b2b/WifiB2bPolicyManager.smali b/smali/com/samsung/android/server/wifi/b2b/WifiB2bPolicyManager.smali
+index a04b70f..8a0bd38 100644
+--- a/smali/com/samsung/android/server/wifi/b2b/WifiB2bPolicyManager.smali
++++ b/smali/com/samsung/android/server/wifi/b2b/WifiB2bPolicyManager.smali
+@@ -193,9 +193,19 @@
+ 
+     iput p1, p0, Lcom/samsung/android/server/wifi/b2b/WifiB2bPolicyManager;->supportedBand:I
+ 
++    iget p2, p0, Lcom/samsung/android/server/wifi/b2b/WifiB2bPolicyManager;->setbandDefaultValue:I
++
++    if-gt p1, p2, :cond_compat_band
++
++    const/4 p1, 0x0
++
++    iput p1, p0, Lcom/samsung/android/server/wifi/b2b/WifiB2bPolicyManager;->setbandDefaultValue:I
++
++    :cond_compat_band
++
+     new-instance p1, Ljava/lang/StringBuilder;
+ 
+-    const-string p2, "value of 6ghz secproduct feature :true  setbandDefaultValue "
++    const-string p2, "value of 6ghz secproduct feature :false  setbandDefaultValue "
+ 
+     invoke-direct {p1, p2}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+ 
+-- 
+2.53.0
+
