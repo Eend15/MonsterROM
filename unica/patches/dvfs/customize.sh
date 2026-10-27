@@ -1,10 +1,22 @@
 if [[ "$SOURCE_DVFSAPP_CONFIG_DVFS_POLICY_FILENAME" == "$TARGET_DVFSAPP_CONFIG_DVFS_POLICY_FILENAME" ]] && \
-    [[ "$SOURCE_DVFSAPP_CONFIG_SSRM_POLICY_FILENAME" == "$TARGET_DVFSAPP_CONFIG_SSRM_POLICY_FILENAME" ]]; then
+    [[ "$SOURCE_DVFSAPP_CONFIG_SSRM_POLICY_FILENAME" == "$TARGET_DVFSAPP_CONFIG_SSRM_POLICY_FILENAME" ]] && \
+    [ ! -f "$SRC_DIR/target/$TARGET_CODENAME/dvfs/siop_model.xml" ]; then
     LOG "\033[0;33m! Nothing to do\033[0m"
     return 0
 fi
 
 _LOG() { if $DEBUG; then LOGW "$1"; else ABORT "$1"; fi }
+
+# Reviewed SDK-37 SDHMS classes; keep the original methods and only replace
+# the same policy inputs. Do not guess another class by its obfuscated name.
+DVFS_FEATURE_SMALI="smali/r1/c.smali"
+DVFS_PROPERTIES_SMALI="smali/z1/e.smali"
+DVFS_UTIL_SMALI="smali/U1/w.smali"
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    DVFS_FEATURE_SMALI="smali/c4/c.smali"
+    DVFS_PROPERTIES_SMALI="smali/k4/e.smali"
+    DVFS_UTIL_SMALI="smali/n5/i0.smali"
+fi
 
 # SEC_PRODUCT_FEATURE_DVFSAPP_CONFIG_DVFS_POLICY_FILENAME
 if [[ "$SOURCE_DVFSAPP_CONFIG_DVFS_POLICY_FILENAME" != "$TARGET_DVFSAPP_CONFIG_DVFS_POLICY_FILENAME" ]]; then
@@ -25,13 +37,13 @@ if [[ "$SOURCE_DVFSAPP_CONFIG_DVFS_POLICY_FILENAME" != "$TARGET_DVFSAPP_CONFIG_D
 
     # com/sec/android/sdhms/performance/PerformanceFeature
     SMALI_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
-        "smali/r1/c.smali" "replace" \
+        "$DVFS_FEATURE_SMALI" "replace" \
         "<clinit>()V" \
         "$SOURCE_DVFSAPP_CONFIG_DVFS_POLICY_FILENAME" \
         "$TARGET_DVFSAPP_CONFIG_DVFS_POLICY_FILENAME"
     # com/sec/android/sdhms/performance/settings/PerformanceProperties
     SMALI_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
-        "smali/z1/e.smali" "replace" \
+        "$DVFS_PROPERTIES_SMALI" "replace" \
         "<init>(Landroid/content/Context;)V" \
         "$SOURCE_DVFSAPP_CONFIG_DVFS_POLICY_FILENAME" \
         "$TARGET_DVFSAPP_CONFIG_DVFS_POLICY_FILENAME"
@@ -65,7 +77,7 @@ if [[ "$SOURCE_DVFSAPP_CONFIG_SSRM_POLICY_FILENAME" != "$TARGET_DVFSAPP_CONFIG_S
 
     # com/sec/android/sdhms/util/Feature
     SMALI_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
-        "smali/U1/w.smali" "replace" \
+        "$DVFS_UTIL_SMALI" "replace" \
         "<clinit>()V" \
         "$SOURCE_DVFSAPP_CONFIG_SSRM_POLICY_FILENAME" \
         "$TARGET_DVFSAPP_CONFIG_SSRM_POLICY_FILENAME"
@@ -75,11 +87,11 @@ if [ -f "$SRC_DIR/target/$TARGET_CODENAME/dvfs/siop_model.xml" ]; then
     DECODE_APK "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk"
 
     LOG "- Deleting /system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk/assets/siop_default"
-    EVAL "rm \"$APKTOOL_DIR/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk/assets/siop_default\""
+    EVAL "rm -f \"$APKTOOL_DIR/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk/assets/siop_default\""
     LOG "- Deleting /system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk/assets/siop_model"
-    EVAL "rm \"$APKTOOL_DIR/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk/assets/siop_model\""
+    EVAL "rm -f \"$APKTOOL_DIR/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk/assets/siop_model\""
     LOG "- Deleting /system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk/assets/ssrm_default"
-    EVAL "rm \"$APKTOOL_DIR/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk/assets/ssrm_default\""
+    EVAL "rm -f \"$APKTOOL_DIR/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk/assets/ssrm_default\""
 
     LOG "- Adding /system/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk/assets/siop_default.xml"
     EVAL "cp -a \"$MODPATH/assets/siop_default.xml\" \"$APKTOOL_DIR/system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk/assets/siop_default.xml\""
@@ -94,4 +106,13 @@ else
     fi
 fi
 
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    APPLY_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
+        "$MODPATH/sdk37/SamsungDeviceHealthManagerService.apk/0001-Restore-DEX-thermal-complex-dispatch.patch" || return 1
+    APPLY_PATCH "system" "system/priv-app/SamsungDeviceHealthManagerService/SamsungDeviceHealthManagerService.apk" \
+        "$MODPATH/sdk37/SamsungDeviceHealthManagerService.apk/0002-Add-display-aware-DEX-thermal-handler.patch" || return 1
+    SET_PROP "system" "ro.unica.version" "$(GET_PROP "system" "ro.unica.version")-sdhms-camera-r1"
+fi
+
+unset DVFS_FEATURE_SMALI DVFS_PROPERTIES_SMALI DVFS_UTIL_SMALI
 unset -f _LOG
