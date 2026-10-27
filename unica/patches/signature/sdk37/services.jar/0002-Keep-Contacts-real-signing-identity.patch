@@ -1,0 +1,44 @@
+Subject: [PATCH] Keep standalone Contacts out of the platform certificate alias
+
+Contacts has no shared UID and uses Samsung's contacts certificate, rather
+than its platform certificate. Retain the verified custom certificate for
+this package. The existing system-image reconciliation path handles its
+system-app upgrade; ordinary data-app updates still require a matching key.
+
+diff --git a/smali_classes2/com/android/server/pm/InstallPackageHelper.smali b/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
+--- a/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
++++ b/smali_classes2/com/android/server/pm/InstallPackageHelper.smali
+@@ -24932,4 +24932,16 @@
+ .method public final applyCustomPlatformSignaturePolicy(Lcom/android/internal/pm/parsing/pkg/ParsedPackage;)V
+     .locals 2
+ 
++    const-string v0, "com.samsung.android.app.contacts"
++
++    invoke-interface {p1}, Lcom/android/internal/pm/parsing/pkg/ParsedPackage;->getPackageName()Ljava/lang/String;
++
++    move-result-object v1
++
++    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v0
++
++    if-nez v0, :done
++
+     iget-object v0, p0, Lcom/android/server/pm/InstallPackageHelper;->mCustomPlatformSignatures:[Landroid/content/pm/Signature;
+@@ -24950,4 +24962,16 @@
+ .method public final setCustomPlatformSigningDetails(Lcom/android/internal/pm/parsing/pkg/ParsedPackage;)V
+     .locals 2
+ 
++    const-string v0, "com.samsung.android.app.contacts"
++
++    invoke-interface {p1}, Lcom/android/internal/pm/parsing/pkg/ParsedPackage;->getPackageName()Ljava/lang/String;
++
++    move-result-object v1
++
++    invoke-virtual {v0, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v0
++
++    if-nez v0, :done
++
+     iget-object v0, p0, Lcom/android/server/pm/InstallPackageHelper;->mCustomPlatformSignatures:[Landroid/content/pm/Signature;
