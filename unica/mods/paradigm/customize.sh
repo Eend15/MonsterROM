@@ -68,6 +68,33 @@ PERL
 # Keep the newer SDK-37 applications and native feature cohorts. Do not
 # downgrade them indiscriminately to the SDK-36/S25 payloads below.
 if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    LOG_STEP_IN "- Selecting target-compatible Samsung brand sounds"
+    if ! $TARGET_AUDIO_SUPPORT_ACH_RINGTONE; then
+        # SDK37 supplies ACH-only tones. Use the original coherent ordinary
+        # SoundTheme pack on non-ACH targets, not renamed haptic-channel files.
+        DELETE_FROM_WORK_DIR "system" "system/media/audio/notifications"
+        DELETE_FROM_WORK_DIR "system" "system/media/audio/ringtones"
+        ADD_TO_WORK_DIR "a56xnaxx" "system" "system/etc/ringtones_count_list.txt" 0 0 644 "u:object_r:system_file:s0"
+        ADD_TO_WORK_DIR "a56xnaxx" "system" "system/media/audio/notifications" 0 0 755 "u:object_r:system_file:s0"
+        ADD_TO_WORK_DIR "a56xnaxx" "system" "system/media/audio/ringtones" 0 0 755 "u:object_r:system_file:s0"
+        PARADIGM_AUDIO_PREFIX=""
+    else
+        # The genuine SDK37 ACH pack already supersedes the 2025 ACH payload.
+        PARADIGM_AUDIO_PREFIX="ACH_"
+    fi
+    SET_PROP "vendor" "ro.config.ringtone" "${PARADIGM_AUDIO_PREFIX}Galaxy_Bells.ogg"
+    SET_PROP "vendor" "ro.config.notification_sound" "${PARADIGM_AUDIO_PREFIX}Brightline.ogg"
+    SET_PROP "vendor" "ro.config.alarm_alert" "${PARADIGM_AUDIO_PREFIX}Morning_Xylophone.ogg"
+    SET_PROP "vendor" "ro.config.media_sound" "Media_preview_Over_the_horizon.ogg"
+    SET_PROP "vendor" "ro.config.ringtone_2" "${PARADIGM_AUDIO_PREFIX}Atomic_Bell.ogg"
+    SET_PROP "vendor" "ro.config.notification_sound_2" "${PARADIGM_AUDIO_PREFIX}Three_Star.ogg"
+    unset PARADIGM_AUDIO_PREFIX
+    # Keep the newer SDK37 Horizon music/preview and the original brand-sound
+    # reader behavior, which is still gated on the target's first shipping API.
+    APPLY_PATCH "system" "system/priv-app/SecSoundPicker/SecSoundPicker.apk" \
+        "$MODPATH/brandsound/SecSoundPicker.apk/0001-Enable-SUPPORT_SAMSUNG_BRAND_SOUND_ONEUI_7.patch"
+    LOG_STEP_OUT
+
     # QPR2 feature customization is owned here. Keep the reviewed order and
     # each former child MODPATH: payloads/contracts/patches stay in place.
     # No conditional sourcing or feature-function wrapper: errexit stays active
