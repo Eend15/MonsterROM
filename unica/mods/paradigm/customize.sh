@@ -926,6 +926,8 @@ PERL
             "$MODPATH/patches/SamsungVideoPlayer.apk/0001-Connect-native-Video-blur-to-QPR2-material.patch"
         APPLY_PATCH "system" "system/priv-app/SoundAlive_C/SoundAlive_C.apk" \
             "$MODPATH/patches/SoundAlive_C.apk/0001-Add-QPR2-material-to-SoundAlive-action-rows.patch"
+        APPLY_PATCH "system" "system/priv-app/SamsungMagnifier3/SamsungMagnifier3.apk" \
+            "$MODPATH/patches/SamsungMagnifier3.apk/0001-Add-QPR2-material-behind-native-Magnifier-controls.patch"
     fi
     LOG_STEP_OUT
 
