@@ -1,0 +1,12 @@
+diff --git a/smali/com/samsung/android/game/display/GameDisplayListener.smali b/smali/com/samsung/android/game/display/GameDisplayListener.smali
+--- a/smali/com/samsung/android/game/display/GameDisplayListener.smali
++++ b/smali/com/samsung/android/game/display/GameDisplayListener.smali
+@@ -50,6 +50,8 @@
+ 
+     move-result v0
+ 
++    xor-int/lit8 v0, v0, 0x1
++
+     iput-boolean v0, p0, Lcom/samsung/android/game/display/GameDisplayListener;->MULTI_RESOLUTION_SUPPORTED:Z
+ 
+     const/4 v0, 0x0
