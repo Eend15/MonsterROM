@@ -1,0 +1,495 @@
+Subject: [PATCH] Use QPR2 country-aware phone equality for typed selections; preserve extensions
+
+diff --git a/smali/jp/p.smali b/smali/jp/p.smali
+--- a/smali/jp/p.smali
++++ b/smali/jp/p.smali
+@@ -1535,7 +1535,7 @@
+ .end method
+ 
+ .method public final f(Ljava/lang/String;)Z
+-    .locals 6
++    .locals 7
+ 
+     iget-object v0, p0, Ljp/p;->f:Lip/j;
+ 
+@@ -1564,6 +1564,18 @@
+     return v3
+ 
+     :cond_0
++    move-object v6, v2
++
++    check-cast v6, Lkp/f;
++
++    invoke-virtual {v6}, Landroidx/fragment/app/z;->m0()Landroid/content/Context;
++
++    move-result-object v6
++
++    invoke-static {v6}, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers;->country(Landroid/content/Context;)Ljava/lang/String;
++
++    move-result-object v6
++
+     invoke-virtual {v0}, Lip/j;->s1()Ljava/util/LinkedHashMap;
+ 
+     move-result-object v0
+@@ -1635,7 +1647,7 @@
+ 
+     if-eqz v5, :cond_4
+ 
+-    invoke-static {v1, p1}, Landroid/telephony/PhoneNumberUtils;->compare(Ljava/lang/String;Ljava/lang/String;)Z
++    invoke-static {v1, p1, v6}, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers;->sameForCountry(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
+ 
+     move-result v1
+ 
+diff --git a/smali_classes2/io/mesalabs/unica/contacts/Qpr2ContactNumbers$Number.smali b/smali_classes2/io/mesalabs/unica/contacts/Qpr2ContactNumbers$Number.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes2/io/mesalabs/unica/contacts/Qpr2ContactNumbers$Number.smali
+@@ -0,0 +1,38 @@
++.class final Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;
++.super Ljava/lang/Object;
++.source "Qpr2ContactNumbers.java"
++
++
++# annotations
++.annotation system Ldalvik/annotation/EnclosingClass;
++    value = Lio/mesalabs/unica/contacts/Qpr2ContactNumbers;
++.end annotation
++
++.annotation system Ldalvik/annotation/InnerClass;
++    accessFlags = 0x1a
++    name = "Number"
++.end annotation
++
++
++# instance fields
++.field final extension:Ljava/lang/String;
++
++.field final network:Ljava/lang/String;
++
++.field final postDial:Ljava/lang/String;
++
++
++# direct methods
++.method constructor <init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
++    .locals 0
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    iput-object p1, p0, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;->network:Ljava/lang/String;
++
++    iput-object p2, p0, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;->extension:Ljava/lang/String;
++
++    iput-object p3, p0, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;->postDial:Ljava/lang/String;
++
++    return-void
++.end method
+diff --git a/smali_classes2/io/mesalabs/unica/contacts/Qpr2ContactNumbers.smali b/smali_classes2/io/mesalabs/unica/contacts/Qpr2ContactNumbers.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes2/io/mesalabs/unica/contacts/Qpr2ContactNumbers.smali
+@@ -0,0 +1,405 @@
++.class public final Lio/mesalabs/unica/contacts/Qpr2ContactNumbers;
++.super Ljava/lang/Object;
++.source "Qpr2ContactNumbers.java"
++
++
++# annotations
++.annotation system Ldalvik/annotation/MemberClasses;
++    value = {
++        Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;
++    }
++.end annotation
++
++
++# static fields
++.field private static final COUNTRY:Ljava/util/regex/Pattern;
++
++.field private static final EXTENSION:Ljava/util/regex/Pattern;
++
++
++# direct methods
++.method static constructor <clinit>()V
++    .locals 1
++
++    const-string v0, "(?i)\\s*(?:ext\\.?|extension|x|#)\\s*([\\p{Nd}]+)\\s*$"
++
++    invoke-static {v0}, Ljava/util/regex/Pattern;->compile(Ljava/lang/String;)Ljava/util/regex/Pattern;
++
++    move-result-object v0
++
++    sput-object v0, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers;->EXTENSION:Ljava/util/regex/Pattern;
++
++    const-string v0, "[a-zA-Z]{2}"
++
++    invoke-static {v0}, Ljava/util/regex/Pattern;->compile(Ljava/lang/String;)Ljava/util/regex/Pattern;
++
++    move-result-object v0
++
++    sput-object v0, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers;->COUNTRY:Ljava/util/regex/Pattern;
++
++    return-void
++.end method
++
++.method public constructor <init>()V
++    .locals 0
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    return-void
++.end method
++
++.method public static country(Landroid/content/Context;)Ljava/lang/String;
++    .locals 2
++
++    const-string v0, ""
++
++    if-nez p0, :cond_6
++
++    const/4 p0, 0x0
++
++    goto :goto_e
++
++    :cond_6
++    :try_start_6
++    const-class v1, Landroid/telephony/TelephonyManager;
++
++    invoke-virtual {p0, v1}, Landroid/content/Context;->getSystemService(Ljava/lang/Class;)Ljava/lang/Object;
++
++    move-result-object p0
++
++    check-cast p0, Landroid/telephony/TelephonyManager;
++
++    :goto_e
++    if-eqz p0, :cond_14
++
++    invoke-virtual {p0}, Landroid/telephony/TelephonyManager;->getNetworkCountryIso()Ljava/lang/String;
++
++    move-result-object v0
++    :try_end_14
++    .catch Ljava/lang/RuntimeException; {:try_start_6 .. :try_end_14} :catch_14
++
++    :catch_14
++    :cond_14
++    if-eqz v0, :cond_22
++
++    sget-object p0, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers;->COUNTRY:Ljava/util/regex/Pattern;
++
++    invoke-virtual {p0, v0}, Ljava/util/regex/Pattern;->matcher(Ljava/lang/CharSequence;)Ljava/util/regex/Matcher;
++
++    move-result-object p0
++
++    invoke-virtual {p0}, Ljava/util/regex/Matcher;->matches()Z
++
++    move-result p0
++
++    if-nez p0, :cond_2a
++
++    :cond_22
++    invoke-static {}, Ljava/util/Locale;->getDefault()Ljava/util/Locale;
++
++    move-result-object p0
++
++    invoke-virtual {p0}, Ljava/util/Locale;->getCountry()Ljava/lang/String;
++
++    move-result-object v0
++
++    :cond_2a
++    return-object v0
++.end method
++
++.method private static digits(Ljava/lang/String;)Ljava/lang/String;
++    .locals 4
++
++    new-instance v0, Ljava/lang/StringBuilder;
++
++    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
++
++    const/4 v1, 0x0
++
++    :goto_6
++    invoke-virtual {p0}, Ljava/lang/String;->length()I
++
++    move-result v2
++
++    if-ge v1, v2, :cond_21
++
++    invoke-virtual {p0, v1}, Ljava/lang/String;->charAt(I)C
++
++    move-result v2
++
++    const/16 v3, 0xa
++
++    invoke-static {v2, v3}, Ljava/lang/Character;->digit(CI)I
++
++    move-result v3
++
++    if-ltz v3, :cond_1b
++
++    add-int/lit8 v3, v3, 0x30
++
++    int-to-char v2, v3
++
++    :cond_1b
++    invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(C)Ljava/lang/StringBuilder;
++
++    add-int/lit8 v1, v1, 0x1
++
++    goto :goto_6
++
++    :cond_21
++    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
++
++    move-result-object p0
++
++    return-object p0
++.end method
++
++.method public static sameForCountry(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
++    .locals 3
++
++    const/4 v0, 0x0
++
++    if-eqz p0, :cond_84
++
++    if-eqz p1, :cond_84
++
++    invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
++
++    move-result-object p0
++
++    invoke-virtual {p1}, Ljava/lang/String;->trim()Ljava/lang/String;
++
++    move-result-object p1
++
++    invoke-virtual {p0}, Ljava/lang/String;->isEmpty()Z
++
++    move-result v1
++
++    if-nez v1, :cond_84
++
++    invoke-virtual {p1}, Ljava/lang/String;->isEmpty()Z
++
++    move-result v1
++
++    if-nez v1, :cond_84
++
++    invoke-virtual {p0, p1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v1
++
++    if-eqz v1, :cond_21
++
++    const/4 p0, 0x1
++
++    return p0
++
++    :cond_21
++    const/16 v1, 0x40
++
++    invoke-virtual {p0, v1}, Ljava/lang/String;->indexOf(I)I
++
++    move-result v2
++
++    if-gez v2, :cond_84
++
++    invoke-virtual {p1, v1}, Ljava/lang/String;->indexOf(I)I
++
++    move-result v1
++
++    if-gez v1, :cond_84
++
++    const/16 v1, 0x2a
++
++    invoke-virtual {p0, v1}, Ljava/lang/String;->indexOf(I)I
++
++    move-result v2
++
++    if-gez v2, :cond_84
++
++    invoke-virtual {p1, v1}, Ljava/lang/String;->indexOf(I)I
++
++    move-result v1
++
++    if-gez v1, :cond_84
++
++    const-string v1, "#"
++
++    invoke-virtual {p0, v1}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
++
++    move-result v2
++
++    if-nez v2, :cond_84
++
++    invoke-virtual {p1, v1}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
++
++    move-result v1
++
++    if-nez v1, :cond_84
++
++    invoke-static {p0}, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers;->split(Ljava/lang/String;)Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;
++
++    move-result-object p0
++
++    invoke-static {p1}, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers;->split(Ljava/lang/String;)Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;
++
++    move-result-object p1
++
++    iget-object v1, p0, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;->extension:Ljava/lang/String;
++
++    iget-object v2, p1, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;->extension:Ljava/lang/String;
++
++    invoke-virtual {v1, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v1
++
++    if-eqz v1, :cond_84
++
++    iget-object v1, p0, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;->postDial:Ljava/lang/String;
++
++    iget-object v2, p1, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;->postDial:Ljava/lang/String;
++
++    invoke-virtual {v1, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v1
++
++    if-eqz v1, :cond_84
++
++    if-eqz p2, :cond_84
++
++    sget-object v1, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers;->COUNTRY:Ljava/util/regex/Pattern;
++
++    invoke-virtual {v1, p2}, Ljava/util/regex/Pattern;->matcher(Ljava/lang/CharSequence;)Ljava/util/regex/Matcher;
++
++    move-result-object v1
++
++    invoke-virtual {v1}, Ljava/util/regex/Matcher;->matches()Z
++
++    move-result v1
++
++    if-eqz v1, :cond_84
++
++    :try_start_75
++    iget-object p0, p0, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;->network:Ljava/lang/String;
++
++    iget-object p1, p1, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;->network:Ljava/lang/String;
++
++    sget-object v1, Ljava/util/Locale;->ROOT:Ljava/util/Locale;
++
++    invoke-virtual {p2, v1}, Ljava/lang/String;->toUpperCase(Ljava/util/Locale;)Ljava/lang/String;
++
++    move-result-object p2
++
++    invoke-static {p0, p1, p2}, Landroid/telephony/PhoneNumberUtils;->areSamePhoneNumber(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z
++
++    move-result p0
++    :try_end_83
++    .catch Ljava/lang/RuntimeException; {:try_start_75 .. :try_end_83} :catch_84
++
++    return p0
++
++    :catch_84
++    :cond_84
++    return v0
++.end method
++
++.method private static split(Ljava/lang/String;)Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;
++    .locals 5
++
++    const/16 v0, 0x2c
++
++    invoke-virtual {p0, v0}, Ljava/lang/String;->indexOf(I)I
++
++    move-result v0
++
++    const/16 v1, 0x3b
++
++    invoke-virtual {p0, v1}, Ljava/lang/String;->indexOf(I)I
++
++    move-result v1
++
++    if-gez v0, :cond_10
++
++    move v0, v1
++
++    goto :goto_16
++
++    :cond_10
++    if-ltz v1, :cond_16
++
++    invoke-static {v0, v1}, Ljava/lang/Math;->min(II)I
++
++    move-result v0
++
++    :cond_16
++    :goto_16
++    const/4 v1, 0x0
++
++    const-string v2, ""
++
++    if-ltz v0, :cond_2e
++
++    invoke-virtual {p0, v0}, Ljava/lang/String;->substring(I)Ljava/lang/String;
++
++    move-result-object v3
++
++    const-string v4, "\\s+"
++
++    invoke-virtual {v3, v4, v2}, Ljava/lang/String;->replaceAll(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
++    invoke-static {v3}, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers;->digits(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v3
++
++    invoke-virtual {p0, v1, v0}, Ljava/lang/String;->substring(II)Ljava/lang/String;
++
++    move-result-object p0
++
++    goto :goto_2f
++
++    :cond_2e
++    move-object v3, v2
++
++    :goto_2f
++    sget-object v0, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers;->EXTENSION:Ljava/util/regex/Pattern;
++
++    invoke-virtual {v0, p0}, Ljava/util/regex/Pattern;->matcher(Ljava/lang/CharSequence;)Ljava/util/regex/Matcher;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Ljava/util/regex/Matcher;->find()Z
++
++    move-result v4
++
++    if-eqz v4, :cond_4c
++
++    const/4 v2, 0x1
++
++    invoke-virtual {v0, v2}, Ljava/util/regex/Matcher;->group(I)Ljava/lang/String;
++
++    move-result-object v2
++
++    invoke-static {v2}, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers;->digits(Ljava/lang/String;)Ljava/lang/String;
++
++    move-result-object v2
++
++    invoke-virtual {v0}, Ljava/util/regex/Matcher;->start()I
++
++    move-result v0
++
++    invoke-virtual {p0, v1, v0}, Ljava/lang/String;->substring(II)Ljava/lang/String;
++
++    move-result-object p0
++
++    :cond_4c
++    new-instance v0, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;
++
++    invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
++
++    move-result-object p0
++
++    invoke-direct {v0, p0, v2, v3}, Lio/mesalabs/unica/contacts/Qpr2ContactNumbers$Number;-><init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
++
++    return-object v0
++.end method
