@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.mesalabs.unica.camera95" android:versionCode="3702017" android:versionName="1.0-r17">
+    <uses-sdk android:minSdkVersion="37" android:targetSdkVersion="37" />
+    <overlay android:targetPackage="com.sec.android.app.camera" android:isStatic="true"
+        android:priority="1" android:resourcesMap="@xml/overlays" />
+    <application android:hasCode="false" android:label="UN1CA Camera controls" />
+</manifest>

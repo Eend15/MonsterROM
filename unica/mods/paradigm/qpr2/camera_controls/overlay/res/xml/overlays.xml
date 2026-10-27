@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<overlay>
+    <item target="layout/key_screen_quick_setting_button" value="@layout/unica95_quick_setting_button" />
+</overlay>

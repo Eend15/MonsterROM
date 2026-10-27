@@ -931,6 +931,14 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # Source-built Camera surfaces; this child owns its temporary build trap.
+    LOG_STEP_IN "- Adding One UI 9.5 camera controls"
+    (
+        MODPATH="$PARADIGM_MODPATH/qpr2/camera_controls"
+        source "$MODPATH/customize.sh"
+    ) || return 1
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

@@ -1,0 +1,10 @@
+{
+  "reference": "https://www.sammobile.com/wp-content/uploads/2026/08/Samsung-One-UI-9.5-Camera-Sub-Menu-Designs-Leak.jpg",
+  "reference_status": "early leak attributed to Fahad Ali Javed; not official firmware source",
+  "target_package": "com.sec.android.app.camera",
+  "target_layout": "key_screen_quick_setting_button",
+  "reference_target_sha256": "c321c1493635657d0fc9ca7e7c8bc6efc12d83cf0b4a41ac2204ec9861bc93cb",
+  "idmap_policy": "product|public, overlayable enforced",
+  "new_sensor_modes": false,
+  "original_APK_replaced": false
+}
