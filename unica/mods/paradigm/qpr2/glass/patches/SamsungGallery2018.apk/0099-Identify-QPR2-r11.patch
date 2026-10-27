@@ -1,0 +1,16 @@
+Subject: [PATCH] Identify the QPR2 r11 app candidate
+
+diff --git a/apktool.yml b/apktool.yml
+--- a/apktool.yml
++++ b/apktool.yml
+@@ -8,8 +8,8 @@
+   minSdkVersion: 30
+   targetSdkVersion: 37
+ versionInfo:
+-  versionCode: 1590000050
+-  versionName: 15.9.00.50
++  versionCode: 1590000052
++  versionName: 15.9.00.50-UN1CA.QPR2.r17
+ resourcesInfo:
+   packageId: 127
+ doNotCompress:
