@@ -312,6 +312,26 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
     fi
     LOG_STEP_OUT
 
+    # QPR2 conscrypt_trust
+    MODPATH="$PARADIGM_MODPATH/qpr2/conscrypt_trust"
+    LOG_STEP_IN "- Adding QPR2 conscrypt_trust"
+    # Finite complete signed com.android.conscrypt input; cohort preflight runs before either copy.
+    if [ "${UN1CA_QPR2_RUNTIME_COHORT:-off}" = "trial-r15" ]; then
+        [ "${QPR2_RUNTIME_PREFLIGHT:-}" = "trial-r15" ] || {
+            ABORT "Run the paired QPR2 runtime preflight first"
+            return 1
+        }
+        ADD_TO_WORK_DIR "$SRC_DIR/prebuilts/qpr2-runtime" "system" "system/apex/com.google.android.conscrypt.apex" 0 0 644
+        [ "$(sha256sum "$WORK_DIR/system/system/apex/com.google.android.conscrypt.apex" | cut -d ' ' -f 1)" = "4d5881208615078ed816687106e7843a8fec516bea72adc7fbc6329a5d8ab15d" ] || return 1
+        if [ -f "$WORK_DIR/system/system/apex/com.google.android.conscrypt_compressed.apex" ]; then
+            DELETE_FROM_WORK_DIR "system" "system/apex/com.google.android.conscrypt_compressed.apex"
+        fi
+        SET_PROP "system" "ro.unica.qpr2.runtime_cohort" "trial-r15"
+    fi
+    LOG_STEP_OUT
+
+    unset QPR2_RUNTIME_PREFLIGHT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
