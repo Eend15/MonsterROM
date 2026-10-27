@@ -87,6 +87,10 @@
 
     iget v7, v4, Landroid/content/pm/ApplicationInfo;->uid:I
 
+    invoke-static {v7}, Landroid/os/UserHandle;->getUserId(I)I
+
+    move-result v7
+
     sget-object v8, Landroidx/picker/model/AppInfo;->Companion:Landroidx/picker/model/AppInfo$Companion;
 
     const-string v8, ""
