@@ -1,0 +1,43 @@
+From 79f3e63be46907ba38f56f660d025e2b2243985f Mon Sep 17 00:00:00 2001
+From: ditternation <ditternation@outlook.com>
+Date: Wed, 30 Sep 2026 17:29:49 +0200
+Subject: [PATCH] Match hotspot capabilities to target
+
+---
+ .../WifiApConfigureSecurityDropDownController.smali         | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/smali_classes4/com/samsung/android/settings/wifi/mobileap/configure/WifiApConfigureSecurityDropDownController.smali b/smali_classes4/com/samsung/android/settings/wifi/mobileap/configure/WifiApConfigureSecurityDropDownController.smali
+index c1326b4..8a5365b 100644
+--- a/smali_classes4/com/samsung/android/settings/wifi/mobileap/configure/WifiApConfigureSecurityDropDownController.smali
++++ b/smali_classes4/com/samsung/android/settings/wifi/mobileap/configure/WifiApConfigureSecurityDropDownController.smali
+@@ -231,7 +231,7 @@
+ 
+     move-result-object p1
+ 
+-    const v0, 0x7f0301f7
++    const v0, 0x7f0301f8
+ 
+     invoke-virtual {p1, v0}, Landroid/content/res/Resources;->getStringArray(I)[Ljava/lang/String;
+ 
+@@ -252,7 +252,7 @@
+ 
+     move-result-object p1
+ 
+-    const v0, 0x7f030203
++    const v0, 0x7f03020b
+ 
+     invoke-virtual {p1, v0}, Landroid/content/res/Resources;->getStringArray(I)[Ljava/lang/String;
+ 
+@@ -273,7 +273,7 @@
+ 
+     move-result-object p1
+ 
+-    const v0, 0x7f030202
++    const v0, 0x7f030205
+ 
+     invoke-virtual {p1, v0}, Landroid/content/res/Resources;->getStringArray(I)[Ljava/lang/String;
+ 
+-- 
+2.53.0
+
