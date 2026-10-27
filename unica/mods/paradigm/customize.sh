@@ -1028,6 +1028,17 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 video_routes
+    MODPATH="$PARADIGM_MODPATH/qpr2/video_routes"
+    LOG_STEP_IN "- Adding QPR2 video_routes"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SamsungVideoPlayer/SamsungVideoPlayer.apk" \
+            "$MODPATH/patches/SamsungVideoPlayer.apk/0001-Use-QPR2-session-specific-audio-output.patch"
+        APPLY_PATCH "system" "system/priv-app/SamsungVideoPlayer/SamsungVideoPlayer.apk" \
+            "$MODPATH/patches/SamsungVideoPlayer.apk/0099-Identify-QPR2-r13.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

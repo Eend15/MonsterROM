@@ -1,0 +1,384 @@
+Subject: [PATCH] Use the native Video Player media-session token for QPR2 audio output selection
+
+diff --git a/res/values-nl/unica_video_routes.xml b/res/values-nl/unica_video_routes.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values-nl/unica_video_routes.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources><string name="unica_video_output_title">Audio-uitvoer</string><string name="unica_video_output_unavailable">Audio-uitvoer is niet beschikbaar voor deze afspeelsessie</string></resources>
+diff --git a/res/values/public.xml b/res/values/public.xml
+--- a/res/values/public.xml
++++ b/res/values/public.xml
+@@ -9123,4 +9123,7 @@
+     <public type="drawable" name="unica_inline_gap_7f080081" id="0x7f080081" />
+     <public type="drawable" name="unica_inline_gap_7f080082" id="0x7f080082" />
+     <public type="id" name="unica_glass_surface" id="0x7f0a0517" />
++    <public type="id" name="unica_video_output" id="0x7f0a0518" />
++    <public type="string" name="unica_video_output_title" id="0x7f1303db" />
++    <public type="string" name="unica_video_output_unavailable" id="0x7f1303dc" />
+ </resources>
+diff --git a/res/values/unica_video_routes.xml b/res/values/unica_video_routes.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values/unica_video_routes.xml
+@@ -0,0 +1,2 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources><item type="id" name="unica_video_output" /><string name="unica_video_output_title">Audio output</string><string name="unica_video_output_unavailable">Audio output is unavailable for this playback session</string></resources>
+diff --git a/smali/com/samsung/android/video/player/activity/MoviePlayer.smali b/smali/com/samsung/android/video/player/activity/MoviePlayer.smali
+--- a/smali/com/samsung/android/video/player/activity/MoviePlayer.smali
++++ b/smali/com/samsung/android/video/player/activity/MoviePlayer.smali
+@@ -5029,6 +5029,8 @@
+ 
+     invoke-virtual {v1, v2, p1}, Landroid/view/MenuInflater;->inflate(ILandroid/view/Menu;)V
+ 
++    invoke-static {p0, p1}, Lio/mesalabs/unica/video/Qpr2VideoRoutes;->add(Landroid/app/Activity;Landroid/view/Menu;)V
++
+     invoke-static {}, Llb/x1;->d()Llb/x1;
+ 
+     move-result-object p1
+@@ -6825,7 +6827,27 @@
+ .end method
+ 
+ .method public final onOptionsItemSelected(Landroid/view/MenuItem;)Z
+-    .locals 0
++    .locals 2
++
++    const/4 v0, 0x0
++
++    sget-object v1, Llb/d;->l:Llb/d;
++
++    if-eqz v1, :unica_video_session_ready
++
++    iget-object v0, v1, Llb/d;->c:Landroid/media/session/MediaSession;
++
++    :unica_video_session_ready
++
++    invoke-static {p0, p1, v0}, Lio/mesalabs/unica/video/Qpr2VideoRoutes;->handle(Landroid/app/Activity;Landroid/view/MenuItem;Landroid/media/session/MediaSession;)Z
++
++    move-result v0
++
++    if-eqz v0, :unica_native_video_menu
++
++    return v0
++
++    :unica_native_video_menu
+ 
+     invoke-super {p0, p1}, Landroid/app/Activity;->onOptionsItemSelected(Landroid/view/MenuItem;)Z
+ 
+@@ -7353,6 +7375,29 @@
+     iput-object v1, v0, Llb/x0;->b:Llb/w0;
+ 
+     invoke-virtual {v0, p1}, Llb/x1;->f(Landroid/view/Menu;)V
++
++    const/4 v2, 0x0
++
++    iget-object v0, v0, Llb/x0;->b:Llb/w0;
++
++    sget-object v1, Llb/w0;->NORMAL:Llb/w0;
++
++    if-ne v0, v1, :unica_video_mode_ready
++
++    const/4 v2, 0x1
++
++    :unica_video_mode_ready
++    const/4 v0, 0x0
++
++    sget-object v1, Llb/d;->l:Llb/d;
++
++    if-eqz v1, :unica_video_session_ready
++
++    iget-object v0, v1, Llb/d;->c:Landroid/media/session/MediaSession;
++
++    :unica_video_session_ready
++
++    invoke-static {p0, p1, v0, v2}, Lio/mesalabs/unica/video/Qpr2VideoRoutes;->prepare(Landroid/app/Activity;Landroid/view/Menu;Landroid/media/session/MediaSession;Z)V
+ 
+     invoke-super {p0, p1}, Landroid/app/Activity;->onPrepareOptionsMenu(Landroid/view/Menu;)Z
+ 
+diff --git a/smali_classes2/io/mesalabs/unica/video/Qpr2VideoRoutes.smali b/smali_classes2/io/mesalabs/unica/video/Qpr2VideoRoutes.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes2/io/mesalabs/unica/video/Qpr2VideoRoutes.smali
+@@ -0,0 +1,281 @@
++.class public final Lio/mesalabs/unica/video/Qpr2VideoRoutes;
++.super Ljava/lang/Object;
++.source "Qpr2VideoRoutes.java"
++
++
++# direct methods
++.method private constructor <init>()V
++    .locals 0
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    return-void
++.end method
++
++.method public static add(Landroid/app/Activity;Landroid/view/Menu;)V
++    .locals 3
++
++    if-eqz p0, :cond_2e
++
++    if-eqz p1, :cond_2e
++
++    const-string v0, "unica_video_output"
++
++    const-string v1, "id"
++
++    invoke-static {p0, v0, v1}, Lio/mesalabs/unica/video/Qpr2VideoRoutes;->resource(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result v0
++
++    const-string v1, "unica_video_output_title"
++
++    const-string v2, "string"
++
++    invoke-static {p0, v1, v2}, Lio/mesalabs/unica/video/Qpr2VideoRoutes;->resource(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result v1
++
++    if-eqz v0, :cond_2e
++
++    if-eqz v1, :cond_2e
++
++    invoke-interface {p1, v0}, Landroid/view/Menu;->findItem(I)Landroid/view/MenuItem;
++
++    move-result-object v2
++
++    if-nez v2, :cond_2e
++
++    const/16 v2, 0x64
++
++    invoke-virtual {p0, v1}, Landroid/app/Activity;->getString(I)Ljava/lang/String;
++
++    move-result-object p0
++
++    const/4 v1, 0x0
++
++    invoke-interface {p1, v1, v0, v2, p0}, Landroid/view/Menu;->add(IIILjava/lang/CharSequence;)Landroid/view/MenuItem;
++
++    move-result-object p0
++
++    sget p1, Landroid/view/MenuItem;->SHOW_AS_ACTION_NEVER:I
++
++    invoke-interface {p0, p1}, Landroid/view/MenuItem;->setShowAsAction(I)V
++
++    :cond_2e
++    return-void
++.end method
++
++.method public static handle(Landroid/app/Activity;Landroid/view/MenuItem;Landroid/media/session/MediaSession;)Z
++    .locals 3
++
++    const/4 v0, 0x0
++
++    if-eqz p0, :cond_5f
++
++    if-eqz p1, :cond_5f
++
++    const-string v1, "unica_video_output"
++
++    const-string v2, "id"
++
++    invoke-static {p0, v1, v2}, Lio/mesalabs/unica/video/Qpr2VideoRoutes;->resource(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result v1
++
++    if-eqz v1, :cond_5f
++
++    invoke-interface {p1}, Landroid/view/MenuItem;->getItemId()I
++
++    move-result v2
++
++    if-ne v2, v1, :cond_5f
++
++    invoke-interface {p1}, Landroid/view/MenuItem;->isEnabled()Z
++
++    move-result v0
++
++    const/4 v1, 0x1
++
++    if-eqz v0, :cond_5e
++
++    invoke-interface {p1}, Landroid/view/MenuItem;->isVisible()Z
++
++    move-result p1
++
++    if-eqz p1, :cond_5e
++
++    invoke-virtual {p0}, Landroid/app/Activity;->isFinishing()Z
++
++    move-result p1
++
++    if-nez p1, :cond_5e
++
++    invoke-virtual {p0}, Landroid/app/Activity;->isDestroyed()Z
++
++    move-result p1
++
++    if-nez p1, :cond_5e
++
++    if-eqz p2, :cond_47
++
++    :try_start_30
++    invoke-virtual {p2}, Landroid/media/session/MediaSession;->isActive()Z
++
++    move-result p1
++
++    if-eqz p1, :cond_47
++
++    invoke-virtual {p2}, Landroid/media/session/MediaSession;->getSessionToken()Landroid/media/session/MediaSession$Token;
++
++    move-result-object p1
++
++    if-eqz p1, :cond_47
++
++    invoke-static {p0}, Landroid/media/MediaRouter2;->getInstance(Landroid/content/Context;)Landroid/media/MediaRouter2;
++
++    move-result-object p2
++
++    invoke-virtual {p2, p1}, Landroid/media/MediaRouter2;->showSystemOutputSwitcher(Landroid/media/session/MediaSession$Token;)Z
++
++    move-result p1
++    :try_end_44
++    .catch Ljava/lang/IllegalArgumentException; {:try_start_30 .. :try_end_44} :catch_47
++    .catch Ljava/lang/IllegalStateException; {:try_start_30 .. :try_end_44} :catch_47
++    .catch Ljava/lang/SecurityException; {:try_start_30 .. :try_end_44} :catch_47
++    .catch Ljava/lang/LinkageError; {:try_start_30 .. :try_end_44} :catch_47
++
++    if-eqz p1, :cond_47
++
++    return v1
++
++    :catch_47
++    :cond_47
++    const-string p1, "unica_video_output_unavailable"
++
++    const-string p2, "string"
++
++    invoke-static {p0, p1, p2}, Lio/mesalabs/unica/video/Qpr2VideoRoutes;->resource(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result p1
++
++    if-eqz p1, :cond_5e
++
++    invoke-virtual {p0, p1}, Landroid/app/Activity;->getString(I)Ljava/lang/String;
++
++    move-result-object p1
++
++    sget p2, Landroid/widget/Toast;->LENGTH_SHORT:I
++
++    invoke-static {p0, p1, p2}, Landroid/widget/Toast;->makeText(Landroid/content/Context;Ljava/lang/CharSequence;I)Landroid/widget/Toast;
++
++    move-result-object p0
++
++    invoke-virtual {p0}, Landroid/widget/Toast;->show()V
++
++    :cond_5e
++    return v1
++
++    :cond_5f
++    return v0
++.end method
++
++.method public static prepare(Landroid/app/Activity;Landroid/view/Menu;Landroid/media/session/MediaSession;Z)V
++    .locals 3
++
++    if-eqz p0, :cond_3b
++
++    if-eqz p1, :cond_3b
++
++    const-string v0, "unica_video_output"
++
++    const-string v1, "id"
++
++    invoke-static {p0, v0, v1}, Lio/mesalabs/unica/video/Qpr2VideoRoutes;->resource(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result v0
++
++    if-eqz v0, :cond_3b
++
++    invoke-interface {p1, v0}, Landroid/view/Menu;->findItem(I)Landroid/view/MenuItem;
++
++    move-result-object p1
++
++    if-eqz p1, :cond_3b
++
++    const/4 v0, 0x1
++
++    const/4 v1, 0x0
++
++    if-eqz p3, :cond_26
++
++    invoke-virtual {p0}, Landroid/app/Activity;->isFinishing()Z
++
++    move-result v2
++
++    if-nez v2, :cond_26
++
++    invoke-virtual {p0}, Landroid/app/Activity;->isDestroyed()Z
++
++    move-result p0
++
++    if-nez p0, :cond_26
++
++    move p0, v0
++
++    goto :goto_27
++
++    :cond_26
++    move p0, v1
++
++    :goto_27
++    if-eqz p0, :cond_34
++
++    if-eqz p2, :cond_31
++
++    :try_start_2b
++    invoke-virtual {p2}, Landroid/media/session/MediaSession;->isActive()Z
++
++    move-result p0
++    :try_end_2f
++    .catch Ljava/lang/IllegalStateException; {:try_start_2b .. :try_end_2f} :catch_35
++
++    if-nez p0, :cond_32
++
++    :cond_31
++    move v0, v1
++
++    :cond_32
++    move v1, v0
++
++    goto :goto_35
++
++    :cond_34
++    move v1, p0
++
++    :catch_35
++    :goto_35
++    invoke-interface {p1, p3}, Landroid/view/MenuItem;->setVisible(Z)Landroid/view/MenuItem;
++
++    invoke-interface {p1, v1}, Landroid/view/MenuItem;->setEnabled(Z)Landroid/view/MenuItem;
++
++    :cond_3b
++    return-void
++.end method
++
++.method private static resource(Landroid/app/Activity;Ljava/lang/String;Ljava/lang/String;)I
++    .locals 1
++
++    invoke-virtual {p0}, Landroid/app/Activity;->getResources()Landroid/content/res/Resources;
++
++    move-result-object v0
++
++    invoke-virtual {p0}, Landroid/app/Activity;->getPackageName()Ljava/lang/String;
++
++    move-result-object p0
++
++    invoke-virtual {v0, p1, p2, p0}, Landroid/content/res/Resources;->getIdentifier(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I
++
++    move-result p0
++
++    return p0
++.end method
