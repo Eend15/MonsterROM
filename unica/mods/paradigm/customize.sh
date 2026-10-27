@@ -10,6 +10,107 @@ if [ ! "$(GET_PROP "system" "ro.unica.codename")" ]; then
     unset ROM_CODENAME
 fi
 
+PARADIGM_VERIFY_RUNTIME()
+(
+    # Check the retained SDK37 providers after VNDK's native-only ARM32 graft.
+    # Read actual payloads, independently of cache receipts, without rebuilding.
+    QPR2_SOURCE_RUNTIME="$FW_DIR/${SOURCE_FIRMWARE%%/*}_$(cut -d / -f 2 <<< "$SOURCE_FIRMWARE")/system/system/apex/com.android.runtime.apex"
+    QPR2_RUNTIME="$WORK_DIR/system/system/apex/com.android.runtime.apex"
+    [ "$(sha256sum "$QPR2_SOURCE_RUNTIME" | cut -d ' ' -f 1)" = \
+        "0e1941d33200a01c12f45ff9ed6439ae60c1b3a8880c95f074f58544b1633793" ] || exit 1
+    if cmp -s "$QPR2_SOURCE_RUNTIME" "$QPR2_RUNTIME"; then exit 0; fi
+    QPR2_RUNTIME_TEMP="$(mktemp -d "$OUT_DIR/qpr2-runtime-check.XXXXXX")" || exit 1
+    # shellcheck disable=SC2329 # Invoked by the EXIT trap.
+    cleanup_qpr2_runtime()
+    {
+        local FAILED=false POINT
+        for POINT in work source; do
+            if mountpoint -q "$QPR2_RUNTIME_TEMP/$POINT"; then
+                sudo umount "$QPR2_RUNTIME_TEMP/$POINT" || FAILED=true
+            fi
+        done
+        if ! $FAILED; then rm -rf -- "$QPR2_RUNTIME_TEMP"; fi
+    }
+    trap cleanup_qpr2_runtime EXIT
+    mkdir "$QPR2_RUNTIME_TEMP/source" "$QPR2_RUNTIME_TEMP/work" || exit 1
+    unzip -p "$QPR2_SOURCE_RUNTIME" apex_payload.img > "$QPR2_RUNTIME_TEMP/source.img" || exit 1
+    unzip -p "$QPR2_RUNTIME" apex_payload.img > "$QPR2_RUNTIME_TEMP/work.img" || exit 1
+    avbtool verify_image --image "$QPR2_RUNTIME_TEMP/work.img" \
+        --key "$SRC_DIR/security/avb/testkey_rsa4096.pem" || exit 1
+    sudo mount -o ro,noload "$QPR2_RUNTIME_TEMP/source.img" "$QPR2_RUNTIME_TEMP/source" || exit 1
+    sudo mount -o ro,noload "$QPR2_RUNTIME_TEMP/work.img" "$QPR2_RUNTIME_TEMP/work" || exit 1
+    sudo perl - "$QPR2_RUNTIME_TEMP/source" "$QPR2_RUNTIME_TEMP/work" <<'PERL'
+use strict;
+use warnings;
+use Digest::SHA;
+use File::Find;
+use Fcntl ':mode';
+sub need { die "$_[1]\n" unless $_[0] }
+sub sha { open my $f,'<:raw',$_[0] or die "$!\n"; return Digest::SHA->new(256)->addfile($f)->hexdigest }
+sub label {
+    open my $f,'-|','getfattr','-h','--absolute-names','-n','security.selinux','--only-values','--',$_[0] or die "$!\n";
+    local $/; my $v=<$f>//''; close $f or die "Missing runtime label: $_[0]\n"; return $v;
+}
+my($source,$work)=@ARGV; my $files=0;
+find({no_chdir=>1,wanted=>sub {
+    my $p=$File::Find::name; my $n=substr($p,length($source)); my $q="$work$n";
+    my @s=lstat($p); my @t=lstat($q); need(@s && @t,"Missing original runtime provider: $n");
+    need(($s[2]&0177777)==($t[2]&0177777) && $s[4]==$t[4] && $s[5]==$t[5] && label($p) eq label($q),"Original runtime metadata changed: $n");
+    if(S_ISREG($s[2])) { need(sha($p) eq sha($q),"Original runtime provider changed: $n"); ++$files }
+    elsif(S_ISLNK($s[2])) { need(readlink($p) eq readlink($q),"Original runtime symlink changed: $n") }
+    else { need(S_ISDIR($s[2]),"Unsupported runtime node: $n") }
+}},$source);
+need($files>=10,'Incomplete original runtime cohort');
+print "Verified $files original SDK37 runtime providers after native ARM32 graft\n";
+PERL
+)
+
+# Keep the newer SDK-37 applications and native feature cohorts. Do not
+# downgrade them indiscriminately to the SDK-36/S25 payloads below.
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    # QPR2 feature customization is owned here. Keep the reviewed order and
+    # each former child MODPATH: payloads/contracts/patches stay in place.
+    # No conditional sourcing or feature-function wrapper: errexit stays active
+    # inside the original builder functions, including commands within EVAL.
+    PARADIGM_MODPATH="$MODPATH"
+
+    # Public QPR2 API and actual observer lifecycle used by current apps.
+
+    # This is an isolated ROM build, not a claim that a live Camera2 extension or
+    # the Samsung ISP has been validated. Both schema and Path must be included
+    # together. Each part still checks the exact reviewed donor/native cohort.
+    : "${UN1CA_QPR2_CAMERA_METADATA:=true}"
+    : "${UN1CA_QPR2_CAMERA_PATH:=true}"
+    : "${UN1CA_QPR2_SUBJECT_CPU_PREVIEW:=true}"
+    : "${UN1CA_QPR2_MAINLINE:=true}"
+    : "${UN1CA_QPR2_SWCODEC:=false}"
+    : "${UN1CA_QPR2_RUNTIME_COHORT:=off}"
+    : "${UN1CA_QPR2_CPU_LEAVES:=true}"
+    : "${UN1CA_QPR2_GSI_DIR:=$SRC_DIR/prebuilts/qpr2}"
+
+    # Reject mistyped/partial profiles before changing any APK or native provider.
+    for QPR2_OPTION in UN1CA_QPR2_CAMERA_METADATA UN1CA_QPR2_CAMERA_PATH UN1CA_QPR2_SUBJECT_CPU_PREVIEW UN1CA_QPR2_CPU_LEAVES UN1CA_QPR2_MAINLINE UN1CA_QPR2_SWCODEC; do
+        case "${!QPR2_OPTION:-false}" in
+            true|false) ;;
+            *) ABORT "$QPR2_OPTION must be true or false"; return 1 ;;
+        esac
+    done
+    unset QPR2_OPTION
+    case "$UN1CA_QPR2_RUNTIME_COHORT" in
+        off|trial-r15) ;;
+        *) ABORT "UN1CA_QPR2_RUNTIME_COHORT must be off or trial-r15"; return 1 ;;
+    esac
+    if [ "$UN1CA_QPR2_CAMERA_METADATA" != "$UN1CA_QPR2_CAMERA_PATH" ]; then
+        ABORT "Enable or disable QPR2 camera metadata and Path conversion together"
+        return 1
+    fi
+
+    MODPATH="$PARADIGM_MODPATH"
+    unset PARADIGM_MODPATH
+
+    return 0
+fi
+
 # 2025 Audio Pack
 LOG_STEP_IN "- Adding 2025 Audio Pack"
 DELETE_FROM_WORK_DIR "system" "system/hidden/INTERNAL_SDCARD/Music/Samsung/Over_the_Horizon.mp3"
