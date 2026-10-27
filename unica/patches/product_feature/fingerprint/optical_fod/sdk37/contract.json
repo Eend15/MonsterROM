@@ -1,0 +1,36 @@
+{
+  "artifacts": {
+    "framework.jar": "system/framework/framework.jar",
+    "services.jar": "system/framework/services.jar",
+    "BiometricSetting.apk": "system/priv-app/BiometricSetting/BiometricSetting.apk",
+    "SecSettings.apk": "system/priv-app/SecSettings/SecSettings.apk",
+    "SystemUI.apk": "system_ext/priv-app/SystemUI/SystemUI.apk"
+  },
+  "patches": {
+    "framework.jar": "4c06c718bed4eb2831791ea857308d7723c48c4f8a802c2d7c6c7bac70c32cb3",
+    "services.jar": "8e7c4c20b17752e6588099b627f2549fee63469861f8f39bf9e85a9e6114a5e5",
+    "BiometricSetting.apk": "2becab8ec3b58d5d60008a16f14d85c6869d829c1740af687b8e64028a23440b",
+    "SecSettings.apk": "2fbc040b72596e5153c1e4aee320e26049cf5a9c3723471aaeebc3c55f9c704d",
+    "SystemUI.apk": "3f7ac6ec68edbfd0efecba45154a298da982b28726b1903eddbfc196de42700b"
+  },
+  "files": [
+    {"artifact":"framework.jar","path":"smali_classes2/android/hardware/fingerprint/HidlFingerprintSensorConfig.smali","methods":{"mapHidlToAidlSensorConfiguration(Landroid/content/Context;)V":"d43f0b22cfe62a41d9cc50f16fae2e6f67d09f583bf096f705b8704959cd4ed5"}},
+    {"artifact":"framework.jar","path":"smali_classes6/com/samsung/android/bio/fingerprint/SemFingerprintManager$Characteristics.smali","methods":{"getSensorType()I":"9c0e1e8aa3ff79a8b66ffdaebf81a10b3207c97351cc14bb939bf333756582c2"}},
+    {"artifact":"framework.jar","path":"smali_classes6/com/samsung/android/bio/fingerprint/SemFingerprintManager.smali","methods":{"getMaxTemplateNumberFromSPF()I":"9a5f9bd32b53348d24dc342e12a847524c411573cdb20eb8a45664254d942da7","getProductFeatureValue(Landroid/content/Context;)Ljava/lang/String;":"89b52912e5de80f3634cdd3c8cd05b42c24953d0de3fefdf1060c93e0ea58cc6"}},
+    {"artifact":"framework.jar","path":"smali_classes4/android/view/ViewRootImpl.smali","methods":{"updateBlastSurfaceIfNeeded()V":"9d33151a2b00b2076643e973a9bb642cf4559a8b544dd55e99041a0cf0e93652","nativeSetOpticalMaskBufferUsage(J)I":null,"setOpticalMaskBufferUsage(Landroid/graphics/BLASTBufferQueue;)V":null}},
+    {"artifact":"services.jar","path":"smali/com/android/server/biometrics/SemBiometricFeature.smali","methods":{"<clinit>()V":"2d4ca7464a8e390c0f1f515c352ba0eec65f72453e08c919d917e36499e8adb5"}},
+    {"artifact":"BiometricSetting.apk","path":"smali/com/samsung/android/biometrics/app/setting/Utils$Config.smali","methods":{"<clinit>()V":"09128417a43957b2c793d3a03b1a74c6f496b90d0b4dd1702b41a608effcb69d"}},
+    {"artifact":"BiometricSetting.apk","path":"smali/com/samsung/android/biometrics/app/setting/DisplayStateManager.smali","methods":{"<init>(Lcom/samsung/android/biometrics/app/setting/BiometricsUIService;)V":"37a1b7383a54d4c84207d586f1cff277cfad11e769475d8dfd7b36be269d535f"}},
+    {"artifact":"SystemUI.apk","path":"smali/com/android/systemui/LsRune.smali","methods":{"<clinit>()V":"6222c2a337792d1f5afd2920f45dbce11e6c9c5c91523a34f3bd5fc6167e366c"}},
+    {"artifact":"SystemUI.apk","path":"smali_classes4/com/android/systemui/util/DeviceType.smali","methods":{"isOpticalFingerprintSupported()Z":"c0268157c947fe71005f15007dae365d469fba25bf41c8c6cb4fdd3af27650d3"}},
+    {"artifact":"SystemUI.apk","path":"smali/com/android/keyguard/KeyguardSecUpdateMonitorImpl.smali","methods":{"addMaskViewForOpticalFpSensor()V":null,"removeMaskViewForOpticalFpSensor()V":null,"updateOpticalFingerprintMask()V":null,"handleFingerprintAuthenticated(IZ)V":"74f7d9b314fef0a836fcc2ac8f5a7802b305d1eed69f27e503f84e0e5b2b079c","handleFaceAuthenticated(IZ)V":"70c5bdbb890fa39fc6417a4913d236ed6cdf319bffa54cd32d6235da8c15bd54","handleFingerprintError(ILjava/lang/String;)V":"14076040824bb636d798cee80722231c790253979c5e2ab34e746628a6f21520","stopListeningForFingerprint()V":"79a19915a2d1d28e385eb32922d414883695c0b7da25da3cbd146163ac1206f2","startListeningForFingerprint(Z)V":"956c1ba6fa8a5c1182c3745933cc58b974eefa8317a3ffc4ddd24a650930e1f4","updateFingerprintListeningState(I)V":"c0bc3bbd8a6bc7e12e311342344aa62becb0956722a39333df03f285aa8bbdb0"}},
+    {"artifact":"SystemUI.apk","path":"smali_classes3/com/android/systemui/shade/SecNotificationShadeWindowControllerHelperImpl.smali","methods":{}},
+    {"artifact":"SystemUI.apk","path":"smali_classes3/com/android/systemui/statusbar/phone/CentralSurfacesImpl.smali","methods":{}},
+    {"artifact":"SystemUI.apk","path":"smali_classes4/com/android/systemui/util/DeviceState.smali","methods":{"isCapturedBlurAllowed()Z":"0b30ff600babe28782c781f2d5128300e76dc12d43e33a4f27d6ce4dee6b534c"}},
+    {"artifact":"SecSettings.apk","path":"smali_classes3/com/samsung/android/settings/biometrics/fingerprint/FingerprintSettingsUtils.smali","methods":{}},
+    {"artifact":"SecSettings.apk","path":"smali_classes3/com/samsung/android/settings/biometrics/fingerprint/FingerprintSettings.smali","methods":{"onPreferenceTreeClick(Landroidx/preference/Preference;)Z":"ef290f1bfa01670b9e15b6a90c3b1af8a28fa85e1f05f6e12a80d27952efc1f5","stopFingerprintAuth()V":"5452f7adf8f5a57f4abdc736da4427812747e00ac8845084adccb65460ae3e6a"}},
+    {"artifact":"SecSettings.apk","path":"smali_classes3/com/samsung/android/settings/biometrics/BiometricsDisclaimerActivity.smali","methods":{}},
+    {"artifact":"SecSettings.apk","path":"smali_classes3/com/samsung/android/settings/biometrics/SuwBiometricsDisclaimerActivity.smali","methods":{}},
+    {"artifact":"SecSettings.apk","path":"smali_classes3/com/samsung/android/settings/biometrics/fingerprint/RegisterFingerprint.smali","methods":{"isOpticalSurfaceUpdatesEnabled()Z":null,"onCreate(Landroid/os/Bundle;)V":"cb9e32515a79af41f3de94005569d0c233ea364cc0ce82dcd645f1538f3a77c2"}}
+  ]
+}

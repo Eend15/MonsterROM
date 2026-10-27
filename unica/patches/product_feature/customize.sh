@@ -1,3 +1,115 @@
+PRODUCT_OPTICAL()
+{
+    perl - "$@" <<'PERL'
+use strict;
+use warnings;
+use JSON::PP;
+use Digest::SHA qw(sha256_hex);
+use File::Path qw(make_path);
+use File::Basename qw(dirname basename);
+use File::Glob qw(bsd_glob);
+use File::Temp qw(tempfile tempdir);
+use File::Spec;
+sub need($$) { die "UN1CA: $_[1]\n" unless $_[0] }
+sub raw { open my $f,'<:raw',$_[0] or die "$_[0]: $!\n"; local $/; return <$f>//'' }
+sub sha { sha256_hex(raw($_[0])) }
+sub json { decode_json(raw($_[0])) }
+sub encoded { JSON::PP->new->canonical->pretty->encode($_[0]) }
+sub same { JSON::PP->new->canonical->encode($_[0]) eq JSON::PP->new->canonical->encode($_[1]) }
+sub put {
+    my($path,$data)=@_; return if -f $path && raw($path) eq $data;
+    make_path(dirname($path)); my($f,$name)=tempfile('.unica-native-XXXXXX',DIR=>dirname($path),UNLINK=>0);
+    binmode $f; print $f $data or die "write $path: $!"; close $f or die "close $path: $!";
+    chmod((-e $path ? (stat($path))[2]&0777 : 0644),$name) or die "chmod $name: $!";
+    rename($name,$path) or die "rename $path: $!";
+}
+sub save { put($_[0],encoded($_[1])) }
+sub rel { my($path,$root)=@_; $path =~ s/^\Q$root\E\/// or die "Outside $root: $path"; return $path }
+sub capture {
+    my @cmd=@_; my($err,$name)=tempfile('unica-stderr-XXXXXX',DIR=>scratch_root(),UNLINK=>1); close $err;
+    my $pid=open my $p,'-|'; defined $pid or die "fork: $!";
+    if(!$pid) { open STDERR,'>:raw',$name or die "stderr: $!"; exec {$cmd[0]} @cmd; exit 127 }
+    binmode $p; local $/; my $out=<$p>//''; close $p; my $status=$?; my $error=raw($name);
+    return ($out,$error,$status);
+}
+sub run { my @cmd=@_; my($out,$err,$status)=capture(@cmd); die "Command failed (@cmd): $err$out" if $status; return $out }
+sub scratch_root {return $ENV{UNICA_TEST_TMPDIR}//$ENV{TMPDIR}//(-d '/tmp/opencode'?'/tmp/opencode':File::Spec->tmpdir())}
+sub u16 { unpack('v',substr($_[0],$_[1],2)) }
+sub u32 { unpack('V',substr($_[0],$_[1],4)) }
+sub u64 { unpack('Q<',substr($_[0],$_[1],8)) }
+sub cstr { my($d,$o)=@_; my $end=index($d,"\0",$o); need($o>=0 && $end>=$o,'Invalid string offset'); return substr($d,$o,$end-$o) }
+sub elf64 {
+    my($data)=@_; need(substr($data,0,6) eq "\x7fELF\x02\x01" && u16($data,18)==183,'Expected little-endian ARM64 ELF');
+    my($po,$so,$pe,$pn,$se,$sn,$names)=(u64($data,32),u64($data,40),u16($data,54),u16($data,56),u16($data,58),u16($data,60),u16($data,62));
+    need((!$pn||$pe==56) && $se==64 && $names<$sn && $so+$sn*$se<=length($data) && $po+$pn*$pe<=length($data),'Invalid ELF layout');
+    my @s=map {[unpack('VVQ<Q<Q<Q<VVQ<Q<',substr($data,$so+$_*$se,$se))]} 0..$sn-1;
+    my @p=map {[unpack('VVQ<Q<Q<Q<Q<Q<',substr($data,$po+$_*$pe,$pe))]} 0..$pn-1;
+    my $strings=substr($data,$s[$names][4],$s[$names][5]); my %by;
+    for my $s(@s) { my $name=cstr($strings,$s->[0]); need(!exists $by{$name},'Duplicate ELF section'); $by{$name}=$s }
+    return {data=>$data,sections=>\@s,segments=>\@p,by=>\%by};
+}
+sub elf_abi {
+    my $e=elf64($_[0]); my(@symbols,%imports,%exports,@needed);
+    for my $s(@{$e->{sections}}) {next unless $s->[1]==11; need($s->[9]==24 && $s->[6]<@{$e->{sections}},'Invalid dynamic symbol table'); my $strings=$e->{sections}[$s->[6]]; my $data=substr($e->{data},$strings->[4],$strings->[5]);
+        for(my $o=$s->[4];$o<$s->[4]+$s->[5];$o+=24) {my($n,$info,$vis,$ndx,$value,$size)=unpack('VCCvQ<Q<',substr($e->{data},$o,24)); my $name=cstr($data,$n); my $binding=$info>>4; my $visibility=$vis&3;
+            push @symbols,{name=>$name,binding=>$binding,visibility=>$visibility,ndx=>$ndx,value=>$value,size=>$size}; $exports{$name}=1 if $ndx && ($binding==1||$binding==2) && ($visibility==0||$visibility==3); $imports{$name}=1 if !$ndx && $binding==1;
+        }
+    }
+    if(my $s=$e->{by}{'.dynamic'}) {my $strings=$e->{sections}[$s->[6]]; my $data=substr($e->{data},$strings->[4],$strings->[5]); for(my $o=$s->[4];$o<$s->[4]+$s->[5];$o+=16) {my($tag,$v)=unpack('q<Q<',substr($e->{data},$o,16)); push @needed,cstr($data,$v) if $tag==1}}
+    $e->{symbols}=\@symbols; $e->{exports}=\%exports; $e->{imports}=\%imports; $e->{needed}=\@needed; return $e;
+}
+sub methods { my($text)=@_; my %m; while($text =~ /^(\.method [^\n]+\n.*?^\.end method)/msg) {my $raw=$1; my($first)=split /\n/,$raw; my($name)=$first =~ /(\S+)$/; need(!exists $m{$name},"Duplicate method $name"); $m{$name}=$raw} return \%m }
+my $action=shift(@ARGV)//''; my $module="$ENV{SRC_DIR}/unica/patches/product_feature/fingerprint/optical_fod/sdk37";
+if($action eq 'check-patches') {
+    my($root)=@ARGV; my $contract=json("$module/contract.json");
+    for my $row(@{$contract->{files}}) {my $relative=$row->{path}; $relative =~ s{^smali[^/]*/}{}; my $artifact="$root/$contract->{artifacts}{$row->{artifact}}"; my @paths=grep {-f $_} bsd_glob("$artifact/smali*/$relative");
+        need(@paths==1 && rel($paths[0],$artifact) eq $row->{path},"Missing/ambiguous SDK37 optical class: $relative"); my $text=raw($paths[0]); my $descriptor='L'.substr($relative,0,-6).';'; my @decl=$text =~ /^\.class [^\n]* (L[^\s]+;)$/mg; need(same(\@decl,[$descriptor]),'Optical class descriptor does not match path');
+        my $m=methods($text); for my $sig(keys %{$row->{methods}}) {my $hash=$row->{methods}{$sig}; need(defined($hash)?(exists($m->{$sig})&&sha256_hex($m->{$sig}) eq $hash):!exists($m->{$sig}),"Unmeasured/existing optical method: $relative->$sig")}
+    }
+    for my $artifact(sort keys %{$contract->{artifacts}}) {my $patch="$module/$artifact/0001-Port-optical-FOD-to-SDK37.patch"; need(sha($patch) eq $contract->{patches}{$artifact},'Optical patch differs from reviewed method plan'); run('git','apply','--check','--unsafe-paths',"--directory=$root/$contract->{artifacts}{$artifact}",$patch)}
+    print "SDK37 optical: all 18 owners and five ordinary patches validated before mutation\n"; exit 0;
+}
+need($action eq 'native','Expected native or check-patches optical action'); my %args; while(@ARGV) {my $key=shift @ARGV; need($key =~ /^--/ && @ARGV,'Expected optical argument'); $args{$key}=shift @ARGV}
+my $platform=$args{'--platform'}; need(defined($platform),'Missing optical platform'); my $output=$args{'--output'}; my $libui='system/system/lib64/libui.so';
+my %cohort=('system/system/lib64/libgui.so'=>'aff919fec79a2636533d8026a07ccaa31b3c92673142f68f64e0b60570329b04',$libui=>'466dffbd2087a5a0c18b84717437e7204128af9343a9ec42657ba9839a309d0f','system/system/lib64/libandroid_runtime.so'=>'4a21077a466d05232d8fc521455a3b9e1b036793e3a91bb32ac51252f6beb6b9','vendor/lib64/hw/android.hardware.graphics.allocator@4.0-impl.so'=>'789d49fbcf3620160855e89b17323adf4366f0dff65cf8d1258153e0a6fe01d0','vendor/lib64/hw/android.hardware.graphics.mapper@4.0-impl.so'=>'7859d7e6596127a32b178650a37219146615e5c324cd508b2ac5fb05c72bbcb4','vendor/lib64/libexynosgraphicbuffer.so'=>'177570fe889185ea8834a2f4c55b513a4941e660328a43d452ad81fce1e58e54','vendor/lib64/libexynosdisplay.so'=>'21ec8cf91ba79c838b04f2dedaf7af9192c194757a462549d8c9caa1dc7d1955','vendor/etc/vintf/manifest.xml'=>'e292660d39a886d2a83b7f7e63b1c43b854760a3e1c9dd356c3acb3a7134f875');
+need(!-l "$platform/$libui",'libui work input must not be a symlink'); need(sha("$platform/$_") eq $cohort{$_},"Unmeasured SDK37/r9s optical native cohort: $_") for keys %cohort;
+exit 0 unless defined $output; need(!-e $output && !-l $output,'Refusing existing optical native outputs'); my $raw=raw("$platform/$libui"); my $elf=elf64($raw); my $va=0x446a8; my @offsets=map {$_->[2]+$va-$_->[3]} grep {$_->[0]==1 && $va>=$_->[3] && $va+4<=$_->[3]+$_->[5]} @{$elf->{segments}}; need(@offsets==1,'Ambiguous/unmapped SDK37 instruction'); my $offset=$offsets[0]; need(u32($raw,$offset)==0xf2dfffe8,'Unexpected libui validation instruction'); substr($raw,$offset,4)=pack('V',0xf2dfff68);
+need(sha256_hex($raw) eq '979a5ed04506a6be231ebbe6c5546670739f8dcc89c571c759ad8d600e42c461','Unexpected libui edit scope'); make_path($output); my $library='libunica_optical37.so'; my $target="$output/$library";
+run('clang','--target=aarch64-linux-android37','-fuse-ld=lld','-nostdlib','-shared','-O2','-Wall','-Wextra','-Werror','-fPIC','-fvisibility=hidden','-fstack-protector-strong','-mbranch-protection=standard',"-Wl,-soname,$library",'-Wl,-z,defs,-z,relro,-z,now,-z,noexecstack','-Wl,-z,max-page-size=16384,--build-id=sha1','-Wl,--no-as-needed',"$module/consumer_usage.c","$platform/system/system/lib64/libgui.so",'-o',$target);
+my $jni='Java_android_view_ViewRootImpl_nativeSetOpticalMaskBufferUsage'; my $consumer='_ZN7android12ConsumerBase20setConsumerUsageBitsEm'; my $abi=elf_abi(raw($target)); need(same([sort keys %{$abi->{imports}}],[$consumer]) && same([sort keys %{$abi->{exports}}],[$jni]) && same($abi->{needed},['libgui.so']),'Unexpected optical JNI/linkage ABI'); my $dynamic=run('readelf','-dW',$target); need(index($dynamic,'BIND_NOW')>=0 && index($dynamic,'TEXTREL')<0,'Optical bridge lacks hardening'); put("$output/libui.so",$raw);
+save("$output/native-report.json",{profile=>'r9s HIDL4 / SM-S942B SDK37 arm64 optical usage',input_sha256=>\%cohort,bridge_sha256=>sha($target),libui_output_sha256=>sha256_hex($raw),libui_patch=>{virtual_address=>'0x446a8',file_offset=>sprintf('0x%x',$offset),before=>'0xf2dfffe8',after=>'0xf2dfff68',effect=>'HIDL reserved-usage rejection mask 0xffff00280000 -> 0xfffb00280000; AIDL unchanged'},jni_export=>$jni,import=>$consumer,runtime_verified=>JSON::PP::false,panel_hbm_verified=>JSON::PP::false});
+PERL
+}
+PRODUCT_ENABLE_OPTICAL()
+{
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" != "37" ] || [ "$TARGET_CODENAME" != "r9s" ] || \
+            [ "$TARGET_PLATFORM_SDK_VERSION" != "36" ] || [ "$TARGET_OS_SINGLE_SYSTEM_IMAGE" != "essi" ] || \
+            [ "$TARGET_FINGERPRINT_CONFIG_SENSOR" != "google_touch_display_optical,settings=3" ] || \
+            [ "$SOURCE_FINGERPRINT_CONFIG_SENSOR" != "google_touch_display_ultrasonic" ]; then
+        ABORT "SDK37 optical FOD only supports the reviewed r9s/ESSI cohort"
+        return 1
+    fi
+    local OPTICAL_PATH="$MODPATH/fingerprint/optical_fod/sdk37"
+    PRODUCT_OPTICAL native --platform "$WORK_DIR" --output "$APKTOOL_DIR/.optical-fod-sdk37/native" || return 1
+    DECODE_APK "system" "system/framework/framework.jar" || return 1
+    DECODE_APK "system" "system/framework/services.jar" || return 1
+    DECODE_APK "system" "system/priv-app/BiometricSetting/BiometricSetting.apk" || return 1
+    DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk" || return 1
+    DECODE_APK "system_ext" "priv-app/SystemUI/SystemUI.apk" || return 1
+    PRODUCT_OPTICAL check-patches "$APKTOOL_DIR" || return 1
+    APPLY_PATCH "system" "system/framework/framework.jar" "$OPTICAL_PATH/framework.jar/0001-Port-optical-FOD-to-SDK37.patch" || return 1
+    APPLY_PATCH "system" "system/framework/services.jar" "$OPTICAL_PATH/services.jar/0001-Port-optical-FOD-to-SDK37.patch" || return 1
+    APPLY_PATCH "system" "system/priv-app/BiometricSetting/BiometricSetting.apk" "$OPTICAL_PATH/BiometricSetting.apk/0001-Port-optical-FOD-to-SDK37.patch" || return 1
+    APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" "$OPTICAL_PATH/SecSettings.apk/0001-Port-optical-FOD-to-SDK37.patch" || return 1
+    APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" "$OPTICAL_PATH/SystemUI.apk/0001-Port-optical-FOD-to-SDK37.patch" || return 1
+    SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_BIOAUTH_CONFIG_FINGERPRINT_FEATURES" "optical_display_phone" || return 1
+    SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_LCD_CONFIG_LOCAL_HBM" "0" || return 1
+    SET_FLOATING_FEATURE_CONFIG "SEC_FLOATING_FEATURE_LCD_CONFIG_SELFMASK_VERSION" "0" || return 1
+    install -m 644 "$APKTOOL_DIR/.optical-fod-sdk37/native/libui.so" "$WORK_DIR/system/system/lib64/libui.so" || return 1
+    install -m 644 "$APKTOOL_DIR/.optical-fod-sdk37/native/libunica_optical37.so" "$WORK_DIR/system/system/lib64/libunica_optical37.so" || return 1
+    SET_METADATA "system" "system/lib64/libunica_optical37.so" 0 0 644 "u:object_r:system_lib_file:s0" || return 1
+}
+
 # [
 GET_FINGERPRINT_SENSOR_TYPE()
 {
