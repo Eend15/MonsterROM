@@ -703,6 +703,21 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 usb_permissions
+    MODPATH="$PARADIGM_MODPATH/qpr2/usb_permissions"
+    LOG_STEP_IN "- Adding QPR2 usb_permissions"
+    # Original SDK-36 builds remain unchanged. Exact SDK-37 contracts only.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0001-Port-QPR2-USB-app-permission-management.patch"
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0002-Expose-USB-app-access-on-Samsung-Connections-page.patch"
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0099-Identify-reviewed-QPR2-backport.patch"
+        SET_PROP "system" "ro.unica.qpr2.usb.permissions" "true"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
