@@ -1002,6 +1002,19 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 audio_import
+    MODPATH="$PARADIGM_MODPATH/qpr2/audio_import"
+    LOG_STEP_IN "- Adding QPR2 audio_import"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SecSoundPicker/SecSoundPicker.apk" \
+            "$MODPATH/patches/SecSoundPicker.apk/0001-Port-QPR2-audio-and-OGG-document-choice.patch"
+        APPLY_PATCH "system" "system/priv-app/SecSoundPicker/SecSoundPicker.apk" \
+            "$MODPATH/patches/SecSoundPicker.apk/0002-Reject-empty-sound-import-results.patch"
+        APPLY_PATCH "system" "system/priv-app/SecSoundPicker/SecSoundPicker.apk" \
+            "$MODPATH/patches/SecSoundPicker.apk/0099-Identify-QPR2-r12.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

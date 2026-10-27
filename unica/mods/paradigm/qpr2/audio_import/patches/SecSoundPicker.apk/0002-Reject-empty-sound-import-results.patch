@@ -1,0 +1,20 @@
+Subject: [PATCH] Reject canceled or empty sound-document results before native asynchronous import
+
+diff --git a/smali/com/samsung/android/secsoundpicker/SecSoundPickerActivity.smali b/smali/com/samsung/android/secsoundpicker/SecSoundPickerActivity.smali
+--- a/smali/com/samsung/android/secsoundpicker/SecSoundPickerActivity.smali
++++ b/smali/com/samsung/android/secsoundpicker/SecSoundPickerActivity.smali
+@@ -2688,6 +2688,14 @@
+ 
+     if-ne p2, p1, :cond_1
+ 
++    if-eqz p3, :cond_1
++
++    invoke-virtual {p3}, Landroid/content/Intent;->getData()Landroid/net/Uri;
++
++    move-result-object v0
++
++    if-eqz v0, :cond_1
++
+     new-instance p1, Lcom/samsung/android/secsoundpicker/SecSoundPickerActivity$AddCustomRingtoneAsyncTask;
+ 
+     iget-object p0, p0, Lcom/samsung/android/secsoundpicker/SecSoundPickerActivity;->mContext:Landroid/content/Context;
