@@ -1,6 +1,11 @@
 # shellcheck disable=SC2034
 SKIPUNZIP=1
 
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ] && [ "$TARGET_PLATFORM_SDK_VERSION" -lt 35 ]; then
+    ABORT "SDK37 pre-API35 Camera/Face/Lights/native backports require a reviewed port"
+    return 1
+fi
+
 # [
 BACKPORT_SF_PROPS()
 {
@@ -198,8 +203,19 @@ if [ "$TARGET_PLATFORM_SDK_VERSION" -lt "36" ]; then
             ! grep -q "ro.telephony.sim_slots.count" "$WORK_DIR/vendor/bin/secril_config_svc" && \
             ! grep -q -r "config_num_physical_slots" "$WORK_DIR/vendor/overlay"; then
         PATCHED=true
-        APPLY_PATCH "system" "system/framework/telephony-common.jar" \
-            "$MODPATH/ril/telephony-common.jar/0001-Backport-legacy-UiccController-code.patch"
+        if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+            # This reviewed donor already contains the vendor-API/CI-array
+            # fallback (including the 202404 limit). Do not add it twice.
+            [ "$(sha256sum "$WORK_DIR/system/system/framework/telephony-common.jar" | cut -d ' ' -f 1)" = \
+                "a8c72bb961b667ccc1ea29d87580c50382f7eadbaeeff36d0b3e28308a076583" ] || {
+                ABORT "Review the SDK-37 UiccController fallback before changing this telephony cohort"
+                return 1
+            }
+            LOG "- SDK-37 UiccController already has the required legacy physical-slot fallback"
+        else
+            APPLY_PATCH "system" "system/framework/telephony-common.jar" \
+                "$MODPATH/ril/telephony-common.jar/0001-Backport-legacy-UiccController-code.patch"
+        fi
     fi
 fi
 
