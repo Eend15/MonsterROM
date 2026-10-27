@@ -425,6 +425,61 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 collections_numeric
+    MODPATH="$PARADIGM_MODPATH/qpr2/collections_numeric"
+    LOG_STEP_IN "- Adding QPR2 collections_numeric"
+    # These QPR2 numeric variants use the preceding SparseLongArray compute API.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        DECODE_APK "system" "system/framework/framework.jar"
+        perl - collections_numeric "$APKTOOL_DIR/system/framework/framework.jar" "$MODPATH/SOURCES.json" <<'PERL'
+use strict;
+use warnings;
+use JSON::PP;
+use Digest::SHA qw(sha256_hex);
+use File::Glob qw(bsd_glob);
+sub need($$) { die "UN1CA: $_[1]\n" unless $_[0] }
+sub raw { open my $f,'<:raw',$_[0] or die "$_[0]: $!\n"; local $/; return <$f>//'' }
+sub json { decode_json(raw($_[0])) }
+sub same { JSON::PP->new->canonical->encode($_[0]) eq JSON::PP->new->canonical->encode($_[1]) }
+sub rel { my($path,$root)=@_; $path =~ s/^\Q$root\E\/// or die "Outside $root: $path"; return $path }
+sub methods { my($text)=@_; my %m; while($text =~ /^(\.method [^\n]+\n.*?^\.end method)/msg) {my $raw=$1; my($first)=split /\n/,$raw; my($name)=$first =~ /(\S+)$/; need(!exists $m{$name},"Duplicate method $name"); $m{$name}=$raw} return \%m }
+my($kind,$root,$file)=@ARGV; my $contract=json($file);
+sub one {my($relative)=@_; my @found=grep {-f $_} bsd_glob("$root/smali*/$relative"); need(@found==1,"Expected one framework class: $relative"); return $found[0]}
+sub normalized {my $m=methods($_[0]); for(values %$m) {s/const-string\/jumbo/const-string/g} return $m}
+sub required {my($m,$names,$role)=@_; need(exists $m->{$_},"Missing $role method: $_") for @$names}
+sub fields {my($text)=@_; return [$text =~ /^(\.field .+)$/mg]}
+if($kind eq "collections") {
+    for my $row(@{$contract->{methods}}) {my $relative=substr($row->{owner},1,-1).".smali"; my $path=one($relative); my $text=raw($path);
+        need(rel($path,$root) =~ m{^smali_classes4/},"Collection moved to unreviewed DEX: $relative"); need(same([sort @{fields($text)}],$row->{retained_fields}),"Unreviewed Samsung collection fields: $relative");
+        my $m=methods($text); need(!scalar(grep {/^compute\(/} keys %$m),"Collection compute API already present"); required($m,$row->{retained_required_methods},$relative)}
+    for my $interface(@{$contract->{new_interfaces}}) {need(!scalar(grep {-f $_} bsd_glob("$root/smali*/android/util/$interface.smali")),"Callback interface already present: $interface")}
+    for my $relative(keys %{$contract->{retained_dependencies}}) {required(methods(raw(one($relative))),$contract->{retained_dependencies}{$relative},$relative)}
+} elsif($kind eq "collections_numeric") {
+    for my $row(@{$contract->{classes}}) {my $relative=substr($row->{owner},1,-1).".smali"; my $path=one($relative); my $text=raw($path);
+        need(rel($path,$root) =~ m{^\Q$contract->{target_DEX}\E/},"Numeric collection moved to unreviewed DEX"); need(same(fields($text),$row->{retained_fields}),"Unreviewed numeric collection field layout");
+        my $m=methods($text); need(!scalar(grep {/^compute\(|^lambda\$compute\$/} keys %$m),"Numeric compute method/helper already present"); required($m,$row->{required_original_methods},$relative)}
+    need(!scalar(grep {-f $_} bsd_glob("$root/smali*/$contract->{new_helper}")),"QPR2 callback bridge already present");
+    my $dependency=$contract->{required_prior_collection}; my $m=normalized(raw(one($dependency->{relative})));
+    need(exists($m->{$dependency->{signature}}) && sha256_hex($m->{$dependency->{signature}}) eq $dependency->{method_sha256},"Apply reviewed QPR2 SparseLongArray compute patch first");
+    for my $relative(keys %{$contract->{retained_dependencies}}) {required(methods(raw(one($relative))),$contract->{retained_dependencies}{$relative},$relative)}
+} elsif($kind eq "dimensions") {
+    my $path=one("android/util/TypedValue.smali"); need(rel($path,$root) eq $contract->{target},"Unreviewed TypedValue DEX location"); my $text=raw($path);
+    need(same(fields($text),$contract->{retained_fields}),"Unreviewed TypedValue fields"); my $m=normalized($text); need(!exists $m->{$contract->{new_private_helper}},"TypedValue helper already present");
+    for my $sig(keys %{$contract->{retained_method_contracts}}) {need(exists($m->{$sig}) && sha256_hex($m->{$sig}) eq $contract->{retained_method_contracts}{$sig},"Unreviewed conversion method $sig")}
+} elsif($kind eq "app_identity") {
+    for my $row(@{$contract->{classes}}) {my $path=one($row->{relative}); need(rel($path,$root) eq $row->{target},"Unreviewed app identity DEX location"); my $text=raw($path);
+        need(sha256_hex(join("\n",@{fields($text)})) eq $row->{retained_field_sha256},"Unreviewed Samsung identity fields"); my $m=methods($text); need(!exists $m->{$_},"QPR2 identity helper already present: $_") for keys %{$row->{added_methods}}}
+    for my $relative(keys %{$contract->{retained_dependencies}}) {my $m=normalized(raw(one($relative))); for my $sig(keys %{$contract->{retained_dependencies}{$relative}}) {
+        need(exists($m->{$sig}) && sha256_hex($m->{$sig}) eq $contract->{retained_dependencies}{$relative}{$sig},"Unreviewed identity dependency $relative->$sig")}}
+} else {die "Unsupported QPR2 contract kind $kind\n"}
+print "QPR2 $kind: retained Samsung layout/method/dependency contracts verified\n";
+PERL
+        APPLY_PATCH "system" "system/framework/framework.jar" \
+            "$MODPATH/patches/framework.jar/0001-Backport-QPR2-long-and-double-sparse-compute.patch"
+        SET_PROP "system" "ro.unica.qpr2.collections_numeric" "long-and-double"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

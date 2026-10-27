@@ -1,0 +1,60 @@
+{
+  "inputs": {
+    "source": "/mnt/g/crb_327_Patched/crb_327/Projects/android17QPR2gsi/ROM/system/system/framework/framework.jar",
+    "source_sha256": "ce41964c9cad9c6da21f3d80aa9f66d72d27105f128719c303a1b1ab85624ec2",
+    "current": "/home/jonathan/UN1CA/out/target/t2s/work_dir/system/system/framework/framework.jar",
+    "current_sha256": "9c9c953e2c1f1fe68f438d2ab80a6c9dfff36f9e286cf87846aabd02a46054ba",
+    "composed_input": "/home/jonathan/UN1CA/out/oneui95/qpr2-dimensions-20261026/framework-QPR2-collections-dimensions.jar",
+    "composed_input_sha256": "7061e1f5053eaf973728716f760aa0daba899767fc40b6fc80137f394abfb3fa"
+  },
+  "source_build": "CP41.260831.007.A3",
+  "classes": [
+    {
+      "owner": "Landroid/util/LongSparseLongArray;",
+      "retained_fields": [
+        ".field private greylist-max-p mKeys:[J",
+        ".field private greylist-max-p mSize:I",
+        ".field private greylist-max-p mValues:[J"
+      ],
+      "original_methods": 23,
+      "added_methods": {
+        "compute(JLjava/util/function/LongBinaryOperator;)J": "820c11bd568161e164f4a30efa41fc62387d65d1a9906d7330995b476617abe5"
+      },
+      "required_original_methods": [
+        "indexOfKey(J)I"
+      ]
+    },
+    {
+      "owner": "Landroid/util/SparseDoubleArray;",
+      "retained_fields": [
+        ".field private blacklist mValues:Landroid/util/SparseLongArray;"
+      ],
+      "original_methods": 17,
+      "added_methods": {
+        "lambda$compute$0(Ljava/util/function/DoubleBinaryOperator;JJ)J": "3cdb943f3c2ae462a3f3271c543a29104d6d877f0566ae67b427559db7821735",
+        "compute(ILjava/util/function/DoubleBinaryOperator;)D": "06660cc7808fe9b76a6719f12134872cf9caca5f26172c1db335895f9baad84c"
+      },
+      "required_original_methods": [
+        "get(I)D",
+        "put(ID)V"
+      ]
+    }
+  ],
+  "new_helper": "android/util/SparseDoubleArray$$ExternalSyntheticLambda0.smali",
+  "helper_source_sha256": "60cb492c0a33398bf0f847e07b5cc1ae068d8fffce17c1ced9b04d9831ebadf2",
+  "required_prior_collection": {
+    "relative": "android/util/SparseLongArray.smali",
+    "signature": "compute(ILjava/util/function/LongBinaryOperator;)J",
+    "method_sha256": "0f4e4808c744488d5835ad7627446a92668b5cc625e47ec7caabf9e2c7446c87"
+  },
+  "retained_dependencies": {
+    "com/android/internal/util/GrowingArrayUtils.smali": [
+      "insert([JIIJ)[J"
+    ]
+  },
+  "target_DEX": "smali_classes4",
+  "source_bodies_copied_exactly": true,
+  "new_SDK_public_APIs": 0,
+  "additional_internal_compute_APIs": 2,
+  "additional_synthetic_classes": 1
+}

@@ -1,0 +1,166 @@
+From: UN1CA contributors
+Subject: [PATCH] Backport QPR2 long-key and double sparse compute methods
+
+diff --git a/smali_classes4/android/util/LongSparseLongArray.smali b/smali_classes4/android/util/LongSparseLongArray.smali
+--- a/smali_classes4/android/util/LongSparseLongArray.smali
++++ b/smali_classes4/android/util/LongSparseLongArray.smali
+@@ -558,3 +558,64 @@
+ 
+     return-wide p0
+ .end method
++
++.method public blacklist compute(JLjava/util/function/LongBinaryOperator;)J
++    .locals 4
++
++    invoke-virtual {p0, p1, p2}, Landroid/util/LongSparseLongArray;->indexOfKey(J)I
++
++    move-result v0
++
++    if-ltz v0, :cond_0
++
++    iget-object v1, p0, Landroid/util/LongSparseLongArray;->mValues:[J
++
++    aget-wide v1, v1, v0
++
++    invoke-interface {p3, p1, p2, v1, v2}, Ljava/util/function/LongBinaryOperator;->applyAsLong(JJ)J
++
++    move-result-wide p1
++
++    iget-object p0, p0, Landroid/util/LongSparseLongArray;->mValues:[J
++
++    aput-wide p1, p0, v0
++
++    return-wide p1
++
++    :cond_0
++    not-int v0, v0
++
++    const-wide/16 v1, 0x0
++
++    invoke-interface {p3, p1, p2, v1, v2}, Ljava/util/function/LongBinaryOperator;->applyAsLong(JJ)J
++
++    move-result-wide v1
++
++    iget-object p3, p0, Landroid/util/LongSparseLongArray;->mKeys:[J
++
++    iget v3, p0, Landroid/util/LongSparseLongArray;->mSize:I
++
++    invoke-static {p3, v3, v0, p1, p2}, Lcom/android/internal/util/GrowingArrayUtils;->insert([JIIJ)[J
++
++    move-result-object p1
++
++    iput-object p1, p0, Landroid/util/LongSparseLongArray;->mKeys:[J
++
++    iget-object p1, p0, Landroid/util/LongSparseLongArray;->mValues:[J
++
++    iget p2, p0, Landroid/util/LongSparseLongArray;->mSize:I
++
++    invoke-static {p1, p2, v0, v1, v2}, Lcom/android/internal/util/GrowingArrayUtils;->insert([JIIJ)[J
++
++    move-result-object p1
++
++    iput-object p1, p0, Landroid/util/LongSparseLongArray;->mValues:[J
++
++    iget p1, p0, Landroid/util/LongSparseLongArray;->mSize:I
++
++    add-int/lit8 p1, p1, 0x1
++
++    iput p1, p0, Landroid/util/LongSparseLongArray;->mSize:I
++
++    return-wide v1
++.end method
+diff --git a/smali_classes4/android/util/SparseDoubleArray.smali b/smali_classes4/android/util/SparseDoubleArray.smali
+--- a/smali_classes4/android/util/SparseDoubleArray.smali
++++ b/smali_classes4/android/util/SparseDoubleArray.smali
+@@ -11,6 +11,26 @@
+ 
+ 
+ # direct methods
++.method static synthetic blacklist lambda$compute$0(Ljava/util/function/DoubleBinaryOperator;JJ)J
++    .locals 0
++
++    long-to-double p1, p1
++
++    invoke-static {p3, p4}, Ljava/lang/Double;->longBitsToDouble(J)D
++
++    move-result-wide p3
++
++    invoke-interface {p0, p1, p2, p3, p4}, Ljava/util/function/DoubleBinaryOperator;->applyAsDouble(DD)D
++
++    move-result-wide p0
++
++    invoke-static {p0, p1}, Ljava/lang/Double;->doubleToRawLongBits(D)J
++
++    move-result-wide p0
++
++    return-wide p0
++.end method
++
+ .method public constructor blacklist <init>()V
+     .locals 1
+ 
+@@ -318,3 +338,23 @@
+ 
+     return-wide p0
+ .end method
++
++.method public blacklist compute(ILjava/util/function/DoubleBinaryOperator;)D
++    .locals 1
++
++    iget-object p0, p0, Landroid/util/SparseDoubleArray;->mValues:Landroid/util/SparseLongArray;
++
++    new-instance v0, Landroid/util/SparseDoubleArray$$ExternalSyntheticLambda0;
++
++    invoke-direct {v0, p2}, Landroid/util/SparseDoubleArray$$ExternalSyntheticLambda0;-><init>(Ljava/util/function/DoubleBinaryOperator;)V
++
++    invoke-virtual {p0, p1, v0}, Landroid/util/SparseLongArray;->compute(ILjava/util/function/LongBinaryOperator;)J
++
++    move-result-wide p0
++
++    invoke-static {p0, p1}, Ljava/lang/Double;->longBitsToDouble(J)D
++
++    move-result-wide p0
++
++    return-wide p0
++.end method
+diff --git a/smali_classes4/android/util/SparseDoubleArray$$ExternalSyntheticLambda0.smali b/smali_classes4/android/util/SparseDoubleArray$$ExternalSyntheticLambda0.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/android/util/SparseDoubleArray$$ExternalSyntheticLambda0.smali
+@@ -0,0 +1,36 @@
++.class public final synthetic Landroid/util/SparseDoubleArray$$ExternalSyntheticLambda0;
++.super Ljava/lang/Object;
++.source "D8$$SyntheticClass"
++
++# interfaces
++.implements Ljava/util/function/LongBinaryOperator;
++
++
++# instance fields
++.field public final synthetic blacklist f$0:Ljava/util/function/DoubleBinaryOperator;
++
++
++# direct methods
++.method public synthetic constructor blacklist <init>(Ljava/util/function/DoubleBinaryOperator;)V
++    .locals 0
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    iput-object p1, p0, Landroid/util/SparseDoubleArray$$ExternalSyntheticLambda0;->f$0:Ljava/util/function/DoubleBinaryOperator;
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public final whitelist test-api applyAsLong(JJ)J
++    .locals 0
++
++    iget-object p0, p0, Landroid/util/SparseDoubleArray$$ExternalSyntheticLambda0;->f$0:Ljava/util/function/DoubleBinaryOperator;
++
++    invoke-static {p0, p1, p2, p3, p4}, Landroid/util/SparseDoubleArray;->lambda$compute$0(Ljava/util/function/DoubleBinaryOperator;JJ)J
++
++    move-result-wide p0
++
++    return-wide p0
++.end method
