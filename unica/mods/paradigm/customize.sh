@@ -677,6 +677,19 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 storage_paths
+    MODPATH="$PARADIGM_MODPATH/qpr2/storage_paths"
+    LOG_STEP_IN "- Adding QPR2 storage_paths"
+    # Original SDK-36 builds remain unchanged. Exact SDK-37 contracts only.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/ExternalStorageProvider/ExternalStorageProvider.apk" \
+            "$MODPATH/patches/ExternalStorageProvider.apk/0001-Protect-QPR2-private-storage-paths.patch"
+        APPLY_PATCH "system" "system/priv-app/ExternalStorageProvider/ExternalStorageProvider.apk" \
+            "$MODPATH/patches/ExternalStorageProvider.apk/0099-Identify-reviewed-QPR2-backport.patch"
+        SET_PROP "system" "ro.unica.qpr2.storage_paths" "unicode-and-private-trash"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
