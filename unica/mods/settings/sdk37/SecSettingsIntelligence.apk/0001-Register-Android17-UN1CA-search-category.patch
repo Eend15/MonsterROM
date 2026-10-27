@@ -1,0 +1,31 @@
+Subject: [PATCH] Register UN1CA without dropping the Android 17 Buds category
+
+Retain all current Samsung categories and parameter-range instructions.
+Append both owned categories, including the optional official updater tile.
+An absent unofficial updater contributes no result, but an official updater
+must not be categorized as "others" simply because it uses its own key.
+
+diff --git a/smali_classes2/com/samsung/android/settings/intelligence/search/categorizing/TopLevelKeysCollector.smali b/smali_classes2/com/samsung/android/settings/intelligence/search/categorizing/TopLevelKeysCollector.smali
+--- a/smali_classes2/com/samsung/android/settings/intelligence/search/categorizing/TopLevelKeysCollector.smali
++++ b/smali_classes2/com/samsung/android/settings/intelligence/search/categorizing/TopLevelKeysCollector.smali
+@@ -45,7 +45,7 @@
+ .end method
+ 
+ .method public constructor <init>(Landroid/content/Context;)V
+-    .locals 37
++    .locals 39
+ 
+     move-object/from16 v0, p0
+ 
+@@ -123,6 +123,10 @@
+ 
+     const-string v34, "top_level_about_phone"
+ 
+-    filled-new-array/range {v1 .. v36}, [Ljava/lang/String;
++    const-string v37, "top_level_unica"
++
++    const-string v38, "top_level_choidujour"
++
++    filled-new-array/range {v1 .. v38}, [Ljava/lang/String;
+ 
+     move-result-object v1
