@@ -112,11 +112,13 @@ PRODUCT_ENABLE_OPTICAL()
 
 PRODUCT_PATCH_ABI=""
 PRODUCT_DISPLAY_SMALI_DIR="smali_classes4"
+PRODUCT_REFRESH_DUMP_METHOD="dump(Ljava/io/PrintWriter;Ljava/lang/String;Z)V"
 PRODUCT_SDK37_RESOLUTION=false
 PRODUCT_SDK37_OPTICAL=false
 if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
     PRODUCT_PATCH_ABI="sdk37/"
     PRODUCT_DISPLAY_SMALI_DIR="smali_classes3"
+    PRODUCT_REFRESH_DUMP_METHOD="dumpProductFeature(Ljava/io/PrintWriter;Ljava/lang/String;Z)V"
 fi
 
 # [
@@ -722,11 +724,11 @@ if [[ "$SOURCE_LCD_CONFIG_HFR_DEFAULT_REFRESH_RATE" != "$TARGET_LCD_CONFIG_HFR_D
 
     SMALI_PATCH "system" "system/framework/framework.jar" \
         "smali_classes6/com/samsung/android/hardware/display/RefreshRateConfig.smali" "replace" \
-        "dump(Ljava/io/PrintWriter;Ljava/lang/String;Z)V" \
+        "$PRODUCT_REFRESH_DUMP_METHOD" \
         "HFR_DEFAULT_REFRESH_RATE: $SOURCE_LCD_CONFIG_HFR_DEFAULT_REFRESH_RATE" \
         "HFR_DEFAULT_REFRESH_RATE: $TARGET_LCD_CONFIG_HFR_DEFAULT_REFRESH_RATE"
     SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-        "smali_classes4/com/samsung/android/settings/display/SecDisplayUtils.smali" "replace" \
+        "$PRODUCT_DISPLAY_SMALI_DIR/com/samsung/android/settings/display/SecDisplayUtils.smali" "replace" \
         "getHighRefreshRateDefaultValue(Landroid/content/Context;I)I" \
         "$SOURCE_LCD_CONFIG_HFR_DEFAULT_REFRESH_RATE" \
         "$TARGET_LCD_CONFIG_HFR_DEFAULT_REFRESH_RATE"
