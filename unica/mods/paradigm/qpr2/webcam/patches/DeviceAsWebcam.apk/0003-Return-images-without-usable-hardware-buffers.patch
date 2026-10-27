@@ -1,0 +1,25 @@
+Subject: [PATCH] Release an acquired image without a HardwareBuffer before publishing it to the asynchronous image map
+
+diff --git a/smali/com/android/deviceaswebcam/CameraController$5.smali b/smali/com/android/deviceaswebcam/CameraController$5.smali
+--- a/smali/com/android/deviceaswebcam/CameraController$5.smali
++++ b/smali/com/android/deviceaswebcam/CameraController$5.smali
+@@ -131,10 +131,19 @@
+ 
+     invoke-virtual {v2}, Landroid/media/Image;->getHardwareBuffer()Landroid/hardware/HardwareBuffer;
+ 
+     move-result-object p1
+ 
++    if-nez p1, :unica_qpr2_hardware_buffer_ready
++
++    invoke-virtual {v2}, Landroid/media/Image;->close()V
++
++    monitor-exit v1
++
++    return-void
++
++    :unica_qpr2_hardware_buffer_ready
+     monitor-exit v1
+     :try_end_0
+     .catchall {:try_start_0 .. :try_end_0} :catchall_0
+ 
+     iget-object v0, p0, Lcom/android/deviceaswebcam/CameraController$5;->this$0:Lcom/android/deviceaswebcam/CameraController;

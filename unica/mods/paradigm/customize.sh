@@ -718,6 +718,24 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 webcam
+    MODPATH="$PARADIGM_MODPATH/qpr2/webcam"
+    LOG_STEP_IN "- Adding QPR2 webcam"
+    # Original SDK-36 builds remain unchanged. Exact SDK-37 contracts only.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/DeviceAsWebcam/DeviceAsWebcam.apk" \
+            "$MODPATH/patches/DeviceAsWebcam.apk/0001-Port-QPR2-responsive-camera-zoom-controls.patch"
+        APPLY_PATCH "system" "system/priv-app/DeviceAsWebcam/DeviceAsWebcam.apk" \
+            "$MODPATH/patches/DeviceAsWebcam.apk/0002-Reject-invalid-camera-buffers-before-native-encode.patch"
+        APPLY_PATCH "system" "system/priv-app/DeviceAsWebcam/DeviceAsWebcam.apk" \
+            "$MODPATH/patches/DeviceAsWebcam.apk/0003-Return-images-without-usable-hardware-buffers.patch"
+        APPLY_PATCH "system" "system/priv-app/DeviceAsWebcam/DeviceAsWebcam.apk" \
+            "$MODPATH/patches/DeviceAsWebcam.apk/0099-Identify-reviewed-QPR2-backport.patch"
+        SET_PROP "system" "ro.unica.qpr2.webcam.zoom" "responsive"
+        SET_PROP "system" "ro.unica.qpr2.webcam.buffers" "checked"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
