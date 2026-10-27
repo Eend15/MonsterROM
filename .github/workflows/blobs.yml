@@ -101,8 +101,17 @@ jobs:
           DEBIAN_FRONTEND=noninteractive sudo apt install -yq \
             attr ccache clang ffmpeg libbrotli-dev libbz2-dev \
             libgtest-dev libprotobuf-dev libunwind-dev libpcre2-dev \
-            libzstd-dev "linux-modules-extra-$(uname -r)" lld protobuf-compiler webp
-          sudo modprobe erofs f2fs
+            libzstd-dev lld protobuf-compiler webp
+          # extract_fw uses fuse.erofs, not the kernel EROFS driver. Matching
+          # Azure kernel packages need not exist in this runner image's APT repo.
+          if ! grep -qw fuse /proc/filesystems; then
+            sudo modprobe fuse
+          fi
+          if ! test -c /dev/fuse; then
+            echo "::error::The firmware extractor requires a runner with /dev/fuse support." >&2
+            exit 1
+          fi
+          # Native filesystem mounts are still checked by the real extractor.
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
