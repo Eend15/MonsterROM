@@ -6,12 +6,18 @@ fi
 
 # Start adbd on boot
 # https://android.googlesource.com/platform/packages/modules/adb/+/refs/heads/main/docs/dev/how_adbd_starts.md
-SET_PROP_IF_DIFF "product" "persist.sys.usb.config" "$(GET_PROP "product" "persist.sys.usb.config"),adb"
-SET_PROP_IF_DIFF "odm" "persist.sys.usb.config" "$(GET_PROP "odm" "persist.sys.usb.config"),adb"
-SET_PROP_IF_DIFF "odm_dlkm" "persist.sys.usb.config" "$(GET_PROP "odm_dlkm" "persist.sys.usb.config"),adb"
-SET_PROP_IF_DIFF "system_dlkm" "persist.sys.usb.config" "$(GET_PROP "system_dlkm" "persist.sys.usb.config"),adb"
-SET_PROP_IF_DIFF "vendor" "persist.sys.usb.config" "$(GET_PROP "vendor" "persist.sys.usb.config"),adb"
-SET_PROP_IF_DIFF "vendor_dlkm" "persist.sys.usb.config" "$(GET_PROP "vendor_dlkm" "persist.sys.usb.config"),adb"
+for ADB_PARTITION in system product odm odm_dlkm system_dlkm vendor vendor_dlkm; do
+    ADB_USB_CONFIG="$(GET_PROP "$ADB_PARTITION" "persist.sys.usb.config")"
+    # Do not create properties in absent partitions, append adb twice, or
+    # retain "none" alongside a real function (there is no none,adb trigger).
+    [ -n "$ADB_USB_CONFIG" ] || continue
+    case ",$ADB_USB_CONFIG," in
+        *,adb,*) continue ;;
+    esac
+    [ "$ADB_USB_CONFIG" != "none" ] || ADB_USB_CONFIG=""
+    SET_PROP "$ADB_PARTITION" "persist.sys.usb.config" "${ADB_USB_CONFIG:+$ADB_USB_CONFIG,}adb"
+done
+unset ADB_PARTITION ADB_USB_CONFIG
 
 # Disable adb authentication
 # https://android.googlesource.com/platform/packages/modules/adb/+/refs/tags/android-15.0.0_r1/daemon/main.cpp#213
