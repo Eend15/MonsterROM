@@ -112,12 +112,14 @@ PRODUCT_ENABLE_OPTICAL()
 
 PRODUCT_PATCH_ABI=""
 PRODUCT_DISPLAY_SMALI_DIR="smali_classes4"
+PRODUCT_TELEPHONY_SMALI_DIR="smali_classes4"
 PRODUCT_REFRESH_DUMP_METHOD="dump(Ljava/io/PrintWriter;Ljava/lang/String;Z)V"
 PRODUCT_SDK37_RESOLUTION=false
 PRODUCT_SDK37_OPTICAL=false
 if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
     PRODUCT_PATCH_ABI="sdk37/"
     PRODUCT_DISPLAY_SMALI_DIR="smali_classes3"
+    PRODUCT_TELEPHONY_SMALI_DIR="smali_classes6"
     PRODUCT_REFRESH_DUMP_METHOD="dumpProductFeature(Ljava/io/PrintWriter;Ljava/lang/String;Z)V"
 fi
 
@@ -931,18 +933,26 @@ fi
 if [[ "$SOURCE_RIL_FEATURES" != "$TARGET_RIL_FEATURES" ]]; then
     if [[ "$SOURCE_RIL_FEATURES" != "none" ]]; then
         SMALI_PATCH "system" "system/framework/framework.jar" \
-            "smali_classes4/com/android/internal/telephony/TelephonyFeatures.smali" "replaceall" \
+            "$PRODUCT_TELEPHONY_SMALI_DIR/com/android/internal/telephony/TelephonyFeatures.smali" "replaceall" \
             "$SOURCE_RIL_FEATURES" \
             "${TARGET_RIL_FEATURES//none/}"
-        SMALI_PATCH "system" "system/framework/telephony-common.jar" \
-            "smali/com/android/internal/telephony/TelephonyLogger.smali" "replace" \
-            "dump(Ljava/io/FileDescriptor;Ljava/io/PrintWriter;[Ljava/lang/String;)V" \
-            "$SOURCE_RIL_FEATURES" \
-            "${TARGET_RIL_FEATURES//none/}"
-        SMALI_PATCH "system" "system/priv-app/TeleService/TeleService.apk" \
-            "smali/com/samsung/telephony/model/feature/tag/SamsungProductFeatureTag.smali" "replaceall" \
-            "$SOURCE_RIL_FEATURES" \
-            "${TARGET_RIL_FEATURES//none/}"
+        if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+            # R8 folded the feature string into the dump message.
+            SMALI_PATCH "system" "system/framework/telephony-common.jar" \
+                "smali/com/android/internal/telephony/TelephonyLogger.smali" "replaceall" \
+                "$SOURCE_RIL_FEATURES" \
+                "${TARGET_RIL_FEATURES//none/}"
+        else
+            SMALI_PATCH "system" "system/framework/telephony-common.jar" \
+                "smali/com/android/internal/telephony/TelephonyLogger.smali" "replace" \
+                "dump(Ljava/io/FileDescriptor;Ljava/io/PrintWriter;[Ljava/lang/String;)V" \
+                "$SOURCE_RIL_FEATURES" \
+                "${TARGET_RIL_FEATURES//none/}"
+            SMALI_PATCH "system" "system/priv-app/TeleService/TeleService.apk" \
+                "smali/com/samsung/telephony/model/feature/tag/SamsungProductFeatureTag.smali" "replaceall" \
+                "$SOURCE_RIL_FEATURES" \
+                "${TARGET_RIL_FEATURES//none/}"
+        fi
         SMALI_PATCH "system" "system/priv-app/TeleService/TeleService.apk" \
             "smali/com/samsung/telephony/model/feature/SamsungFeatureSatellite.smali" "replaceall" \
             "$SOURCE_RIL_FEATURES" \
