@@ -17,6 +17,11 @@ else
         'ro.product.vendor.device' || return 1
 fi
 
+VENDOR_WARNING_PATCH="sdk36.patch"
+[ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ] && VENDOR_WARNING_PATCH="sdk37.patch"
+APPLY_PATCH "system" "system/framework/services.jar" "$MODPATH/vendor_mismatch/$VENDOR_WARNING_PATCH" || return 1
+unset VENDOR_WARNING_PATCH
+
 # shellcheck disable=SC2016
 # Disable RescueParty
 SMALI_PATCH "system" "system/framework/services.jar" \
