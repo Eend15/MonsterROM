@@ -149,6 +149,56 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
         return 1
     fi
 
+    # QPR2 mainline
+    MODPATH="$PARADIGM_MODPATH/qpr2/mainline"
+    LOG_STEP_IN "- Adding QPR2 mainline"
+    # Complete original signed modules. No payload editing, re-signing or key change.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ] && [ "${UN1CA_QPR2_MAINLINE:-false}" = "true" ]; then
+        # Validate the entire finite module set before copying the first container.
+        while read -r QPR2_APEX QPR2_OLD QPR2_NEW QPR2_OLD_SHA QPR2_NEW_SHA; do
+            [ "$(sha256sum "$SRC_DIR/prebuilts/qpr2/system/system/apex/$QPR2_NEW" | cut -d ' ' -f 1)" = "$QPR2_NEW_SHA" ] || {
+                ABORT "Unreviewed QPR2 APEX input: $QPR2_APEX"
+                return 1
+            }
+            if [ "$QPR2_OLD" = "$QPR2_NEW" ]; then
+                QPR2_CURRENT_SHA="$(sha256sum "$WORK_DIR/system/system/apex/$QPR2_OLD" | cut -d ' ' -f 1)"
+                [ "$QPR2_CURRENT_SHA" = "$QPR2_OLD_SHA" ] || [ "$QPR2_CURRENT_SHA" = "$QPR2_NEW_SHA" ] || {
+                    ABORT "Unreviewed existing APEX: $QPR2_APEX"
+                    return 1
+                }
+            else
+                # A reviewed new file must not hide an unrelated old container, or
+                # authorize overwriting an existing unreviewed new-name container.
+                if [ -f "$WORK_DIR/system/system/apex/$QPR2_OLD" ]; then
+                    [ "$(sha256sum "$WORK_DIR/system/system/apex/$QPR2_OLD" | cut -d ' ' -f 1)" = "$QPR2_OLD_SHA" ] || {
+                        ABORT "Unreviewed old APEX container: $QPR2_APEX"
+                        return 1
+                    }
+                fi
+                if [ -f "$WORK_DIR/system/system/apex/$QPR2_NEW" ]; then
+                    [ "$(sha256sum "$WORK_DIR/system/system/apex/$QPR2_NEW" | cut -d ' ' -f 1)" = "$QPR2_NEW_SHA" ] || {
+                        ABORT "Unreviewed new-name APEX container: $QPR2_APEX"
+                        return 1
+                    }
+                elif [ ! -f "$WORK_DIR/system/system/apex/$QPR2_OLD" ]; then
+                    ABORT "Missing existing APEX: $QPR2_APEX"
+                    return 1
+                fi
+            fi
+        done < "$MODPATH/modules.sha256"
+
+        while read -r QPR2_APEX QPR2_OLD QPR2_NEW QPR2_OLD_SHA QPR2_NEW_SHA; do
+            ADD_TO_WORK_DIR "$SRC_DIR/prebuilts/qpr2" "system" "system/apex/$QPR2_NEW" 0 0 644
+            [ "$(sha256sum "$WORK_DIR/system/system/apex/$QPR2_NEW" | cut -d ' ' -f 1)" = "$QPR2_NEW_SHA" ] || return 1
+            if [ "$QPR2_OLD" != "$QPR2_NEW" ] && [ -f "$WORK_DIR/system/system/apex/$QPR2_OLD" ]; then
+                DELETE_FROM_WORK_DIR "system" "system/apex/$QPR2_OLD"
+            fi
+        done < "$MODPATH/modules.sha256"
+        SET_PROP "system" "ro.unica.qpr2.mainline" "sdkext,tzdata"
+        unset QPR2_APEX QPR2_OLD QPR2_NEW QPR2_OLD_SHA QPR2_NEW_SHA QPR2_CURRENT_SHA
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
