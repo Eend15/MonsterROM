@@ -910,6 +910,8 @@ PERL
             "$MODPATH/patches/SystemUI.apk/0002-Reveal-glass-behind-native-slider-tracks.patch"
         APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
             "$MODPATH/patches/SecSettings.apk/0001-Connect-existing-blur-surfaces-to-QPR2-material.patch"
+        APPLY_PATCH "system" "system/priv-app/SecMyFiles2020/SecMyFiles2020.apk" \
+            "$MODPATH/patches/SecMyFiles2020.apk/0001-Connect-existing-blur-surfaces-to-QPR2-material.patch"
     fi
     LOG_STEP_OUT
 
