@@ -603,6 +603,35 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 dream_vsync
+    MODPATH="$PARADIGM_MODPATH/qpr2/dream_vsync"
+    LOG_STEP_IN "- Adding QPR2 dream_vsync"
+    # Original SDK-36 builds remain unchanged. Exact SDK-37 contracts only.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        # Keep the original signed APK. Scope the scheduling change to its
+        # exact callback/package instead of rebuilding it with another signer.
+        DECODE_APK "system" "system/framework/framework.jar" || return 1
+        for QPR2_CHECK in framework apks; do
+            QPR2_CHECK_ROOT="$APKTOOL_DIR/system/framework/framework.jar"
+            if [ "$QPR2_CHECK" = "apks" ]; then QPR2_CHECK_ROOT="$WORK_DIR/system/system"; fi
+            [ -s "$MODPATH/$QPR2_CHECK.sha256" ] || {
+                ABORT "Missing original-dream source contract: $QPR2_CHECK"
+                return 1
+            }
+            while read -r QPR2_EXPECTED QPR2_FILE; do
+                [ "$(sha256sum "$QPR2_CHECK_ROOT/$QPR2_FILE" | cut -d ' ' -f 1)" = "$QPR2_EXPECTED" ] || {
+                    ABORT "Unreviewed original-dream source: $QPR2_FILE"
+                    return 1
+                }
+            done < "$MODPATH/$QPR2_CHECK.sha256" || return 1
+        done
+        unset QPR2_CHECK QPR2_CHECK_ROOT QPR2_EXPECTED QPR2_FILE
+        APPLY_PATCH "system" "system/framework/framework.jar" \
+            "$MODPATH/patches/framework.jar/0001-Use-next-vsync-for-original-Samsung-Colors-dream.patch" || return 1
+        SET_PROP "system" "ro.unica.qpr2.dream_vsync" "true" || return 1
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

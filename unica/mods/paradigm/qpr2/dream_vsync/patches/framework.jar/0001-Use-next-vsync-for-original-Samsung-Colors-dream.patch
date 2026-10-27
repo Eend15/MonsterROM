@@ -1,0 +1,58 @@
+Subject: [PATCH] Limit QPR2 next-vsync scheduling to the signed Samsung Colors dream
+
+Source-bound compatibility backport, not a global Choreographer timing change.
+Keep BasicDreams.apk and its non-platform Samsung signer completely unchanged.
+The original Samsung ColorsGLRenderer.doFrame schedules this exact callback
+with 25 ms; QPR2 schedules the same callback with postFrameCallback (0 ms).
+Only the exact callback class, bound application package, and original 25 ms
+delay qualify. Null callbacks retain the original Samsung error path.
+
+diff --git a/smali_classes4/android/view/Choreographer.smali b/smali_classes4/android/view/Choreographer.smali
+--- a/smali_classes4/android/view/Choreographer.smali
++++ b/smali_classes4/android/view/Choreographer.smali
+@@ -2748,8 +2748,45 @@
+ .method public whitelist postFrameCallbackDelayed(Landroid/view/Choreographer$FrameCallback;J)V
+     .locals 6
+ 
+     if-eqz p1, :cond_0
+ 
++    const-wide/16 v0, 0x19
++
++    cmp-long v0, p2, v0
++
++    if-nez v0, :qpr2_dream_schedule
++
++    invoke-virtual {p1}, Ljava/lang/Object;->getClass()Ljava/lang/Class;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Ljava/lang/Class;->getName()Ljava/lang/String;
++
++    move-result-object v0
++
++    const-string v1, "com.android.dreams.basic.ColorsGLRenderer"
++
++    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v0
++
++    if-eqz v0, :qpr2_dream_schedule
++
++    invoke-static {}, Landroid/app/ActivityThread;->currentPackageName()Ljava/lang/String;
++
++    move-result-object v0
++
++    const-string v1, "com.android.dreams.basic"
++
++    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
++
++    move-result v0
++
++    if-eqz v0, :qpr2_dream_schedule
++
++    const-wide/16 p2, 0x0
++
++    :qpr2_dream_schedule
+     const/4 v1, 0x1
+ 
+     sget-object v3, Landroid/view/Choreographer;->FRAME_CALLBACK_TOKEN:Ljava/lang/Object;
