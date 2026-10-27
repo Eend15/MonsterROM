@@ -1,0 +1,262 @@
+Subject: [PATCH] Route QPR2 Ctrl-Enter rename through Samsung F2 validation and consume its key pair
+
+diff --git a/smali_classes2/com/sec/android/app/myfiles/ui/MainActivity.smali b/smali_classes2/com/sec/android/app/myfiles/ui/MainActivity.smali
+--- a/smali_classes2/com/sec/android/app/myfiles/ui/MainActivity.smali
++++ b/smali_classes2/com/sec/android/app/myfiles/ui/MainActivity.smali
+@@ -214,6 +214,8 @@
+ 
+ 
+ # instance fields
++.field private unicaQpr2Shortcuts:Lio/mesalabs/unica/files/Qpr2FileShortcuts;
++
+ .field private final activityHandler$delegate:Lmq/h;
+ 
+ .field private final activityHelper$delegate:Lmq/h;
+@@ -2015,6 +2017,28 @@
+     move-result-object v0
+ 
+     :cond_0
++    iget-object v1, p0, Lcom/sec/android/app/myfiles/ui/MainActivity;->unicaQpr2Shortcuts:Lio/mesalabs/unica/files/Qpr2FileShortcuts;
++
++    if-nez v1, :unica_shortcuts_ready
++
++    new-instance v1, Lio/mesalabs/unica/files/Qpr2FileShortcuts;
++
++    invoke-direct {v1}, Lio/mesalabs/unica/files/Qpr2FileShortcuts;-><init>()V
++
++    iput-object v1, p0, Lcom/sec/android/app/myfiles/ui/MainActivity;->unicaQpr2Shortcuts:Lio/mesalabs/unica/files/Qpr2FileShortcuts;
++
++    :unica_shortcuts_ready
++    invoke-virtual {v1, p0, v0, p1}, Lio/mesalabs/unica/files/Qpr2FileShortcuts;->handle(Lh/o;Lek/a;Landroid/view/KeyEvent;)Z
++
++    move-result v1
++
++    if-eqz v1, :unica_native_key
++
++    const/4 v1, 0x1
++
++    return v1
++
++    :unica_native_key
+     invoke-virtual {p1}, Landroid/view/KeyEvent;->getAction()I
+ 
+     move-result v1
+diff --git a/smali_classes3/io/mesalabs/unica/files/Qpr2FileShortcuts.smali b/smali_classes3/io/mesalabs/unica/files/Qpr2FileShortcuts.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes3/io/mesalabs/unica/files/Qpr2FileShortcuts.smali
+@@ -0,0 +1,214 @@
++.class public final Lio/mesalabs/unica/files/Qpr2FileShortcuts;
++.super Ljava/lang/Object;
++.source "Qpr2FileShortcuts.java"
++
++
++# instance fields
++.field private consumedDevice:I
++
++.field private consumedDown:J
++
++
++# direct methods
++.method public constructor <init>()V
++    .locals 2
++
++    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
++
++    const-wide/16 v0, -0x1
++
++    iput-wide v0, p0, Lio/mesalabs/unica/files/Qpr2FileShortcuts;->consumedDown:J
++
++    const/4 v0, -0x1
++
++    iput v0, p0, Lio/mesalabs/unica/files/Qpr2FileShortcuts;->consumedDevice:I
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public handle(Lh/o;Lek/a;Landroid/view/KeyEvent;)Z
++    .locals 9
++
++    const/4 v0, 0x0
++
++    if-eqz p3, :cond_a5
++
++    invoke-virtual {p3}, Landroid/view/KeyEvent;->getKeyCode()I
++
++    move-result v1
++
++    sget v2, Landroid/view/KeyEvent;->KEYCODE_ENTER:I
++
++    if-ne v1, v2, :cond_a5
++
++    invoke-virtual {p3}, Landroid/view/KeyEvent;->getAction()I
++
++    move-result v1
++
++    sget v2, Landroid/view/KeyEvent;->ACTION_UP:I
++
++    const/4 v3, -0x1
++
++    const-wide/16 v4, -0x1
++
++    const/4 v6, 0x1
++
++    if-ne v1, v2, :cond_31
++
++    invoke-virtual {p3}, Landroid/view/KeyEvent;->getDownTime()J
++
++    move-result-wide p1
++
++    iget-wide v1, p0, Lio/mesalabs/unica/files/Qpr2FileShortcuts;->consumedDown:J
++
++    cmp-long p1, p1, v1
++
++    if-nez p1, :cond_2a
++
++    invoke-virtual {p3}, Landroid/view/KeyEvent;->getDeviceId()I
++
++    move-result p1
++
++    iget p2, p0, Lio/mesalabs/unica/files/Qpr2FileShortcuts;->consumedDevice:I
++
++    if-ne p1, p2, :cond_2a
++
++    move v0, v6
++
++    :cond_2a
++    if-eqz v0, :cond_30
++
++    iput-wide v4, p0, Lio/mesalabs/unica/files/Qpr2FileShortcuts;->consumedDown:J
++
++    iput v3, p0, Lio/mesalabs/unica/files/Qpr2FileShortcuts;->consumedDevice:I
++
++    :cond_30
++    return v0
++
++    :cond_31
++    invoke-virtual {p3}, Landroid/view/KeyEvent;->getAction()I
++
++    move-result v1
++
++    sget v2, Landroid/view/KeyEvent;->ACTION_DOWN:I
++
++    if-eq v1, v2, :cond_3a
++
++    return v0
++
++    :cond_3a
++    invoke-virtual {p3}, Landroid/view/KeyEvent;->getDownTime()J
++
++    move-result-wide v1
++
++    iget-wide v7, p0, Lio/mesalabs/unica/files/Qpr2FileShortcuts;->consumedDown:J
++
++    cmp-long v1, v1, v7
++
++    if-nez v1, :cond_4d
++
++    invoke-virtual {p3}, Landroid/view/KeyEvent;->getDeviceId()I
++
++    move-result v1
++
++    iget v2, p0, Lio/mesalabs/unica/files/Qpr2FileShortcuts;->consumedDevice:I
++
++    if-ne v1, v2, :cond_4d
++
++    return v6
++
++    :cond_4d
++    iput-wide v4, p0, Lio/mesalabs/unica/files/Qpr2FileShortcuts;->consumedDown:J
++
++    iput v3, p0, Lio/mesalabs/unica/files/Qpr2FileShortcuts;->consumedDevice:I
++
++    invoke-virtual {p3}, Landroid/view/KeyEvent;->getRepeatCount()I
++
++    move-result v1
++
++    if-nez v1, :cond_a5
++
++    sget v1, Landroid/view/KeyEvent;->META_CTRL_ON:I
++
++    invoke-virtual {p3, v1}, Landroid/view/KeyEvent;->hasModifiers(I)Z
++
++    move-result v1
++
++    if-eqz v1, :cond_a5
++
++    invoke-virtual {p3}, Landroid/view/KeyEvent;->isCanceled()Z
++
++    move-result v1
++
++    if-nez v1, :cond_a5
++
++    invoke-virtual {p1}, Lh/o;->getCurrentFocus()Landroid/view/View;
++
++    move-result-object v1
++
++    if-eqz v1, :cond_72
++
++    invoke-virtual {v1}, Landroid/view/View;->onCheckIsTextEditor()Z
++
++    move-result v1
++
++    if-eqz v1, :cond_72
++
++    return v0
++
++    :cond_72
++    if-eqz p2, :cond_a5
++
++    invoke-virtual {p2}, Lek/a;->w()Z
++
++    move-result v1
++
++    if-eqz v1, :cond_a5
++
++    invoke-static {p2}, Lll/p;->c(Lek/a;)Lll/k;
++
++    move-result-object v1
++
++    if-eqz v1, :cond_a5
++
++    invoke-virtual {v1}, Lll/k;->b()Lwg/g;
++
++    move-result-object v2
++
++    if-eqz v2, :cond_a5
++
++    new-instance v0, Lll/a;
++
++    const/4 v2, 0x2
++
++    invoke-direct {v0, v2}, Lll/a;-><init>(I)V
++
++    new-instance v2, Landroid/view/KeyEvent;
++
++    sget v3, Landroid/view/KeyEvent;->ACTION_DOWN:I
++
++    sget v4, Landroid/view/KeyEvent;->KEYCODE_F2:I
++
++    invoke-direct {v2, v3, v4}, Landroid/view/KeyEvent;-><init>(II)V
++
++    invoke-virtual {v0, v1, p1, p2, v2}, Lll/a;->a(Lll/k;Lh/o;Lek/a;Landroid/view/KeyEvent;)Z
++
++    invoke-virtual {p3}, Landroid/view/KeyEvent;->getDownTime()J
++
++    move-result-wide p1
++
++    iput-wide p1, p0, Lio/mesalabs/unica/files/Qpr2FileShortcuts;->consumedDown:J
++
++    invoke-virtual {p3}, Landroid/view/KeyEvent;->getDeviceId()I
++
++    move-result p1
++
++    iput p1, p0, Lio/mesalabs/unica/files/Qpr2FileShortcuts;->consumedDevice:I
++
++    return v6
++
++    :cond_a5
++    return v0
++.end method

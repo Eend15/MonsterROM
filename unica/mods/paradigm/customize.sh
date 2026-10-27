@@ -978,6 +978,17 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 file_shortcuts
+    MODPATH="$PARADIGM_MODPATH/qpr2/file_shortcuts"
+    LOG_STEP_IN "- Adding QPR2 file_shortcuts"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SecMyFiles2020/SecMyFiles2020.apk" \
+            "$MODPATH/patches/SecMyFiles2020.apk/0001-Route-QPR2-Ctrl-Enter-through-native-rename.patch"
+        APPLY_PATCH "system" "system/priv-app/SecMyFiles2020/SecMyFiles2020.apk" \
+            "$MODPATH/patches/SecMyFiles2020.apk/0099-Identify-QPR2-r11.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
