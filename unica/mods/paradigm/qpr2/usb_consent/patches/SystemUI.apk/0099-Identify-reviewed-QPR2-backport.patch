@@ -1,0 +1,19 @@
+Subject: [PATCH] Identify the reviewed QPR2 SystemUI backport
+
+diff --git a/apktool.yml b/apktool.yml
+--- a/apktool.yml
++++ b/apktool.yml
+@@ -7,11 +7,11 @@
+ sdkInfo:
+   minSdkVersion: 37
+   targetSdkVersion: 37
+ versionInfo:
+-  versionCode: 37
+-  versionName: 17
++  versionCode: 39
++  versionName: 17-UN1CA.QPR2.clean4
+ resourcesInfo:
+   packageId: 126
+   sparseEntries: true
+   compactEntries: true
+ doNotCompress:

@@ -690,6 +690,19 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 usb_consent
+    MODPATH="$PARADIGM_MODPATH/qpr2/usb_consent"
+    LOG_STEP_IN "- Adding QPR2 usb_consent"
+    # Original SDK-36 builds remain unchanged. Exact SDK-37 contracts only.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+            "$MODPATH/patches/SystemUI.apk/0001-Describe-QPR2-composite-USB-device-interfaces.patch"
+        APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
+            "$MODPATH/patches/SystemUI.apk/0099-Identify-reviewed-QPR2-backport.patch"
+        SET_PROP "system" "ro.unica.qpr2.usb.descriptions" "true"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
