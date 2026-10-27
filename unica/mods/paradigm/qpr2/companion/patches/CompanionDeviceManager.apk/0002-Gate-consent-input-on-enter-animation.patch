@@ -1,0 +1,148 @@
+Subject: [PATCH] Port QPR2 enter-animation input gating while retaining Samsung grant handlers
+
+diff --git a/smali/com/android/companiondevicemanager/CompanionAssociationActivity.smali b/smali/com/android/companiondevicemanager/CompanionAssociationActivity.smali
+--- a/smali/com/android/companiondevicemanager/CompanionAssociationActivity.smali
++++ b/smali/com/android/companiondevicemanager/CompanionAssociationActivity.smali
+@@ -12,10 +12,12 @@
+ # static fields
+ .field public static final synthetic $r8$clinit:I
+ 
+ 
+ # instance fields
++.field public mEnterAnimationCompleted:Z
++
+ .field public _viewModelStore:Landroidx/lifecycle/ViewModelStore;
+ 
+ .field public activityResultRegistry:Landroidx/activity/ComponentActivity$activityResultRegistry$1;
+ 
+ .field public btnDivider:Landroid/view/View;
+@@ -1829,10 +1831,19 @@
+ .end method
+ 
+ .method public final onCreate(Landroid/os/Bundle;)V
+     .locals 3
+ 
++    # A restored Activity has no pending enter animation.
++    if-eqz p1, :unica_qpr2_fresh_consent
++
++    const/4 v0, 0x1
++
++    iput-boolean v0, p0, Lcom/android/companiondevicemanager/CompanionAssociationActivity;->mEnterAnimationCompleted:Z
++
++    :unica_qpr2_fresh_consent
++
+     invoke-virtual {p0, p1}, Lcom/android/companiondevicemanager/CompanionAssociationActivity;->onCreate$androidx$fragment$app$FragmentActivity(Landroid/os/Bundle;)V
+ 
+     invoke-virtual {p0}, Landroid/app/Activity;->getIntent()Landroid/content/Intent;
+ 
+     move-result-object p1
+@@ -5023,5 +5034,36 @@
+ 
+     invoke-virtual {p0, v1}, Landroid/view/View;->setVisibility(I)V
+ 
+     return-void
+ .end method
++
++.method public final dispatchTouchEvent(Landroid/view/MotionEvent;)Z
++    .locals 1
++
++    iget-boolean v0, p0, Lcom/android/companiondevicemanager/CompanionAssociationActivity;->mEnterAnimationCompleted:Z
++
++    if-nez v0, :cond_0
++
++    const/4 p0, 0x1
++
++    return p0
++
++    :cond_0
++    invoke-super {p0, p1}, Landroid/app/Activity;->dispatchTouchEvent(Landroid/view/MotionEvent;)Z
++
++    move-result p0
++
++    return p0
++.end method
++
++.method public final onEnterAnimationComplete()V
++    .locals 1
++
++    invoke-super {p0}, Landroid/app/Activity;->onEnterAnimationComplete()V
++
++    const/4 v0, 0x1
++
++    iput-boolean v0, p0, Lcom/android/companiondevicemanager/CompanionAssociationActivity;->mEnterAnimationCompleted:Z
++
++    return-void
++.end method
+diff --git a/smali/com/android/companiondevicemanager/CompanionDeviceDataTransferActivity.smali b/smali/com/android/companiondevicemanager/CompanionDeviceDataTransferActivity.smali
+--- a/smali/com/android/companiondevicemanager/CompanionDeviceDataTransferActivity.smali
++++ b/smali/com/android/companiondevicemanager/CompanionDeviceDataTransferActivity.smali
+@@ -6,10 +6,12 @@
+ # static fields
+ .field public static final synthetic $r8$clinit:I
+ 
+ 
+ # instance fields
++.field public mEnterAnimationCompleted:Z
++
+ .field public mCdmServiceReceiver:Landroid/os/ResultReceiver;
+ 
+ .field public mCompanionDeviceName:Ljava/lang/CharSequence;
+ 
+ .field public mRequest:Landroid/companion/datatransfer/SystemDataTransferRequest;
+@@ -27,10 +29,19 @@
+ 
+ # virtual methods
+ .method public final onCreate(Landroid/os/Bundle;)V
+     .locals 8
+ 
++    # A restored Activity has no pending enter animation.
++    if-eqz p1, :unica_qpr2_fresh_consent
++
++    const/4 v0, 0x1
++
++    iput-boolean v0, p0, Lcom/android/companiondevicemanager/CompanionDeviceDataTransferActivity;->mEnterAnimationCompleted:Z
++
++    :unica_qpr2_fresh_consent
++
+     invoke-super {p0, p1}, Landroid/app/Activity;->onCreate(Landroid/os/Bundle;)V
+ 
+     const-string p1, "CDM_CompanionDeviceDataTransferActivity"
+ 
+     const-string v0, "Creating UI for data transfer confirmation."
+@@ -192,5 +203,36 @@
+     invoke-virtual {v2, p1}, Landroid/widget/Button;->setOnClickListener(Landroid/view/View$OnClickListener;)V
+ 
+     :cond_0
+     return-void
+ .end method
++
++.method public final dispatchTouchEvent(Landroid/view/MotionEvent;)Z
++    .locals 1
++
++    iget-boolean v0, p0, Lcom/android/companiondevicemanager/CompanionDeviceDataTransferActivity;->mEnterAnimationCompleted:Z
++
++    if-nez v0, :cond_0
++
++    const/4 p0, 0x1
++
++    return p0
++
++    :cond_0
++    invoke-super {p0, p1}, Landroid/app/Activity;->dispatchTouchEvent(Landroid/view/MotionEvent;)Z
++
++    move-result p0
++
++    return p0
++.end method
++
++.method public final onEnterAnimationComplete()V
++    .locals 1
++
++    invoke-super {p0}, Landroid/app/Activity;->onEnterAnimationComplete()V
++
++    const/4 v0, 0x1
++
++    iput-boolean v0, p0, Lcom/android/companiondevicemanager/CompanionDeviceDataTransferActivity;->mEnterAnimationCompleted:Z
++
++    return-void
++.end method

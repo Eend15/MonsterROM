@@ -344,6 +344,20 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
     fi
     LOG_STEP_OUT
 
+    # QPR2 companion
+    MODPATH="$PARADIGM_MODPATH/qpr2/companion"
+    LOG_STEP_IN "- Adding QPR2 companion"
+    # Keep the original SDK-36 / One UI 8 build unchanged.
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/app/CompanionDeviceManager/CompanionDeviceManager.apk" \
+            "$MODPATH/patches/CompanionDeviceManager.apk/0001-Reject-obscured-consent-touches.patch"
+        APPLY_PATCH "system" "system/app/CompanionDeviceManager/CompanionDeviceManager.apk" \
+            "$MODPATH/patches/CompanionDeviceManager.apk/0002-Gate-consent-input-on-enter-animation.patch"
+        APPLY_PATCH "system" "system/app/CompanionDeviceManager/CompanionDeviceManager.apk" \
+            "$MODPATH/patches/CompanionDeviceManager.apk/0099-Identify-reviewed-QPR2-backport.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 
