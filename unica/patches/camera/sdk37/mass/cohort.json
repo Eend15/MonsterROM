@@ -1,0 +1,23 @@
+{
+  "target": {
+    "system/system/priv-app/SamsungCamera/SamsungCamera.apk": "3de8d9573907f391a8c457995ff61070b06df680a1cc4e240588800ead359637",
+    "system/system/cameradata/camera-feature.xml": "8f2d8f21dd8cdf43ab9097e118000189ff84b38b38a907e0db29798ca3720f0e",
+    "system/system/lib64/libAIQSolution_MPI.camera.samsung.so": "3986cabd31c32b7a51108ae32c108bc784e2db431f1a69aa83f26cb9c732190a",
+    "system/system/lib64/libMultiFrameProcessing30.snapwrapper.camera.samsung.so": "8d12e774b10b1670bab81a5d0c432ab95afeb6fc82fd41f00086e71b01c999e5"
+  },
+  "work": {
+    "system/system/lib64/libsnap_aidl.snap.samsung.so": "866697412890dd097ef20606d93d83f70e3cb4a2be83f2e1a1e9ab1ff8d26d6c",
+    "system/system/lib64/libMultiFrameProcessing30.camera.samsung.so": "23b95cb2ccd64dfb30a59fa9a8c523d20196fd6344443d367dec41a9f14648a3",
+    "system/system/lib64/libMultiFrameProcessing30Tuning.camera.samsung.so": "22da3cf07264a1177e8ca5857cdfa479058f1bbe318332d22c3b22d81e2e9371",
+    "system/system/lib64/libSwIsp_core.camera.samsung.so": "e62db1d6d65c0131b88f1f328c4ec1a08b4bc48f49f88f5d3076dea939c9c136",
+    "system/system/lib64/libSwIsp_wrapper_v1.camera.samsung.so": "8ab32d6873783d96abebc5296b39da22740f05cdefff2e65aef1a5dfe73260e5",
+    "system/system/lib64/libLocalTM_pcc.camera.samsung.so": "f1bac2dd3eb2b00da400b7922bf499337de2a80e92415727d52e10ee6b6ac512",
+    "system/system/lib64/libsimba.media.samsung.so": "127b601643c13f60c154a65d916f37a856cf4f3be7a33ae9f561f5b609577a37",
+    "system/system/lib64/libheifcapture.so": "1f02483acc1351519e658619a1a799c96974bab2d37e48826914fe80160e29d1",
+    "system/system/lib64/libimagecodec.quram.so": "19339a8b728d9bd1e89c30a8f95632b3bf7125ca78051cf5962d68dd5e8a281e",
+    "system/system/lib64/libjpega.camera.samsung.so": "d533241073d92f975ff5ebd97cc7ab7a7b32a9ffaaa4be52e417c60aea6c70e0",
+    "system/system/lib64/libexifa.camera.samsung.so": "e132f14b43a283628e977aa3a936ca6da12a1839f37805c155afe23b175db46c",
+    "system/system/lib64/libslljpeg.media.samsung.so": "258cdc641f70d5eaff79bbca43c9df778dc43055576c62dc78a2aa43484504b0",
+    "system/system/apex/com.samsung.android.media.imagecodec.system.signed.apex": "b312ae8f7229d34be555bec1df296117d4805cbd798336f60ad202bfb596617b"
+  }
+}
