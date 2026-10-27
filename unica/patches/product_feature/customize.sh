@@ -1057,13 +1057,20 @@ if [[ "$SOURCE_WLAN_CONFIG_CUSTOM_BACKOFF" != "$TARGET_WLAN_CONFIG_CUSTOM_BACKOF
             "CONFIG_CUSTOM_BACKOFF" \
             "$TARGET_WLAN_CONFIG_CUSTOM_BACKOFF" | \
             sed "s/CONFIG_CUSTOM_BACKOFF/$SOURCE_WLAN_CONFIG_CUSTOM_BACKOFF/g"
+        [ "${PIPESTATUS[0]}" -eq 0 ] || return 1
     elif [[ "$SOURCE_WLAN_CONFIG_CUSTOM_BACKOFF" != "none" ]] && [[ "$TARGET_WLAN_CONFIG_CUSTOM_BACKOFF" == "none" ]]; then
-        SMALI_PATCH "system" "system/framework/semwifi-service.jar" \
-            "smali/com/samsung/android/server/wifi/SemWifiCoexManager.smali" "replaceall" \
-            "$SOURCE_WLAN_CONFIG_CUSTOM_BACKOFF" \
-            "CONFIG_CUSTOM_BACKOFF" > /dev/null
-        APPLY_PATCH "system" "system/framework/semwifi-service.jar" \
-            "$MODPATH/wifi/custom_backoff/semwifi-service.jar/0001-Remove-CUSTOM_BACKOFF-value.patch"
+        if [[ "$SOURCE_PLATFORM_SDK_VERSION" -ge "37" ]]; then
+            SMALI_PATCH "system" "system/framework/semwifi-service.jar" \
+                "smali/com/samsung/android/server/wifi/SemWifiCoexManager.smali" "replaceall" \
+                "$SOURCE_WLAN_CONFIG_CUSTOM_BACKOFF" ""
+        else
+            SMALI_PATCH "system" "system/framework/semwifi-service.jar" \
+                "smali/com/samsung/android/server/wifi/SemWifiCoexManager.smali" "replaceall" \
+                "$SOURCE_WLAN_CONFIG_CUSTOM_BACKOFF" \
+                "CONFIG_CUSTOM_BACKOFF" > /dev/null
+            APPLY_PATCH "system" "system/framework/semwifi-service.jar" \
+                "$MODPATH/wifi/custom_backoff/semwifi-service.jar/0001-Remove-CUSTOM_BACKOFF-value.patch"
+        fi
     fi
 fi
 
