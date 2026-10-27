@@ -1,0 +1,39 @@
+Subject: [PATCH] Port QPR2 print-preview state descriptions with Samsung resource IDs
+
+diff --git a/smali/com/android/printspooler/widget/PreviewPageFrame.smali b/smali/com/android/printspooler/widget/PreviewPageFrame.smali
+--- a/smali/com/android/printspooler/widget/PreviewPageFrame.smali
++++ b/smali/com/android/printspooler/widget/PreviewPageFrame.smali
+@@ -73,5 +73,33 @@
+ 
+     invoke-virtual {p0, v1}, Landroid/widget/LinearLayout;->notifyViewAccessibilityStateChangedIfNeeded(I)V
+ 
+     return v0
+ .end method
++
++.method public final setSelected(Z)V
++    .locals 1
++
++    invoke-super {p0, p1}, Landroid/widget/LinearLayout;->setSelected(Z)V
++
++    invoke-virtual {p0}, Landroid/widget/LinearLayout;->getContext()Landroid/content/Context;
++
++    move-result-object v0
++
++    if-eqz p1, :cond_0
++
++    const p1, 0x1040ef3
++
++    goto :goto_0
++
++    :cond_0
++    const p1, 0x1040a0f
++
++    :goto_0
++    invoke-virtual {v0, p1}, Landroid/content/Context;->getString(I)Ljava/lang/String;
++
++    move-result-object p1
++
++    invoke-virtual {p0, p1}, Landroid/widget/LinearLayout;->setStateDescription(Ljava/lang/CharSequence;)V
++
++    return-void
++.end method
