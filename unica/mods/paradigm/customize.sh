@@ -965,6 +965,19 @@ PERL
     fi
     LOG_STEP_OUT
 
+    # QPR2 input_controls
+    MODPATH="$PARADIGM_MODPATH/qpr2/input_controls"
+    LOG_STEP_IN "- Adding QPR2 input_controls"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0001-Integrate-QPR2-controlled-wheel-scrolling.patch"
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0002-Reset-QPR2-wheel-options-with-Samsung-mouse-settings.patch"
+        APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
+            "$MODPATH/patches/SecSettings.apk/0099-Identify-QPR2-r11.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

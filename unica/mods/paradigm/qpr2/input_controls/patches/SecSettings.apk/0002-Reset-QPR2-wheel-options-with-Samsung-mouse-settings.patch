@@ -1,0 +1,20 @@
+Subject: [PATCH] Reset the newly exposed wheel options with Samsung mouse settings
+
+diff --git a/smali_classes3/com/samsung/android/settings/inputmethod/SecMouseSettingsFragment$1.smali b/smali_classes3/com/samsung/android/settings/inputmethod/SecMouseSettingsFragment$1.smali
+--- a/smali_classes3/com/samsung/android/settings/inputmethod/SecMouseSettingsFragment$1.smali
++++ b/smali_classes3/com/samsung/android/settings/inputmethod/SecMouseSettingsFragment$1.smali
+@@ -6,6 +6,14 @@
+ # virtual methods
+ .method public final resetSettings(Landroid/content/Context;)V
+     .locals 3
++
++    const/4 v0, 0x1
++
++    invoke-static {p1, v0}, Landroid/hardware/input/InputSettings;->setMouseScrollingAcceleration(Landroid/content/Context;Z)V
++
++    const/4 v0, 0x0
++
++    invoke-static {p1, v0}, Landroid/hardware/input/InputSettings;->setMouseReverseVerticalScrolling(Landroid/content/Context;Z)V
+ 
+     invoke-virtual {p1}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
+ 
