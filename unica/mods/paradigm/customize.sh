@@ -939,6 +939,19 @@ PERL
     ) || return 1
     LOG_STEP_OUT
 
+    # QPR2 dialer
+    MODPATH="$PARADIGM_MODPATH/qpr2/dialer"
+    LOG_STEP_IN "- Adding QPR2 dialer"
+    if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        APPLY_PATCH "system" "system/priv-app/SamsungDialer/SamsungDialer.apk" \
+            "$MODPATH/patches/SamsungDialer.apk/0001-Add-fourth-native-Search-action-and-accessibility.patch"
+        APPLY_PATCH "system" "system/priv-app/SamsungDialer/SamsungDialer.apk" \
+            "$MODPATH/patches/SamsungDialer.apk/0002-Route-QPR2-search-keyboard-shortcuts.patch"
+        APPLY_PATCH "system" "system/priv-app/SamsungDialer/SamsungDialer.apk" \
+            "$MODPATH/patches/SamsungDialer.apk/0099-Identify-QPR2-Phone-r10.patch"
+    fi
+    LOG_STEP_OUT
+
     MODPATH="$PARADIGM_MODPATH"
     unset PARADIGM_MODPATH
 

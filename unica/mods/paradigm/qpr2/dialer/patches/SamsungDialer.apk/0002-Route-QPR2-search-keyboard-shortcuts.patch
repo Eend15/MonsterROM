@@ -1,0 +1,31 @@
+Subject: [PATCH] Add Ctrl-F and dedicated Search-key access to the original Phone search action
+
+diff --git a/smali/com/samsung/android/dialer/DialtactsActivity.smali b/smali/com/samsung/android/dialer/DialtactsActivity.smali
+--- a/smali/com/samsung/android/dialer/DialtactsActivity.smali
++++ b/smali/com/samsung/android/dialer/DialtactsActivity.smali
+@@ -800,6 +800,25 @@
+     return p0
+ 
+     :cond_1
++    invoke-virtual {p0}, Landroid/app/Activity;->getWindow()Landroid/view/Window;
++
++    move-result-object v0
++
++    invoke-virtual {v0}, Landroid/view/Window;->getDecorView()Landroid/view/View;
++
++    move-result-object v0
++
++    invoke-static {v0, p1}, Lio/mesalabs/unica/glass/PhoneSearchTab;->shortcut(Landroid/view/View;Landroid/view/KeyEvent;)Z
++
++    move-result v0
++
++    if-eqz v0, :unica_not_search_shortcut
++
++    const/4 v0, 0x1
++
++    return v0
++
++    :unica_not_search_shortcut
+     invoke-super {p0, p1}, Lh/l;->dispatchKeyEvent(Landroid/view/KeyEvent;)Z
+ 
+     move-result p0
