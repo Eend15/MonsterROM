@@ -10,6 +10,9 @@
 SYSTEM_DEBLOAT+="
 system/app/WifiRROverlayAppH2E
 "
+PRODUCT_DEBLOAT+="
+overlay/WifiRROverlayAppH2E.apk
+"
 
 # mAFPC
 SYSTEM_DEBLOAT+="
