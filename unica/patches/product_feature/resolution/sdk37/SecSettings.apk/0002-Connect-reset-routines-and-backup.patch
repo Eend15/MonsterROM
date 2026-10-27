@@ -1,0 +1,100 @@
+diff --git a/smali/com/android/settings/DisplaySettings$4.smali b/smali/com/android/settings/DisplaySettings$4.smali
+--- a/smali/com/android/settings/DisplaySettings$4.smali
++++ b/smali/com/android/settings/DisplaySettings$4.smali
+@@ -162,6 +162,8 @@
+     goto :goto_4
+ 
+     :cond_6
++    invoke-static {v0}, Lcom/samsung/android/settings/display/ResolutionPolicy;->reset(Landroid/content/Context;)V
++
+     move v12, v11
+ 
+     :goto_4
+diff --git a/smali_classes3/com/samsung/android/settings/display/bixbyroutines/DisplaySettingsActionInteractor.smali b/smali_classes3/com/samsung/android/settings/display/bixbyroutines/DisplaySettingsActionInteractor.smali
+--- a/smali_classes3/com/samsung/android/settings/display/bixbyroutines/DisplaySettingsActionInteractor.smali
++++ b/smali_classes3/com/samsung/android/settings/display/bixbyroutines/DisplaySettingsActionInteractor.smali
+@@ -1981,10 +1981,13 @@
+     :pswitch_1
+-    sget-object p1, Lcom/samsung/android/settings/Rune;->COMMON_CONFIG_PACKAGE_NAME_SMART_MANAGER:Ljava/lang/String;
++    invoke-static {p1}, Lcom/samsung/android/settings/display/ResolutionPolicy;->availability(Landroid/content/Context;)I
+ 
+-    const-string p1, "Screen resolution is not supported for device"
++    move-result p0
+ 
+-    invoke-static {p0, p1}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
++    if-nez p0, :resolution_not_supported
++
++    sget-object p2, Lcom/samsung/android/sdk/routines/v3/data/SupportStatus;->SUPPORTED:Lcom/samsung/android/sdk/routines/v3/data/SupportStatus;
+ 
++    :resolution_not_supported
+     return-object p2
+ 
+     :pswitch_2
+@@ -2309,8 +2312,6 @@
+     :pswitch_1
+-    sget-object v0, Lcom/samsung/android/settings/Rune;->COMMON_CONFIG_PACKAGE_NAME_SMART_MANAGER:Ljava/lang/String;
+-
+-    invoke-static {v14, v6}, Lcom/samsung/android/settings/asbase/routine/action/SoundSettingsActionInteractor$$ExternalSyntheticOutline0;->m(Lcom/samsung/android/sdk/routines/v3/data/ActionResult$ResultCode;Lcom/samsung/android/sdk/routines/v3/internal/ActionDispatcher$$ExternalSyntheticLambda7;)V
++    invoke-static {v1, v3, v6}, Lcom/samsung/android/settings/display/ResolutionPolicy;->routine(Landroid/content/Context;Lcom/samsung/android/sdk/routines/v3/data/ParameterValues;Lcom/samsung/android/sdk/routines/v3/internal/ActionDispatcher$$ExternalSyntheticLambda7;)V
+ 
+     return-void
+ 
+     :pswitch_2
+@@ -3389,8 +3390,6 @@
+     :pswitch_1
+-    sget-object v0, Lcom/samsung/android/settings/Rune;->COMMON_CONFIG_PACKAGE_NAME_SMART_MANAGER:Ljava/lang/String;
+-
+-    invoke-static {v14, v6}, Lcom/samsung/android/settings/asbase/routine/action/SoundSettingsActionInteractor$$ExternalSyntheticOutline0;->m(Lcom/samsung/android/sdk/routines/v3/data/ActionResult$ResultCode;Lcom/samsung/android/sdk/routines/v3/internal/ActionDispatcher$$ExternalSyntheticLambda7;)V
++    invoke-static {v1, v3, v6}, Lcom/samsung/android/settings/display/ResolutionPolicy;->routine(Landroid/content/Context;Lcom/samsung/android/sdk/routines/v3/data/ParameterValues;Lcom/samsung/android/sdk/routines/v3/internal/ActionDispatcher$$ExternalSyntheticLambda7;)V
+ 
+     return-void
+ 
+     :pswitch_2
+diff --git a/smali_classes3/com/samsung/android/settings/eternal/provider/items/DisplayItem.smali b/smali_classes3/com/samsung/android/settings/eternal/provider/items/DisplayItem.smali
+--- a/smali_classes3/com/samsung/android/settings/eternal/provider/items/DisplayItem.smali
++++ b/smali_classes3/com/samsung/android/settings/eternal/provider/items/DisplayItem.smali
+@@ -1054,12 +1054,16 @@
+     :pswitch_2
+-    sget-object v0, Lcom/samsung/android/settings/Rune;->COMMON_CONFIG_PACKAGE_NAME_SMART_MANAGER:Ljava/lang/String;
++    invoke-static {v0}, Lcom/samsung/android/settings/display/SecDisplayUtils;->getScreenResolution(Landroid/content/Context;)I
+ 
+-    const-string v0, "Device not support ScreenResolution - "
++    move-result v0
+ 
+-    invoke-virtual {v0, v2}, Ljava/lang/String;->concat(Ljava/lang/String;)Ljava/lang/String;
++    invoke-static {v0}, Ljava/lang/String;->valueOf(I)Ljava/lang/String;
+ 
+     move-result-object v0
+ 
+-    invoke-static {v12, v0}, Lcom/samsung/android/util/SemLog;->d(Ljava/lang/String;Ljava/lang/String;)I
++    invoke-virtual {v3, v0}, Lcom/samsung/android/lib/episode/Scene$Builder;->setValue(Ljava/lang/Object;)Lcom/samsung/android/lib/episode/Scene$Builder;
++
++    const/4 v0, 0x0
++
++    invoke-virtual {v3, v0}, Lcom/samsung/android/lib/episode/Scene$Builder;->setDefault(Z)Lcom/samsung/android/lib/episode/Scene$Builder;
+ 
+     return-object v3
+@@ -4847,14 +4851,22 @@
+     :pswitch_2
+-    sget-object v0, Lcom/samsung/android/settings/Rune;->COMMON_CONFIG_PACKAGE_NAME_SMART_MANAGER:Ljava/lang/String;
++    :try_resolution_start
++    invoke-static {v0, v5}, Lcom/samsung/android/settings/display/ResolutionPolicy;->applySelected(Landroid/content/Context;Ljava/lang/String;)V
++    :try_resolution_end
++    .catch Ljava/lang/RuntimeException; {:try_resolution_start .. :try_resolution_end} :resolution_restore_failed
++
++    goto/16 :goto_30
++
++    :resolution_restore_failed
++    move-exception v0
+ 
+     sget-object v0, Lcom/samsung/android/lib/episode/SceneResult$ResultType;->RESULT_FAIL:Lcom/samsung/android/lib/episode/SceneResult$ResultType;
+ 
+     invoke-virtual {v8, v0}, Lcom/samsung/android/lib/episode/SceneResult$Builder;->setResult(Lcom/samsung/android/lib/episode/SceneResult$ResultType;)Lcom/samsung/android/lib/episode/SceneResult$Builder;
+ 
+     move-result-object v0
+ 
+     sget-object v1, Lcom/samsung/android/lib/episode/SceneResult$ErrorType;->NOT_SUPPORTED:Lcom/samsung/android/lib/episode/SceneResult$ErrorType;
+ 
+     invoke-virtual {v0, v1}, Lcom/samsung/android/lib/episode/SceneResult$Builder;->setErrorType(Lcom/samsung/android/lib/episode/SceneResult$ErrorType;)Lcom/samsung/android/lib/episode/SceneResult$Builder;
+ 
+     goto/16 :goto_30
