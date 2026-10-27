@@ -57,6 +57,44 @@ GET_SYSTEM_EXT()
 
 CIL_NAME="$(head -n 1 "$WORK_DIR/vendor/etc/selinux/plat_sepolicy_vers.txt")"
 PATCHED=false
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ] && [ "$CIL_NAME" = "30.0" ]; then
+    # SDK37 no longer ships API30 mappings. Keep the target declarations and
+    # compat files, then apply the reviewed public type-split patch.
+    for SELINUX_PARTITION in system system_ext; do
+        if [ "$SELINUX_PARTITION" = system ]; then
+            SELINUX_DEST="$WORK_DIR/system/system/etc/selinux"
+            SELINUX_REL="system/etc/selinux/mapping"
+            SELINUX_LABEL="u:object_r:sepolicy_file:s0"
+        else
+            SELINUX_DEST="$WORK_DIR/$(GET_SYSTEM_EXT)/etc/selinux"
+            SELINUX_REL="etc/selinux/mapping"
+            SELINUX_LABEL="u:object_r:system_file:s0"
+        fi
+        for SELINUX_FILE in 30.0.cil 30.0.compat.cil; do
+            [ ! -e "$SELINUX_DEST/mapping/$SELINUX_FILE" ] || \
+                ABORT "Unexpected existing API30 $SELINUX_PARTITION mapping; review it before replacing"
+            ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "$SELINUX_PARTITION" \
+                "$SELINUX_REL/$SELINUX_FILE" 0 0 644 "$SELINUX_LABEL"
+            [ -s "$SELINUX_DEST/mapping/$SELINUX_FILE" ] || \
+                ABORT "Missing original target API30 mapping: $SELINUX_PARTITION/$SELINUX_FILE"
+        done
+    done
+    SELINUX_MAPPING_PATCH="$MODPATH/sdk37/system/0001-Backport-public-type-splits-to-API30.patch"
+    if [ "$TARGET_CODENAME" = "r9s" ]; then
+        SELINUX_MAPPING_PATCH="$MODPATH/sdk37/r9s/system/0001-Backport-public-type-splits-to-API30.patch"
+    fi
+    EVAL "LC_ALL=C git apply --check --unsafe-paths --directory=\"$WORK_DIR/system/system/etc/selinux\" \"$SELINUX_MAPPING_PATCH\""
+    EVAL "LC_ALL=C git apply --unsafe-paths --directory=\"$WORK_DIR/system/system/etc/selinux\" \"$SELINUX_MAPPING_PATCH\""
+    SET_PROP "system" "ro.unica.version" "$(GET_PROP "system" "ro.unica.version")-api30policy-r1"
+    PATCHED=true
+    unset SELINUX_PARTITION SELINUX_DEST SELINUX_REL SELINUX_FILE SELINUX_LABEL SELINUX_MAPPING_PATCH
+fi
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    [ -s "$WORK_DIR/system/system/etc/selinux/mapping/$CIL_NAME.cil" ] || \
+        ABORT "Missing platform SELinux mapping for vendor policy $CIL_NAME"
+    [ -s "$WORK_DIR/$(GET_SYSTEM_EXT)/etc/selinux/mapping/$CIL_NAME.cil" ] || \
+        ABORT "Missing system_ext SELinux mapping for vendor policy $CIL_NAME"
+fi
 VENDOR_API_LIST="$(find "$WORK_DIR/$(GET_SYSTEM_EXT)/etc/selinux/mapping" -type f -printf "%f\n" | \
                     sed '/.compat./d' | sed 's/.cil//' | sed 's/\./_/' | sort)"
 # ]
@@ -94,6 +132,35 @@ for e in $DUPLICATES; do
         fi
     fi
 done
+
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ] && [ "$CIL_NAME" = "30.0" ] && \
+        [ "$TARGET_PLATFORM" = "exynos2100" ]; then
+    # Keep the donor assertions and exact reviewed vendor repairs. No policy
+    # assertion, neverallow or runtime enforcement is relaxed by this route.
+    SELINUX_VENDOR_PATCHES=("$MODPATH/sdk37/vendor/"*.patch)
+    if [ "$TARGET_CODENAME" = "r9s" ]; then
+        SELINUX_VENDOR_PATCHES=("$MODPATH/sdk37/r9s/vendor/0001-"*.patch
+            "$MODPATH/sdk37/r9s/vendor/0002-"*.patch
+            "$MODPATH/sdk37/vendor/0003-"*.patch
+            "$MODPATH/sdk37/r9s/vendor/0004-"*.patch
+            "$MODPATH/sdk37/r9s/vendor/0005-"*.patch)
+    fi
+    for SELINUX_PATCH in "$MODPATH/sdk37/system/0002-"*.patch \
+            "$MODPATH/sdk37/system/0003-"*.patch "${SELINUX_VENDOR_PATCHES[@]}"; do
+        [ -f "$SELINUX_PATCH" ] || ABORT "Missing reviewed SDK37 strict-policy patch"
+        case "$SELINUX_PATCH" in
+            */system/*) SELINUX_DEST="$WORK_DIR/system/system/etc/selinux" ;;
+            */vendor/*) SELINUX_DEST="$WORK_DIR/vendor/etc/selinux" ;;
+            *) ABORT "Unexpected strict-policy patch location: $SELINUX_PATCH" ;;
+        esac
+        LOG "- Applying \"$(sed -n 's/^Subject: \[PATCH\] //p' "$SELINUX_PATCH")\" to SELinux policy"
+        EVAL "LC_ALL=C git apply --check --unsafe-paths --directory=\"$SELINUX_DEST\" \"$SELINUX_PATCH\""
+        EVAL "LC_ALL=C git apply --unsafe-paths --directory=\"$SELINUX_DEST\" \"$SELINUX_PATCH\""
+    done
+    SET_PROP "system" "ro.unica.version" "$(GET_PROP "system" "ro.unica.version")-strictpolicy-r1"
+    PATCHED=true
+    unset SELINUX_PATCH SELINUX_DEST SELINUX_VENDOR_PATCHES
+fi
 
 if ! $PATCHED; then
     LOG "\033[0;33m! Nothing to do\033[0m"
