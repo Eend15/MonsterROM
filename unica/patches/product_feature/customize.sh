@@ -111,9 +111,12 @@ PRODUCT_ENABLE_OPTICAL()
 }
 
 PRODUCT_PATCH_ABI=""
+PRODUCT_DISPLAY_SMALI_DIR="smali_classes4"
 PRODUCT_SDK37_RESOLUTION=false
+PRODUCT_SDK37_OPTICAL=false
 if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
     PRODUCT_PATCH_ABI="sdk37/"
+    PRODUCT_DISPLAY_SMALI_DIR="smali_classes3"
 fi
 
 # [
@@ -155,6 +158,21 @@ if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
             PRODUCT_SDK37_RESOLUTION=true
         else
             ABORT "Unreviewed SDK37 dynamic-resolution capability transition"
+            return 1
+        fi
+    fi
+    if [[ "$(GET_FINGERPRINT_SENSOR_TYPE "$SOURCE_FINGERPRINT_CONFIG_SENSOR")" != \
+            "$(GET_FINGERPRINT_SENSOR_TYPE "$TARGET_FINGERPRINT_CONFIG_SENSOR")" ]]; then
+        if [ "$TARGET_CODENAME" = "r9s" ] && [ "$TARGET_PLATFORM_SDK_VERSION" -eq 36 ] && \
+                [ "$TARGET_OS_SINGLE_SYSTEM_IMAGE" = "essi" ] && \
+                [ "$SOURCE_FINGERPRINT_CONFIG_SENSOR" = "google_touch_display_ultrasonic" ] && \
+                [ "$TARGET_FINGERPRINT_CONFIG_SENSOR" = "google_touch_display_optical,settings=3" ]; then
+            # Layout and legacy allocator compatibility are cohort-dependent.
+            # Fail BEFORE unrelated product-feature mutations on new inputs.
+            PRODUCT_OPTICAL native --platform "$WORK_DIR" || return 1
+            PRODUCT_SDK37_OPTICAL=true
+        else
+            ABORT "Unreviewed SDK37 fingerprint sensor-type transition"
             return 1
         fi
     fi
@@ -461,7 +479,12 @@ else
 fi
 
 # SEC_PRODUCT_FEATURE_FINGERPRINT_CONFIG_SENSOR
-if [[ "$SOURCE_FINGERPRINT_CONFIG_SENSOR" != "$TARGET_FINGERPRINT_CONFIG_SENSOR" ]]; then
+if $PRODUCT_SDK37_OPTICAL; then
+    # The renderer must see the source strings/owners, not pre-edited legacy
+    # replacements. It patches all five SDK37 artifacts as one validated plan.
+    # shellcheck source=/dev/null
+    PRODUCT_ENABLE_OPTICAL || return 1
+elif [[ "$SOURCE_FINGERPRINT_CONFIG_SENSOR" != "$TARGET_FINGERPRINT_CONFIG_SENSOR" ]]; then
     SMALI_PATCH "system" "system/framework/framework.jar" \
         "smali_classes6/com/samsung/android/bio/fingerprint/SemFingerprintManager.smali" "replace" \
         "getMaxTemplateNumberFromSPF()I" \
@@ -477,7 +500,7 @@ if [[ "$SOURCE_FINGERPRINT_CONFIG_SENSOR" != "$TARGET_FINGERPRINT_CONFIG_SENSOR"
         "$SOURCE_FINGERPRINT_CONFIG_SENSOR" \
         "$TARGET_FINGERPRINT_CONFIG_SENSOR"
     SMALI_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-        "smali_classes4/com/samsung/android/settings/biometrics/fingerprint/FingerprintSettingsUtils.smali" "replaceall" \
+        "$PRODUCT_DISPLAY_SMALI_DIR/com/samsung/android/settings/biometrics/fingerprint/FingerprintSettingsUtils.smali" "replaceall" \
         "$SOURCE_FINGERPRINT_CONFIG_SENSOR" \
         "$TARGET_FINGERPRINT_CONFIG_SENSOR"
 
