@@ -1,0 +1,238 @@
+Subject: [PATCH] Expose the working QPR2 recorder route with a per-user off-by-default Samsung Sound setting
+
+diff --git a/res/values-nl/unica_qpr2_recording_audio.xml b/res/values-nl/unica_qpr2_recording_audio.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values-nl/unica_qpr2_recording_audio.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <string name="unica_qpr2_recording_bluetooth_title">Bluetooth-microfoon voor schermopnames</string>
++    <string name="unica_qpr2_recording_bluetooth_summary">Gebruik de voorkeursheadset, actieve headset of enige Bluetooth-headset. Bij twijfel of ontbrekende invoer blijft de normale microfoon behouden.</string>
++</resources>
+diff --git a/res/values/unica_qpr2_recording_audio.xml b/res/values/unica_qpr2_recording_audio.xml
+new file mode 100644
+--- /dev/null
++++ b/res/values/unica_qpr2_recording_audio.xml
+@@ -0,0 +1,5 @@
++<?xml version="1.0" encoding="utf-8"?>
++<resources>
++    <string name="unica_qpr2_recording_bluetooth_title">Bluetooth microphone for screen recordings</string>
++    <string name="unica_qpr2_recording_bluetooth_summary">Use the preferred, active or sole Bluetooth headset. Ambiguous or unavailable inputs keep the normal microphone.</string>
++</resources>
+diff --git a/res/xml/as_sound_vibration_settings_v2.xml b/res/xml/as_sound_vibration_settings_v2.xml
+--- a/res/xml/as_sound_vibration_settings_v2.xml
++++ b/res/xml/as_sound_vibration_settings_v2.xml
+@@ -22,6 +22,7 @@
+     <androidx.preference.PreferenceCategory android:title="@string/sec_advance_sound_settings_subtitle" android:key="advanced_sound_category" />
+     <SecPreferenceScreen android:persistent="false" android:title="@string/sec_sound_effect_title" android:key="sound_effect" settings:controller="com.samsung.android.settings.asbase.audio.SecSoundEffectSoundController" settings:keywords="@string/keywords_sound_and_vibrations_settings_sound_quality_and_effects" />
+     <SecPreferenceScreen android:persistent="false" android:title="@string/sec_multi_sound_title" android:key="multi_sound" settings:controller="com.samsung.android.settings.asbase.audio.SecSoundMultiSoundController" />
+     <com.samsung.android.settings.widget.SecInsetCategoryPreference android:key="work_sound_category" />
+     <SecPreferenceScreen android:title="@string/sec_sound_work_settings" android:key="sound_work_settings" android:fragment="com.samsung.android.settings.asbase.work.SecSoundWorkSettings" settings:controller="com.samsung.android.settings.asbase.work.SecWorkSoundsPreferenceController" />
++    <SecSwitchPreference android:persistent="false" android:title="@string/unica_qpr2_recording_bluetooth_title" android:key="unica_qpr2_recording_bluetooth_mic" android:summary="@string/unica_qpr2_recording_bluetooth_summary" settings:controller="io.mesalabs.unica.recording.Qpr2RecordingAudioPreferenceController" />
+ </PreferenceScreen>
+diff --git a/smali_classes4/io/mesalabs/unica/recording/Qpr2RecordingAudioPreferenceController.smali b/smali_classes4/io/mesalabs/unica/recording/Qpr2RecordingAudioPreferenceController.smali
+new file mode 100644
+--- /dev/null
++++ b/smali_classes4/io/mesalabs/unica/recording/Qpr2RecordingAudioPreferenceController.smali
+@@ -0,0 +1,200 @@
++.class public final Lio/mesalabs/unica/recording/Qpr2RecordingAudioPreferenceController;
++.super Lcom/android/settings/core/TogglePreferenceController;
++.source "Qpr2RecordingAudioPreferenceController.java"
++
++
++# direct methods
++.method public constructor <init>(Landroid/content/Context;Ljava/lang/String;)V
++    .registers 3
++
++    invoke-direct {p0, p1, p2}, Lcom/android/settings/core/TogglePreferenceController;-><init>(Landroid/content/Context;Ljava/lang/String;)V
++
++    return-void
++.end method
++
++
++# virtual methods
++.method public getAvailabilityStatus()I
++    .registers 2
++
++    iget-object v0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudioPreferenceController;->mContext:Landroid/content/Context;
++
++    invoke-static {v0}, Lcom/android/settings/accessibility/extensions/ContextExtKt;->isInSetupWizard(Landroid/content/Context;)Z
++
++    move-result v0
++
++    if-nez v0, :cond_14
++
++    iget-object p0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudioPreferenceController;->mContext:Landroid/content/Context;
++
++    const-class v0, Landroid/media/AudioManager;
++
++    invoke-virtual {p0, v0}, Landroid/content/Context;->getSystemService(Ljava/lang/Class;)Ljava/lang/Object;
++
++    move-result-object p0
++
++    if-eqz p0, :cond_14
++
++    const/4 p0, 0x0
++
++    return p0
++
++    :cond_14
++    const/4 p0, 0x3
++
++    return p0
++.end method
++
++.method public getLaunchIntent()Landroid/content/Intent;
++    .registers 1
++
++    const/4 p0, 0x0
++
++    return-object p0
++.end method
++
++.method public getSliceHighlightMenuRes()I
++    .registers 1
++
++    const/4 p0, 0x0
++
++    return p0
++.end method
++
++.method public getStatusText()Ljava/lang/String;
++    .registers 1
++
++    const/4 p0, 0x0
++
++    return-object p0
++.end method
++
++.method public getValue()Lcom/samsung/android/settings/cube/ControlValue;
++    .registers 1
++
++    const/4 p0, 0x0
++
++    return-object p0
++.end method
++
++.method public isChecked()Z
++    .registers 4
++
++    iget-object v0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudioPreferenceController;->mContext:Landroid/content/Context;
++
++    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v0
++
++    iget-object p0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudioPreferenceController;->mContext:Landroid/content/Context;
++
++    invoke-virtual {p0}, Landroid/content/Context;->getUserId()I
++
++    move-result p0
++
++    const-string v1, "unica_qpr2_recording_bluetooth_mic"
++
++    const/4 v2, 0x0
++
++    invoke-static {v0, v1, v2, p0}, Landroid/provider/Settings$Secure;->getIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)I
++
++    move-result p0
++
++    const/4 v0, 0x1
++
++    if-ne p0, v0, :cond_17
++
++    return v0
++
++    :cond_17
++    return v2
++.end method
++
++.method public isControllable()Z
++    .registers 1
++
++    const/4 p0, 0x0
++
++    return p0
++.end method
++
++.method public isSliceable()Z
++    .registers 1
++
++    const/4 p0, 0x0
++
++    return p0
++.end method
++
++.method public needUserInteraction(Ljava/lang/Object;)Lcom/samsung/android/settings/cube/Controllable$ControllableType;
++    .registers 2
++
++    sget-object p0, Lcom/samsung/android/settings/cube/Controllable$ControllableType;->NEED_INTERACTION:Lcom/samsung/android/settings/cube/Controllable$ControllableType;
++
++    return-object p0
++.end method
++
++.method public runDefaultAction()Z
++    .registers 1
++
++    const/4 p0, 0x0
++
++    return p0
++.end method
++
++.method public setChecked(Z)Z
++    .registers 5
++
++    invoke-virtual {p0}, Lio/mesalabs/unica/recording/Qpr2RecordingAudioPreferenceController;->getAvailabilityStatus()I
++
++    move-result v0
++
++    const/4 v1, 0x0
++
++    if-eqz v0, :cond_8
++
++    return v1
++
++    :cond_8
++    :try_start_8
++    iget-object v0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudioPreferenceController;->mContext:Landroid/content/Context;
++
++    invoke-virtual {v0}, Landroid/content/Context;->getContentResolver()Landroid/content/ContentResolver;
++
++    move-result-object v0
++
++    const-string v2, "unica_qpr2_recording_bluetooth_mic"
++
++    iget-object p0, p0, Lio/mesalabs/unica/recording/Qpr2RecordingAudioPreferenceController;->mContext:Landroid/content/Context;
++
++    invoke-virtual {p0}, Landroid/content/Context;->getUserId()I
++
++    move-result p0
++
++    invoke-static {v0, v2, p1, p0}, Landroid/provider/Settings$Secure;->putIntForUser(Landroid/content/ContentResolver;Ljava/lang/String;II)Z
++
++    move-result p0
++    :try_end_1a
++    .catch Ljava/lang/RuntimeException; {:try_start_8 .. :try_end_1a} :catch_1b
++
++    return p0
++
++    :catch_1b
++    move-exception p0
++
++    const-string p1, "UN1CA-QPR2-Recording"
++
++    const-string v0, "Recording preference rejected"
++
++    invoke-static {p1, v0, p0}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
++
++    return v1
++.end method
++
++.method public setValue(Lcom/samsung/android/settings/cube/ControlValue;)Lcom/samsung/android/settings/cube/ControlResult;
++    .registers 2
++
++    const/4 p0, 0x0
++
++    return-object p0
++.end method
