@@ -78,7 +78,7 @@ if($action eq 'state') {
 }
 if($action eq 'payload') {
     my($mode,$image,$tree,$fs,$contexts)=@ARGV; need($mode eq 'extract'||$mode eq 'verify','Invalid payload action');
-    local $ENV{LC_ALL}='C'; my $scratch=tempdir('bt-native-XXXXXX',DIR=>'/tmp/opencode',CLEANUP=>1);
+    local $ENV{LC_ALL}='C'; my $scratch=tempdir('bt-native-XXXXXX',DIR=>scratch_root(),CLEANUP=>1);
     sub quote {my $v=$_[0]; need($v !~ /[\n\r\0]/,'Unsupported debugfs argument'); $v =~ s/([\\"])/\\$1/g; return '"'.$v.'"'}
     my $debug=sub {my($command)=@_; my($out,$err,$status)=capture('debugfs','-R',$command,$image); my @err=grep {!/^debugfs [\d.]+ \(.+\)$/} split /\n/,$err; need(!$status&&!@err,"debugfs $command: $err$out"); return $out};
     my $dump=sub {my($inode,$dest,$size)=@_; $debug->("dump <$inode> ".quote($dest)); need(-f $dest && (-s $dest)==$size,"Incomplete dump of inode $inode")};
