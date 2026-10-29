@@ -153,7 +153,7 @@ else
     if [ "$KIND" = runtime ]; then
         sudo cp -a "$TEMP/arm32/bin/linker" "$TEMP/arm32/bin/crash_dump32" "$TEMP/payload/bin/"
     else
-        sudo cp -a -n "$TEMP/arm32/etc/icu/." "$TEMP/payload/etc/icu/"
+        sudo cp -a --update=none "$TEMP/arm32/etc/icu/." "$TEMP/payload/etc/icu/"
     fi
     sudo chown -hR "$(id -u):$(id -g)" "$TEMP/payload"
     "$SRC_DIR/scripts/build_fs_image.sh" ext4 --no-avb --force -p system \
@@ -174,7 +174,9 @@ else
     cp -a "$TEMP/apex/original/META-INF" "$TEMP/apex/build/apk/META-INF"
     apktool b -j 4 -p "$TEMP/framework" "$TEMP/apex" > /dev/null
     OUTPUT="$TEMP/publish/$NAME"
-    signapk -a 4096 --align-file-size "$SRC_DIR/security/${CERT}_platform.x509.pem" \
+    # Use the original launcher's JVM-option forwarding. Java 17+ accepts this
+    # permission; newer hosts require it for Conscrypt's native library load.
+    signapk -J-enable-native-access=ALL-UNNAMED -a 4096 --align-file-size "$SRC_DIR/security/${CERT}_platform.x509.pem" \
         "$SRC_DIR/security/${CERT}_platform.pk8" "$TEMP/apex/dist/$NAME" "$OUTPUT"
 fi
 
