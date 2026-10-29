@@ -733,13 +733,21 @@ PERL
     LOG_STEP_IN "- Adding QPR2 usb_permissions"
     # Original SDK-36 builds remain unchanged. Exact SDK-37 contracts only.
     if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk" || return 1
+        # Bind the full reviewed classes, including Samsung authentication, then
+        # dry-run every patch before editing Settings or publishing success.
+        python3 "$MODPATH/verify_sources.py" "$MODPATH" \
+            "$APKTOOL_DIR/system/priv-app/SecSettings/SecSettings.apk" || {
+            ABORT "Unreviewed QPR2 USB permission source or patch contract"
+            return 1
+        }
         APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-            "$MODPATH/patches/SecSettings.apk/0001-Port-QPR2-USB-app-permission-management.patch"
+            "$MODPATH/patches/SecSettings.apk/0001-Port-QPR2-USB-app-permission-management.patch" || return 1
         APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-            "$MODPATH/patches/SecSettings.apk/0002-Expose-USB-app-access-on-Samsung-Connections-page.patch"
+            "$MODPATH/patches/SecSettings.apk/0002-Expose-USB-app-access-on-Samsung-Connections-page.patch" || return 1
         APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-            "$MODPATH/patches/SecSettings.apk/0099-Identify-reviewed-QPR2-backport.patch"
-        SET_PROP "system" "ro.unica.qpr2.usb.permissions" "true"
+            "$MODPATH/patches/SecSettings.apk/0099-Identify-reviewed-QPR2-backport.patch" || return 1
+        SET_PROP "system" "ro.unica.qpr2.usb.permissions" "true" || return 1
     fi
     LOG_STEP_OUT
 

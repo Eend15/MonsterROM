@@ -1,0 +1,21 @@
+{
+  "smali/com/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController.smali": [
+    "f82ffe3edcf5727ad61a219d3f02dfccebfbb00a1780335fe6056e617be76ef9",
+    "9fb6ec1094a9c07bad4c8ea29d5ca8a68e712d0b5109d30391d685d238bac263"
+  ],
+  "smali/com/android/settings/connecteddevice/usb/UsbDetailsFragment.smali": [
+    "eba570f3b313e4cbf0d29b08dade8c72c5a0e612f2a2bd6df81bc2a0acf1607f",
+    "fff35fa69951cc2799bab8c1d972074200cdc89a2902094c1816c9518cff997d"
+  ],
+  "smali/com/android/settings/connecteddevice/usb/UsbDetailsController.smali": [
+    "a8030c1c4ad10f935355eb3ab6a0fef7613602fbae46bc065cfde7d00554ff17",
+    "6d51ac93d9a1de4a92579aea326ac9341621102563e99416bbdecc36632d29eb"
+  ],
+  "smali/com/android/settings/connecteddevice/usb/UsbBackend.smali": [
+    "c2a7b91a6d330f10c49f4e62dfdeb20a028ceaab6b90aa6d51cbf9fb135f8c9a",
+    "0dc99fdf226729941bffc36c87890af003772a3cf6b0cc06586541ea40ea8a10"
+  ],
+  "res/xml/sec_connections_settings.xml": [
+    "035ab2229dd74ef4e94f624fe9daa248523972a81366b66684ce21cc59a03297"
+  ]
+}

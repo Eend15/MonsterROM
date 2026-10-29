@@ -31,11 +31,7 @@ new file mode 100644
 diff --git a/smali/com/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController.smali b/smali/com/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController.smali
 --- a/smali/com/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController.smali
 +++ b/smali/com/android/settings/connecteddevice/usb/UsbDetailsConnectedDevicesController.smali
-@@ -2,10 +2,12 @@
- .super Lcom/android/settings/connecteddevice/usb/UsbDetailsController;
- .source "qb/115226349 0553ae3cd7639f9279853187d393fa81ed68baf65d5ecdd61f78393c6a8509dc"
- 
- 
+@@ -6,6 +6,8 @@
  # instance fields
 +.field public qpr2Permissions:Lio/mesalabs/unica/usb/Qpr2UsbPermissions;
 +
