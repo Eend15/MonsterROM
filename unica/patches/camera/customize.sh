@@ -16,7 +16,7 @@ PERL
 }
 CAMERA_RECORDING_DEFAULTS()
 {
-    perl - "$@" <<'PERL'
+    "${BASH_SOURCE[0]%/*}/../../../scripts/run_xml_perl.sh" - "$@" <<'PERL'
 use strict;
 use warnings;
 use File::Path qw(make_path);
@@ -77,6 +77,9 @@ LOG_MISSING_PATCHES()
     fi
 }
 # ]
+
+# Refuse an unsafe host parser before replacing Camera inputs.
+"${BASH_SOURCE[0]%/*}/../../../scripts/run_xml_perl.sh" --check || return 1
 
 SOURCE_FIRMWARE_PATH="$(cut -d "/" -f 1 -s <<< "$SOURCE_FIRMWARE")_$(cut -d "/" -f 2 -s <<< "$SOURCE_FIRMWARE")"
 TARGET_FIRMWARE_PATH="$(cut -d "/" -f 1 -s <<< "$TARGET_FIRMWARE")_$(cut -d "/" -f 2 -s <<< "$TARGET_FIRMWARE")"

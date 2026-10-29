@@ -1,6 +1,6 @@
 SETTINGS_INJECT()
 {
-    perl - "$@" <<'PERL'
+    "${BASH_SOURCE[0]%/*}/../../../scripts/run_xml_perl.sh" - "$@" <<'PERL'
 use strict;
 use warnings;
 use File::Find;
@@ -88,6 +88,9 @@ PERL
 if [[ "${BASH_SOURCE[0]}" == "$0" && "${1:-}" == "--inject" ]]; then
     shift; SETTINGS_INJECT "$@"; exit $?
 fi
+
+# Refuse a missing/corrupt host parser before any Settings mutations.
+"${BASH_SOURCE[0]%/*}/../../../scripts/run_xml_perl.sh" --check || return 1
 
 # Show battery regulatory info in Settings
 # Requires SEM_BATTERY_PROPERTY_IC_AUTHENTICATION_RESULT support

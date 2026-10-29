@@ -40,8 +40,9 @@ jobs:
       - name: Install Perl XML parser for host regressions
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libxml-parser-perl
-          perl -MXML::Parser -e 1
+          sudo apt-get install -y --no-install-recommends build-essential clang libexpat1-dev
+          python3 scripts/setup_xml_parser.py
+          scripts/run_xml_perl.sh --check
 
       - name: Check shell syntax, ordinary patches and JSON
         run: python3 .github/check_source.py
@@ -90,6 +91,9 @@ jobs:
         with:
           submodules: 'recursive'
           clean: false
+
+      - name: Verify provisioned local XML parser offline
+        run: scripts/run_xml_perl.sh --check
 
       - name: Build with the original UN1CA helpers
         shell: bash

@@ -1,6 +1,6 @@
 RRO_RESOURCES()
 {
-    perl - "$@" <<'PERL'
+    "${BASH_SOURCE[0]%/*}/../../../scripts/run_xml_perl.sh" - "$@" <<'PERL'
 use strict;
 use warnings;
 use File::Find;
@@ -65,6 +65,8 @@ if [[ "$SOURCE_PRODUCT_NAME" == "$TARGET_PRODUCT_NAME" ]]; then
 fi
 
 _LOG() { if $DEBUG; then LOGW "$1"; else ABORT "$1"; fi }
+
+"${BASH_SOURCE[0]%/*}/../../../scripts/run_xml_perl.sh" --check || return 1
 
 while IFS= read -r f; do
     f="$(basename "$f")"

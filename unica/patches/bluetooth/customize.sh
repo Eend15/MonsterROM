@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 BLUETOOTH_RUNTIME()
 {
-    perl - "$@" <<'PERL'
+    TOOLS_DIR="${BLUETOOTH_TOOLS:-$TOOLS_DIR}" "${BASH_SOURCE[0]%/*}/../../../scripts/run_xml_perl.sh" - "$@" <<'PERL'
 use strict;
 use warnings;
 use JSON::PP;
@@ -192,6 +192,7 @@ BLUETOOTH_PATCH()
 
 BLUETOOTH_MAIN()
 {
+    "${BASH_SOURCE[0]%/*}/../../../scripts/run_xml_perl.sh" --check || return 1
     local SOURCE_FIRMWARE_PATH TARGET_FIRMWARE_PATH SOURCE_APEX SOURCE_HASH WORK_HASH CERT_PREFIX=aosp
     local REAL_WORK_DIR="$WORK_DIR" REAL_APKTOOL_DIR="$APKTOOL_DIR"
     # UN1CA's caller-provided scratch root is distinct from POSIX TMPDIR below.

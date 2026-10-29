@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 SETUP_RESOURCES()
 {
-    perl - "$@" <<'PERL'
+    "${BASH_SOURCE[0]%/*}/../../../scripts/run_xml_perl.sh" - "$@" <<'PERL'
 use strict;
 use warnings;
 use File::Find;
@@ -76,6 +76,7 @@ for my $path(keys %writes) {xml($writes{$path},1) if $path =~ /\.xml$/}
 put($_,$writes{$_}) for sort keys %writes;
 PERL
 }
+"${BASH_SOURCE[0]%/*}/../../../scripts/run_xml_perl.sh" --check || return 1
 DECODE_APK "system" "system/priv-app/SecSetupWizard_Global/SecSetupWizard_Global.apk"
 LOG "- Enabling navigation bar type settings step"
 SETUP_LIST="smali/S2/f.smali"

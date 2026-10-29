@@ -57,3 +57,39 @@ These are isolated, unsigned/off-device test builds. No release secrets,
 production `out/target`, immutable firmware, phone or flashing operations are
 required. Passing static/build tests does not establish device boot, UI layout,
 live document-provider grants, OTA installation or hardware functionality.
+
+## Host XML parser prerequisite
+
+Run `python3 scripts/setup_xml_parser.py` once before building. This explicitly
+builds checksum-pinned private Perl 5.44.0, XML::Parser 2.59 and its three small
+prerequisites under `out/tools/host-perl/`, runs the upstream core and module
+suites, and changes no system Perl package. Provisioning requires a C build
+environment, `clang`, `make` and Expat development headers. The XML consumers
+select only this verified private runtime through
+`scripts/run_xml_perl.sh`; the original build, APK/signing and extraction helpers
+are unchanged. CI provisions the same source pins.
+
+The reported Settings segfault was reproduced on the host XML::Parser 2.47 with
+the real t2s XML inputs, before any planned injection writes. Its core faults in
+Perl's stack/refcount handling. Callback-lifetime/return workarounds did not fix
+it reliably and are not shipped. An initial 16-case probe with upstream 2.59
+passed, but expanded tests and the actual wrapper still reproduced crashes and
+refcount warnings on host Perl 5.40.1, even in a parse-only loop. A module upgrade
+alone is therefore not accepted as the fix. The pinned private interpreter and
+parser are validated together, without assigning a particular upstream CVE or
+changing XML semantics. No global interpreter or dependency is replaced.
+
+The actual project installer/wrapper passed 24 exact t2s/r9s input-and-repeat
+runs with byte-identical outputs and no warnings, plus 800 parse-only repeats.
+The 27 firmware-free host regressions cover cache/source/ABI rejection, offline
+preflight, inherited options, argument/stdin preservation, literal XML safety,
+replay stability and failures under conditional sourcing. These checks do not
+claim Android runtime or device qualification.
+
+The wrapper checks the complete installed-file receipt, pinned source set,
+actual module identity and private Perl ABI before execution. Missing or changed
+inputs fail offline before mutation, with an explicit setup command; builds
+never download, overwrite or blindly refresh a parser cache. Literal payloads,
+namespaces, DOCTYPE/external-entity rejection, original directives and validation
+of all planned XML before writes remain unchanged. SDK36/37 XML output behavior
+is retained; this is a host dependency fix, not an Android SDK downgrade.

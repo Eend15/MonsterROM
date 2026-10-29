@@ -1,6 +1,6 @@
 SPEN_SDK37()
 {
-    perl - "$@" <<'PERL'
+    "${BASH_SOURCE[0]%/*}/../../../scripts/run_xml_perl.sh" - "$@" <<'PERL'
 use strict;
 use warnings;
 use JSON::PP;
@@ -191,6 +191,7 @@ PERL
 }
 SPEN_ENABLE_SDK37()
 (
+    "${BASH_SOURCE[0]%/*}/../../../scripts/run_xml_perl.sh" --check || exit 1
     [ "$TARGET_CODENAME" = "p3s" ] || { ABORT "SDK37 S Pen native profile only measured for p3s"; return 1; }
     if grep -q '^ro.system.product.cpu.abilist32=.' "$WORK_DIR/system/system/build.prop"; then
         ABORT "SDK37 p3s S Pen requires the source arm64-only platform"

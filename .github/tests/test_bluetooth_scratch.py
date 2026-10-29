@@ -15,8 +15,11 @@ class BluetoothScratchTests(unittest.TestCase):
         install = "      - name: Install Perl XML parser for host regressions\n"
         step = workflow.split(install, 1)[1].split("\n      - name:", 1)[0]
         self.assertIn("sudo apt-get update\n", step)
-        self.assertIn("sudo apt-get install -y --no-install-recommends libxml-parser-perl\n", step)
-        self.assertIn("perl -MXML::Parser -e 1\n", step)
+        self.assertIn("build-essential clang libexpat1-dev\n", step)
+        self.assertIn("python3 scripts/setup_xml_parser.py\n", step)
+        self.assertIn("scripts/run_xml_perl.sh --check\n", step)
+        self.assertNotIn("libxml-parser-perl", step)
+        self.assertNotIn("GITHUB_ENV", step)
         self.assertLess(workflow.index(install), workflow.index("python3 -B -m unittest discover"))
 
     def test_ci_pins_and_authenticates_the_linter_without_relaxing_checks(self):
@@ -59,7 +62,7 @@ use File::Temp ();
             env = {key: value for key, value in os.environ.items()
                    if key not in ("UNICA_TEST_TMPDIR", "TMPDIR", "PERL5OPT", "PERL5LIB")}
             env.update(variables)
-            result = subprocess.run(["perl", "-e", probe, str(file), "payload", "extract",
+            result = subprocess.run([str(ROOT / "scripts/run_xml_perl.sh"), "-e", probe, str(file), "payload", "extract",
                                      "unused.img", "unused-tree", "unused-fs", "unused-contexts"],
                                     env=env, capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, 77, result.stderr)
