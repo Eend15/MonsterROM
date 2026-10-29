@@ -1040,12 +1040,19 @@ PERL
     MODPATH="$PARADIGM_MODPATH/qpr2/capture_actions"
     LOG_STEP_IN "- Adding QPR2 capture_actions"
     if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        DECODE_APK "system" "system/app/SmartCapture/SmartCapture.apk" || return 1
+        QPR2_CAPTURE_IDENTIFICATION="$(python3 "$MODPATH/verify_sources.py" "$MODPATH" \
+            "$APKTOOL_DIR/system/app/SmartCapture/SmartCapture.apk")" || {
+            ABORT "Unreviewed QPR2 capture-actions sources or version metadata"
+            return 1
+        }
         APPLY_PATCH "system" "system/app/SmartCapture/SmartCapture.apk" \
-            "$MODPATH/patches/SmartCapture.apk/0001-Expose-QPR2-post-recording-edit-action.patch"
+            "$MODPATH/patches/SmartCapture.apk/0001-Expose-QPR2-post-recording-edit-action.patch" || return 1
         APPLY_PATCH "system" "system/app/SmartCapture/SmartCapture.apk" \
-            "$MODPATH/patches/SmartCapture.apk/0002-Keep-recording-actions-without-preview-bitmap.patch"
+            "$MODPATH/patches/SmartCapture.apk/0002-Keep-recording-actions-without-preview-bitmap.patch" || return 1
         APPLY_PATCH "system" "system/app/SmartCapture/SmartCapture.apk" \
-            "$MODPATH/patches/SmartCapture.apk/0099-Identify-QPR2-r13.patch"
+            "$MODPATH/patches/SmartCapture.apk/$QPR2_CAPTURE_IDENTIFICATION" || return 1
+        unset QPR2_CAPTURE_IDENTIFICATION
     fi
     LOG_STEP_OUT
 

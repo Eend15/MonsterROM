@@ -1,0 +1,15 @@
+{
+  "AndroidManifest.xml": [
+    "d4535f025a029ddd563c2d4b14aaa23e413b1dbbc6e9a78608a59736aa3aff5a",
+    "ce4de46e6c854fac1b92f26718922c4ee01d07965a80f9a0092493b2d3f7a9a5"
+  ],
+  "res/values/strings.xml": [
+    "1668a1ea85e451e5140ab181a13bb828b7363b577340e1259e5c6302502ee48e"
+  ],
+  "smali_classes3/com/samsung/android/app/smartcapture/baseutil/notification/ScreenRecorderNotification.smali": [
+    "1a7702d410de10c4dc798670690603e55e3a99c8712eeb6866b30ff7b8143fdd"
+  ],
+  "smali_classes3/com/samsung/android/app/smartcapture/screenrecorder/notification/NotificationActivity.smali": [
+    "81a49aae1726f26523d7325f5b17f916961625e316acb51a69bd3ba50998d536"
+  ]
+}
