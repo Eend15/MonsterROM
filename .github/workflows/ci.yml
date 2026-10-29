@@ -37,6 +37,12 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v7
 
+      - name: Install Perl XML parser for host regressions
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libxml-parser-perl
+          perl -MXML::Parser -e 1
+
       - name: Check shell syntax, ordinary patches and JSON
         run: python3 .github/check_source.py
 

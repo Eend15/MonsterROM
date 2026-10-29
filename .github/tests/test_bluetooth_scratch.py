@@ -10,6 +10,15 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class BluetoothScratchTests(unittest.TestCase):
+    def test_ci_installs_the_real_xml_parser_before_the_regressions(self):
+        workflow = (ROOT / ".github/workflows/ci.yml").read_text()
+        install = "      - name: Install Perl XML parser for host regressions\n"
+        step = workflow.split(install, 1)[1].split("\n      - name:", 1)[0]
+        self.assertIn("sudo apt-get update\n", step)
+        self.assertIn("sudo apt-get install -y --no-install-recommends libxml-parser-perl\n", step)
+        self.assertIn("perl -MXML::Parser -e 1\n", step)
+        self.assertLess(workflow.index(install), workflow.index("python3 -B -m unittest discover"))
+
     def probe_scratch(self, variables):
         source = (ROOT / "unica/patches/bluetooth/customize.sh").read_text()
         program = source.split("<<'PERL'\n", 1)[1].split("\nPERL\n", 1)[0]
