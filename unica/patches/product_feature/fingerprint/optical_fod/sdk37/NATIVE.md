@@ -182,3 +182,29 @@ AOD and repeated surface recreation. Static mapping and host compilation do
 not validate ART/JNI loading, linker namespaces, GPU composition selection,
 vendor ABI, panel timing or fingerprint HAL operation. No device success is
 claimed by this implementation.
+
+## Reviewed runtime metadata refresh (29 October 2026)
+
+The native gate retains runtime identity
+`4a21077a466d05232d8fc521455a3b9e1b036793e3a91bb32ac51252f6beb6b9`
+and admits only additional identity
+`7e7d3c0ecb6adc789e02d8d76e8defa0fc003651f514ec22b15efdb446c3f755`.
+All 32 section identities match except the GNU build-id and non-loaded
+`.gnu_debugdata`; all program headers, code/data, dynamic symbols, relocations,
+dependencies and symbol versions match. Load segments are identical after
+accounting only for the GNU build-id note and ELF section-table pointer.
+The shorter debug metadata moves the section table; it does not change the
+runtime load layout or any optical allocation instruction.
+
+All seven other cohort hashes, the bridge source, five ordinary optical patches,
+method contracts and exact one-bit libui input/output identities are unchanged.
+Every cohort input must be a regular non-symlink file, and the report records
+the actual measured runtime hash, not an array of allowed hashes. Unknown or
+incomplete cohorts still stop before product-feature mutations or output creation.
+No arbitrary equivalent-binary normalization or automatic hash refresh is used.
+
+Evidence: `out/r9s-full-rom-rebuild-20261029/optical-native-review/` contains
+complete ELF/load-segment comparisons and readelf ABI inventories. REA artifact
+identity is `ev_66ed785e3763e6f676ef09b44e81aa5f7107d87a7aa5cf4cdca67f17f4a9c29b`;
+that bounded artifact inspection is not a new decompilation or runtime test.
+No fingerprint/HBM/device qualification follows from this metadata comparison.
