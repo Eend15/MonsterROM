@@ -775,30 +775,21 @@ PERL
     # Keep all system/vendor graphics providers and the original SDK-36 build intact.
     if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
         QPR2_SOURCE_FW="$(cut -d '/' -f 1,2 <<< "$SOURCE_FIRMWARE" | tr '/' '_')"
-        [ "$(sha256sum "$FW_DIR/$QPR2_SOURCE_FW/system/system/priv-app/DeviceAsWebcam/DeviceAsWebcam.apk" | cut -d ' ' -f 1)" = \
-            "65d6abd458d729ce2b05244ab51b4c3cf71528ddec5dccf4ac59d39b81665f0e" ] || {
-            ABORT "QPR2 webcam JNI needs the reviewed Samsung native methods and Java callbacks"
-            return 1
-        }
-        # Check every payload before modifying the decoded APK.
-        (cd "$MODPATH/files/arm64-v8a" && sha256sum -c "$MODPATH/libraries.sha256") || {
-            ABORT "QPR2 webcam native payload checksum mismatch"
-            return 1
-        }
-        DECODE_APK "system" "system/priv-app/DeviceAsWebcam/DeviceAsWebcam.apk"
         QPR2_WEBCAM_LIB="$APKTOOL_DIR/system/priv-app/DeviceAsWebcam/DeviceAsWebcam.apk/lib/arm64-v8a"
-        EVAL "mkdir -p \"$QPR2_WEBCAM_LIB\""
-        while read -r _QPR2_LIBRARY_SHA QPR2_LIBRARY; do
-            [ ! -e "$QPR2_WEBCAM_LIB/$QPR2_LIBRARY" ] || {
-                ABORT "Refusing to overwrite an unreviewed existing APK library: $QPR2_LIBRARY"
-                return 1
-            }
-        done < "$MODPATH/libraries.sha256"
-        while read -r _QPR2_LIBRARY_SHA QPR2_LIBRARY; do
-            EVAL "cp -a \"$MODPATH/files/arm64-v8a/$QPR2_LIBRARY\" \"$QPR2_WEBCAM_LIB/$QPR2_LIBRARY\""
-        done < "$MODPATH/libraries.sha256"
-        SET_PROP "system" "ro.unica.qpr2.webcam.native" "app-local-qpr2"
-        unset QPR2_SOURCE_FW QPR2_WEBCAM_LIB _QPR2_LIBRARY_SHA QPR2_LIBRARY
+        python3 "$MODPATH/verify_sources.py" "$MODPATH" \
+            "$FW_DIR/$QPR2_SOURCE_FW/system/system/priv-app/DeviceAsWebcam/DeviceAsWebcam.apk" \
+            "$QPR2_WEBCAM_LIB" || {
+            ABORT "Unreviewed QPR2 webcam APK/native closure or existing libraries"
+            return 1
+        }
+        DECODE_APK "system" "system/priv-app/DeviceAsWebcam/DeviceAsWebcam.apk" || return 1
+        EVAL "mkdir -p \"$QPR2_WEBCAM_LIB\"" || return 1
+        # The validator requires exactly these four reviewed manifest entries.
+        for QPR2_LIBRARY in libjni_deviceAsWebcam.so libjpeg.so libyuv.so libnativehelper.so; do
+            EVAL "cp -a \"$MODPATH/files/arm64-v8a/$QPR2_LIBRARY\" \"$QPR2_WEBCAM_LIB/$QPR2_LIBRARY\"" || return 1
+        done
+        SET_PROP "system" "ro.unica.qpr2.webcam.native" "app-local-qpr2" || return 1
+        unset QPR2_SOURCE_FW QPR2_WEBCAM_LIB QPR2_LIBRARY
     fi
     LOG_STEP_OUT
 

@@ -37,3 +37,30 @@ finite linker/JNI-registration results as a complete camera/GPU port.
 
 The module is skipped for SDK-36 sources and aborts for a changed Samsung APK
 contract or payload. No new runtime namespace bypass or root code is shipped.
+
+## Reviewed APK metadata refresh
+
+`apks.json` retains the original APK identity
+`65d6abd458d729ce2b05244ab51b4c3cf71528ddec5dccf4ac59d39b81665f0e`
+and admits only the additional reviewed identity
+`2aa682666f06e21ce134b515640832f344b6a0f523c8ea8e9bf5ae95dfdd886c`.
+Their complete DEX, Android manifest, resources and member inventory are
+byte-identical; only Samsung buildinfo/JAR signing members differ. Real API37
+APK v3 verification passes for both with the same signer certificate SHA-256
+`34df0e7a9f1cf1892e45c056b4973cd81ccf148a4050d11aea4ac5a65f900a42`.
+The exact DEX comparison retains the previously reviewed JNI methods/callbacks;
+it is not a new camera or hardware qualification.
+
+The four native payloads and `libraries.sha256` are unchanged. The validator
+requires their complete path set, checks every byte, rejects malformed,
+duplicate, extra and missing contract entries, and refuses existing libraries
+or unsafe destinations before copying any payload. Copy/decode failures stop
+the root explicitly even under conditional sourcing, before its success prop.
+No automatic hash regeneration or arbitrary equivalent-APK admission is used.
+
+Review evidence is retained in
+`out/full-rom-rebuild-20261029/webcam-review/`; REA archive identity is
+`ev_8ea2fc2dbdbb1e6b1147f5d7f7a9d32fa13176eb866479ee1f6d4348e2217a21`.
+Archive inventory alone does not verify a signing block; the separate real
+apksig check does. Android/JADX inspection was unavailable; complete DEX byte
+comparison, not a newly claimed REA decompilation, establishes code identity.
