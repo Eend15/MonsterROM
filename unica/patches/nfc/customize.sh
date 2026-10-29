@@ -61,7 +61,69 @@ PERL
 _LOG() { if $DEBUG; then LOGW "$1"; else ABORT "$1"; fi }
 # ]
 
+NFC_SDK37_PREFLIGHT()
+{
+    local NFC_APEX_SHA256
+    NFC_APEX_SHA256="$(sha256sum "$WORK_DIR/system/system/apex/com.android.nfcservices.capex" | cut -d ' ' -f 1)"
+    # Keep the complete signed APK/framework/JNI cohort. Admit only reviewed
+    # package hashes; see SDK37.md before adding another one.
+    case "$NFC_APEX_SHA256" in
+        408f490bf488a6ef364ed0d1d1c249a7546fe6cec1efecfce6552c9192dab597|\
+        00a29b4a9f83cf07746400613e0fa0910c50836e17ab92928a2c9651ed921ae0) ;;
+        *)
+            ABORT "Unreviewed SDK37 NFC APEX (SHA-256: ${NFC_APEX_SHA256:-unreadable}); review the modular NFC/target HIDL contract"
+            return 1
+            ;;
+    esac
+    if [ ! -s "$WORK_DIR/vendor/bin/hw/nxp.android.hardware.nfc@1.2-service" ] || \
+            [ ! -s "$WORK_DIR/vendor/lib64/nfc_nci_nxpsn.so" ]; then
+        ABORT "SDK37 NFC requires the target NXP HIDL 1.2 service and 64-bit NFC library"
+        return 1
+    fi
+    if ! python3 - "$WORK_DIR/vendor/etc/vintf/manifest/nxp.android.hardware.nfc@1.2-service.xml" <<'PY'
+from pathlib import Path
+import sys
+import xml.etree.ElementTree as ET
+
+try:
+    xml = Path(sys.argv[1]).read_text()
+    if "<!DOCTYPE" in xml or "<!ENTITY" in xml:
+        raise ValueError("Unsupported VINTF declarations")
+    root = ET.fromstring(xml)
+    hals = [hal for hal in root.findall("hal")
+            if (hal.findtext("name") or "").strip() == "android.hardware.nfc"]
+    valid = root.tag == "manifest" and root.get("type") == "device" and len(hals) == 1
+    if valid:
+        hal = hals[0]
+        versions = [(value.text or "").strip() for value in hal.findall("version")]
+        fqnames = [(value.text or "").strip() for value in hal.findall("fqname")]
+        interfaces = [((item.findtext("name") or "").strip(),
+                       [(value.text or "").strip() for value in item.findall("instance")])
+                      for item in hal.findall("interface")]
+        legacy = versions == ["1.2"] and interfaces == [("INfc", ["default"])] and not fqnames
+        qualified = fqnames == ["@1.2::INfc/default"] and not versions and not interfaces
+        valid = (hal.get("format") == "hidl"
+                 and (hal.findtext("transport") or "").strip() == "hwbinder"
+                 and (legacy or qualified))
+    if not valid:
+        raise ValueError("Expected android.hardware.nfc@1.2::INfc/default over hwbinder")
+except (OSError, ValueError, ET.ParseError) as error:
+    sys.exit(f"SDK37 NFC VINTF: {error}")
+PY
+    then
+        ABORT "Review the modular SDK-37 NFC/target HIDL contract: incompatible target VINTF manifest"
+        return 1
+    fi
+}
+
 TARGET_FIRMWARE_PATH="$(cut -d "/" -f 1 -s <<< "$TARGET_FIRMWARE")_$(cut -d "/" -f 2 -s <<< "$TARGET_FIRMWARE")"
+
+# Fail before copying target configuration or decoding Settings, including when
+# this module is sourced from a conditional that suppresses Bash errexit.
+if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+    NFC_SDK37_PREFLIGHT || return 1
+fi
+unset -f NFC_SDK37_PREFLIGHT
 
 if [ -f "$FW_DIR/$TARGET_FIRMWARE_PATH/system/system/etc/libnfc-nci.conf" ]; then
     ADD_TO_WORK_DIR "$TARGET_FIRMWARE" "system" "system/etc/libnfc-nci.conf" 0 0 644 "u:object_r:system_file:s0"
@@ -79,15 +141,6 @@ fi
 # already has the matching NXP 1.2 service and vendor driver; do not request
 # obsolete global 32-bit JNI prebuilts or mix an older app into that APEX.
 if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
-    if [ "$(sha256sum "$WORK_DIR/system/system/apex/com.android.nfcservices.capex" | cut -d ' ' -f 1)" != \
-            "408f490bf488a6ef364ed0d1d1c249a7546fe6cec1efecfce6552c9192dab597" ] || \
-            [ ! -s "$WORK_DIR/vendor/bin/hw/nxp.android.hardware.nfc@1.2-service" ] || \
-            [ ! -s "$WORK_DIR/vendor/lib64/nfc_nci_nxpsn.so" ] || \
-            ! grep -Fq '<version>1.2</version>' \
-            "$WORK_DIR/vendor/etc/vintf/manifest/nxp.android.hardware.nfc@1.2-service.xml"; then
-        ABORT "Review the modular SDK-37 NFC/target HIDL contract before changing this cohort"
-        return 1
-    fi
     LOG "- Retaining the complete SDK-37 NFC APEX with the target NXP HIDL 1.2 service"
     # Settings is outside the NFC APEX. Its inlined donor antenna position and
     # animation must describe the target, while its mismatch checks stay intact.
