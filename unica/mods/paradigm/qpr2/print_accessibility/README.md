@@ -12,8 +12,10 @@ original app's CompoundButton-like checkable/checked accessibility semantics.
 Other layouts keep their original behavior. Existing Samsung framework string
 fields/localizations are used, not copied GSI resource IDs.
 
-The root verifies `framework.sha256` and `apks.sha256` before applying the ordinary
-framework patch. The original APK, manifest, Samsung signature, UID/data identity,
+The root verifies complete `framework.sha256` and `apks.sha256` contracts before
+applying the ordinary framework patch. The [reviewed metadata refresh](../ORIGINAL_APPS.md)
+admits one exact BZJA APK identity while retaining the original baseline. The
+original APK, manifest, Samsung signature, UID/data identity,
 private job/PDF persistence and app resources/version remain unchanged. Direct
 APK/identification patches remain inactive: the configured platform signer is
 not this app's signer. Do not copy an unsigned proof artifact into the ROM.

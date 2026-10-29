@@ -10,8 +10,10 @@ Callback identity, initial scheduling, cancellation, null-callback errors and
 Samsung EGL failure handling are retained. Other callbacks, packages and delays
 keep their original behavior; this is not a global frame-rate override.
 
-The root checks `framework.sha256` and `apks.sha256` before applying the ordinary
-framework patch. The original APK, manifest, non-platform Samsung signature,
+The root checks complete `framework.sha256` and `apks.sha256` contracts before
+applying the ordinary framework patch. The [reviewed metadata refresh](../ORIGINAL_APPS.md)
+adds one exact BZJA APK identity without replacing the original baseline. The
+original APK, manifest, non-platform Samsung signature,
 UID/data identity, resources and version remain unchanged. The old direct-APK
 patches stay inactive; the configured platform signer cannot preserve this APK's
 identity. Do not activate those patches or copy an unsigned proof APK.
