@@ -8,8 +8,13 @@
     QPR2_CAMERA_BUILD="$(mktemp -d "$OUT_DIR/qpr2-camera-controls.XXXXXX")" || exit 1
     trap 'rm -rf -- "$QPR2_CAMERA_BUILD"' EXIT
     QPR2_CAMERA_APK="$WORK_DIR/system/system/priv-app/SamsungCamera/SamsungCamera.apk"
-    QPR2_CAMERA_DONOR="$FW_DIR/${SOURCE_FIRMWARE%%/*}_$(cut -d / -f 2 <<< "$SOURCE_FIRMWARE")"
-    QPR2_CAMERA_TAG="$(GET_PROP "$QPR2_CAMERA_DONOR/system/system/build.prop" ro.build.version.incremental)"
+    # Match scripts/apktool.sh: the active work profile selects the resource
+    # cache. Raw donor metadata can predate that profile; never spoof either.
+    QPR2_CAMERA_TAG="$(GET_PROP system ro.build.version.incremental)" || exit 1
+    [[ "$QPR2_CAMERA_TAG" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || {
+        ABORT "Missing or unsafe active Camera framework-cache tag"
+        exit 1
+    }
     QPR2_CAMERA_API="$TOOLS_DIR/apktool/framework/1-$QPR2_CAMERA_TAG.apk"
     DECODE_APK "system" "system/priv-app/SamsungCamera/SamsungCamera.apk" || exit 1
     for QPR2_CAMERA_INPUT in "$QPR2_CAMERA_APK" "$QPR2_CAMERA_API"; do

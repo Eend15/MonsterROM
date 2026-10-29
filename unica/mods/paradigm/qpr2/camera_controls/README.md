@@ -35,3 +35,11 @@ Missing inputs and either incorrect namespace reject without installing an
 overlay; SDK36 stays unchanged. The full t2s source/APK build also passed. These
 checks do not establish Android view inflation, visual equivalence or camera
 hardware behavior.
+
+The framework-cache tag comes from the active work-tree incremental property,
+exactly as in the original `scripts/apktool.sh`, not the raw donor's extraction
+metadata. A QPR2 property profile may legitimately select `S942BXXU5CZJJ` while
+the donor still reports `S942BXXU5BZJA`. Decode provisions that selected cache;
+the overlay uses the same cache and still aborts if it is missing. Empty/unsafe
+tags reject before decode/link/sign/stage. No firmware property, generated
+Apktool tag, resource table, original Camera APK or signing helper is changed.
