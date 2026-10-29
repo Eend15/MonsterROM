@@ -15,9 +15,10 @@ output symlinks and incomplete previous receipts. New parts are staged as a
 complete tree, with the previous profile restored if directory promotion fails.
 If restoration also fails, its backup is retained and its path is reported.
 
-This directory initially contains only this description. Actual payloads and
-receipts arrive in a **draft bot PR** after successful download, extraction and
-validation; there is no placeholder APK or fabricated extraction marker.
+This directory contains the original firmware snapshot, ordered APK parts and
+provenance receipt. Future updates arrive in a **draft bot PR** after successful
+download, extraction and validation; there is no placeholder APK or fabricated
+extraction marker. All donor profiles share the [same prebuilt tree](../README.md).
 
 The existing `pa2qxxx` snapshot remains untouched for legacy SDK36 consumers.
 This profile currently exports only wallpaper resources, not a complete Galaxy
