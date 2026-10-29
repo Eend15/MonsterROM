@@ -19,6 +19,18 @@ class BluetoothScratchTests(unittest.TestCase):
         self.assertIn("perl -MXML::Parser -e 1\n", step)
         self.assertLess(workflow.index(install), workflow.index("python3 -B -m unittest discover"))
 
+    def test_ci_pins_and_authenticates_the_linter_without_relaxing_checks(self):
+        workflow = (ROOT / ".github/workflows/ci.yml").read_text()
+        install = "      - name: Install pinned ShellCheck 0.11.0\n"
+        step = workflow.split(install, 1)[1].split("\n      - name:", 1)[0]
+        self.assertIn("shellcheck-v0.11.0.linux.x86_64.tar.xz", step)
+        self.assertIn("8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198", step)
+        self.assertIn("sha256sum --check --status", step)
+        self.assertLess(step.index("sha256sum --check"), step.index("tar --extract"))
+        self.assertIn('>> "$GITHUB_PATH"', step)
+        self.assertLess(workflow.index(install), workflow.index("      - name: Run shellcheck\n"))
+        self.assertIn('shellcheck -e SC1090,SC1091 -s bash "$f" || CODE=1', workflow)
+
     def probe_scratch(self, variables):
         source = (ROOT / "unica/patches/bluetooth/customize.sh").read_text()
         program = source.split("<<'PERL'\n", 1)[1].split("\nPERL\n", 1)[0]

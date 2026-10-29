@@ -49,6 +49,22 @@ jobs:
       - name: Run host-only profile and scratch regressions
         run: python3 -B -m unittest discover -s .github/tests -v
 
+      # Match the locally validated engine instead of inheriting a different
+      # distro version's control-flow diagnostics. Keep all lint checks enabled.
+      - name: Install pinned ShellCheck 0.11.0
+        run: |
+          HOST_LINT_DIR="$(mktemp -d "$RUNNER_TEMP/shellcheck.XXXXXX")"
+          curl --fail --silent --show-error --location --retry 3 --retry-all-errors \
+            --connect-timeout 10 --max-time 120 \
+            'https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz' \
+            --output "$HOST_LINT_DIR/shellcheck.tar.xz"
+          printf '8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198  %s\n' \
+            "$HOST_LINT_DIR/shellcheck.tar.xz" | sha256sum --check --status
+          tar --extract --xz --file "$HOST_LINT_DIR/shellcheck.tar.xz" \
+            --directory "$HOST_LINT_DIR" --no-same-owner shellcheck-v0.11.0/shellcheck
+          "$HOST_LINT_DIR/shellcheck-v0.11.0/shellcheck" --version
+          echo "$HOST_LINT_DIR/shellcheck-v0.11.0" >> "$GITHUB_PATH"
+
       - name: Run shellcheck
         run: |
           CODE=0
