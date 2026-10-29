@@ -866,26 +866,23 @@ PERL
             return 1
         }
         QPR2_SOURCE_FW="$(cut -d '/' -f 1,2 <<< "$SOURCE_FIRMWARE" | tr '/' '_')"
-        [ "$(sha256sum "$FW_DIR/$QPR2_SOURCE_FW/system/system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk" | cut -d ' ' -f 1)" = \
-            "02b170921cd511e4dbb69c642db9af1e70548867a293861808ed0b7e46eca414" ] || {
-            ABORT "Subject preview needs the reviewed CameraExtensionsProxy baseline"
+        QPR2_SUBJECT_APK="$APKTOOL_DIR/system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk"
+        python3 "$MODPATH/verify_sources.py" "$MODPATH" \
+            "$FW_DIR/$QPR2_SOURCE_FW/system/system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk" \
+            "$QPR2_SUBJECT_APK" || {
+            ABORT "Unreviewed subject-preview APK/payload closure or existing assets"
             return 1
         }
-        (cd "$MODPATH" && sha256sum -c payload.sha256) || return 1
-        DECODE_APK "system" "system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk"
-        QPR2_SUBJECT_APK="$APKTOOL_DIR/system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk"
-        for QPR2_SUBJECT_FILE in lib/arm64-v8a/libunica_subject_cpu.so lib/arm64-v8a/libtensorflowlite_c.2.16.1.camera.samsung.so assets/unica/subject-humanseg.tflite; do
-            [ ! -e "$QPR2_SUBJECT_APK/$QPR2_SUBJECT_FILE" ] || {
-                ABORT "Refusing to overwrite an existing subject preview asset"
-                return 1
-            }
-        done
-        EVAL "mkdir -p \"$QPR2_SUBJECT_APK/lib/arm64-v8a\" \"$QPR2_SUBJECT_APK/assets/unica\""
-        EVAL "cp -a \"$MODPATH/files/arm64-v8a/libunica_subject_cpu.so\" \"$MODPATH/files/arm64-v8a/libtensorflowlite_c.2.16.1.camera.samsung.so\" \"$QPR2_SUBJECT_APK/lib/arm64-v8a/\""
-        EVAL "cp -a \"$MODPATH/files/assets/unica/subject-humanseg.tflite\" \"$QPR2_SUBJECT_APK/assets/unica/subject-humanseg.tflite\""
+        DECODE_APK "system" "system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk" || return 1
+        python3 "$MODPATH/verify_sources.py" "$MODPATH" \
+            "$FW_DIR/$QPR2_SOURCE_FW/system/system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk" \
+            "$QPR2_SUBJECT_APK" --check-patch || return 1
+        EVAL "mkdir -p \"$QPR2_SUBJECT_APK/lib/arm64-v8a\" \"$QPR2_SUBJECT_APK/assets/unica\"" || return 1
+        EVAL "cp -a \"$MODPATH/files/arm64-v8a/libunica_subject_cpu.so\" \"$MODPATH/files/arm64-v8a/libtensorflowlite_c.2.16.1.camera.samsung.so\" \"$QPR2_SUBJECT_APK/lib/arm64-v8a/\"" || return 1
+        EVAL "cp -a \"$MODPATH/files/assets/unica/subject-humanseg.tflite\" \"$QPR2_SUBJECT_APK/assets/unica/subject-humanseg.tflite\"" || return 1
         APPLY_PATCH "system" "system/app/CameraExtensionsProxy/CameraExtensionsProxy.apk" \
-            "$MODPATH/patches/CameraExtensionsProxy.apk/0001-Add-real-humanseg-CPU-preview-without-advertising-a-live-extension.patch"
-        unset QPR2_SOURCE_FW QPR2_SUBJECT_APK QPR2_SUBJECT_FILE
+            "$MODPATH/patches/CameraExtensionsProxy.apk/0001-Add-real-humanseg-CPU-preview-without-advertising-a-live-extension.patch" || return 1
+        unset QPR2_SOURCE_FW QPR2_SUBJECT_APK
     fi
     LOG_STEP_OUT
 

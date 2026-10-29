@@ -38,3 +38,28 @@ Synthetic tests can produce false positives; no accuracy claim is made.
 Original model/runtime come from the user's local Samsung donor and are not
 re-licensed as new AOSP assets. Public C ABI reference:
 https://github.com/tensorflow/tensorflow/blob/v2.16.1/tensorflow/lite/core/c/c_api.h
+
+## Reviewed APK metadata refresh
+
+`apks.json` retains original CameraExtensionsProxy identity
+`02b170921cd511e4dbb69c642db9af1e70548867a293861808ed0b7e46eca414`
+and admits only reviewed identity
+`f658331d1bb03f1f8cb8b375ef61b3639e84c1ac03b2693c45fb78330729c9ff`.
+Complete DEX, manifest, resources and member inventory are byte-identical;
+only Samsung buildinfo/JAR signing members differ. Real API37 v3 verification
+passes for both with the same Samsung certificate SHA-256
+`34df0e7a9f1cf1892e45c056b4973cd81ccf148a4050d11aea4ac5a65f900a42`.
+This is code identity evidence, not new inference, image, UI or hardware testing.
+
+The model, runtime, bridge, payload manifest and ordinary patch are unchanged.
+Preflight requires the complete three-payload contract, exact payload inventory
+and single patch; it rejects missing, duplicate, unsafe or existing destinations
+before copying. After decode, a real patch dry run precedes all payload copies.
+Decode/copy/patch failures propagate explicitly under conditional sourcing.
+SDK36 and a disabled preview do not read these inputs or mutate the APK.
+
+Evidence: `out/full-rom-rebuild-20261029/subject-preview-review/`; REA archive
+identity `ev_3c7fa677782fa1f7ee1dca372820cba250d339b28faf09c5f9492d0a896c9e31`.
+Archive inventory does not verify APK signing blocks; real apksig verification
+was separate. Android/JADX remains unavailable; no new REA decompilation or
+device execution is claimed. Complete DEX byte comparison retains code identity.
