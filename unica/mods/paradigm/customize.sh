@@ -681,14 +681,24 @@ PERL
     LOG_STEP_IN "- Adding QPR2 recording"
     # Exact SDK-37 backports. The SDK-36 source remains unchanged.
     if [ "$SOURCE_PLATFORM_SDK_VERSION" -eq 37 ]; then
+        # Review every input and dry-run the complete group before exposing its
+        # setting or changing a recorder. Do not depend on the caller's errexit.
+        DECODE_APK "system" "system/priv-app/SecSettings/SecSettings.apk" || return 1
+        DECODE_APK "system_ext" "priv-app/SystemUI/SystemUI.apk" || return 1
+        DECODE_APK "system" "system/app/SmartCapture/SmartCapture.apk" || return 1
+        QPR2_RECORDING_ID_PATCH="$(python3 "$MODPATH/verify_sources.py" "$MODPATH" "$APKTOOL_DIR")" || {
+            ABORT "Unreviewed QPR2 recording source or patch contract"
+            return 1
+        }
         APPLY_PATCH "system" "system/priv-app/SecSettings/SecSettings.apk" \
-            "$MODPATH/patches/SecSettings.apk/0001-Expose-opt-in-QPR2-recording-microphone-routing.patch"
+            "$MODPATH/patches/SecSettings.apk/0001-Expose-opt-in-QPR2-recording-microphone-routing.patch" || return 1
         APPLY_PATCH "system_ext" "priv-app/SystemUI/SystemUI.apk" \
-            "$MODPATH/patches/SystemUI.apk/0001-Port-QPR2-recording-microphone-routing.patch"
+            "$MODPATH/patches/SystemUI.apk/0001-Port-QPR2-recording-microphone-routing.patch" || return 1
         APPLY_PATCH "system" "system/app/SmartCapture/SmartCapture.apk" \
-            "$MODPATH/patches/SmartCapture.apk/0001-Port-QPR2-recording-microphone-routing.patch"
+            "$MODPATH/patches/SmartCapture.apk/0001-Port-QPR2-recording-microphone-routing.patch" || return 1
         APPLY_PATCH "system" "system/app/SmartCapture/SmartCapture.apk" \
-            "$MODPATH/patches/SmartCapture.apk/0099-Identify-reviewed-QPR2-backport.patch"
+            "$MODPATH/patches/SmartCapture.apk/$QPR2_RECORDING_ID_PATCH" || return 1
+        unset QPR2_RECORDING_ID_PATCH
     fi
     LOG_STEP_OUT
 

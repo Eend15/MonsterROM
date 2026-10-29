@@ -3,11 +3,7 @@ Subject: [PATCH] Route actual microphone capture through an opt-in recording-own
 diff --git a/smali_classes3/com/android/systemui/screenrecord/ScreenMediaRecorder.smali b/smali_classes3/com/android/systemui/screenrecord/ScreenMediaRecorder.smali
 --- a/smali_classes3/com/android/systemui/screenrecord/ScreenMediaRecorder.smali
 +++ b/smali_classes3/com/android/systemui/screenrecord/ScreenMediaRecorder.smali
-@@ -2,10 +2,12 @@
- .super Ljava/lang/Object;
- .source "qb/115226349 4c90d068a6e0a8bf6cb960c2a4527b11e200a32b28c1d5c525876069e765cced"
- 
- 
+@@ -6,6 +6,8 @@
  # instance fields
 +.field private unicaQpr2Audio:Lio/mesalabs/unica/recording/Qpr2RecordingAudio;
 +

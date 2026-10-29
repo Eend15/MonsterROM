@@ -1,0 +1,23 @@
+{
+  "system/priv-app/SecSettings/SecSettings.apk/res/xml/as_sound_vibration_settings_v2.xml": [
+    "3a64deb1cc78beb50a8dd75605a2a127274d18a29b203a3967484c786fcf164b"
+  ],
+  "system_ext/priv-app/SystemUI/SystemUI.apk/smali_classes3/com/android/systemui/screenrecord/ScreenMediaRecorder.smali": [
+    "4d267d08489dced5bfe5625379197ab2ff62443f887f536a39fed402c8208329",
+    "1440ef1673491ddb7d226eb438b178baf82eef3d8b3df512c4cebd0b8cadbb1b"
+  ],
+  "system_ext/priv-app/SystemUI/SystemUI.apk/smali_classes3/com/android/systemui/screenrecord/ScreenInternalAudioRecorder.smali": [
+    "a0b8bfb33382c010668a860a50261ba5ab65ceca7c3fa24f60100a6cb269b8dd",
+    "9c83d184da0d04b1f4ea18a41bde7f3d51bc2ba4ce0973ca334a1d319f984d31"
+  ],
+  "system_ext/priv-app/SystemUI/SystemUI.apk/smali_classes3/com/android/systemui/screenrecord/ScreenRecordingAudioSource.smali": [
+    "565af01fdc95380bced6d1ea170d6ba3c392c239ed3822f053a447a21f1c9cc5",
+    "630d2058c6218c93596b759bda9b8cd5e7b52944dbe4a9bb0556f99806f926ab"
+  ],
+  "system/app/SmartCapture/SmartCapture.apk/smali_classes3/com/samsung/android/app/smartcapture/screenrecorder/recorder/core/BaseAudioRecorder.smali": [
+    "71c84f6e09fd33649ee11208668d9e9a09b36d7631339ba0f3bc1d02c97eab06"
+  ],
+  "system/app/SmartCapture/SmartCapture.apk/smali_classes3/com/samsung/android/app/smartcapture/screenrecorder/recorder/core/MP4Recorder.smali": [
+    "6bf96bd8d82dcc2d15890878fdba39ea44b4d0b49c99041a58ddb4cf61982195"
+  ]
+}
